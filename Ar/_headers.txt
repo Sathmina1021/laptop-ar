@@ -1,0 +1,5 @@
+/*
+  X-Content-Type-Options: nosniff
+
+/*.mind
+  Content-Type: application/octet-stream
