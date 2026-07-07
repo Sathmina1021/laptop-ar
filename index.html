@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Real Camera 3D AR Scanner</title>
+    <title>Phone View Optimized AR Scanner</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
-        /* CRITICAL LAYER FIX: Hides black background to show the real world camera video feed */
         html, body { margin: 0; overflow: hidden; width: 100%; height: 100%; background-color: transparent; }
         a-scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         
         .mindar-ui-overlay { display: none !important; }
         
-        /* Interactive permission starter overlay screen */
+        /* Interactive Overlay to open camera securely on mobile */
         #start-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, #0c1a30 0%, #020813 100%);
@@ -26,15 +25,15 @@
             font-weight: bold; border-radius: 35px; cursor: pointer; letter-spacing: 1px;
             box-shadow: 0 0 25px rgba(0, 240, 255, 0.4); transition: 0.2s;
         }
-        .scan-btn:hover { transform: scale(1.05); box-shadow: 0 0 35px rgba(0, 255, 156, 0.7); }
         #status-txt { color: #00f0ff; margin-top: 22px; font-size: 13px; letter-spacing: 2px; }
         
-        /* Real camera view HUD text guide */
+        /* Mobile HUD Scan Guide Hint */
         #scan-hint {
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             color: #00ff9c; background: rgba(2, 8, 19, 0.85); padding: 12px 25px;
-            border-radius: 20px; font-size: 13px; font-family: sans-serif; z-index: 99;
+            border-radius: 20px; font-size: 12px; font-family: sans-serif; z-index: 99;
             border: 1px solid #00ff9c; pointer-events: none; opacity: 0; transition: opacity 0.4s;
+            text-align: center; width: 70%; max-width: 280px;
         }
     </style>
 </head>
@@ -42,10 +41,10 @@
 
     <div id="start-overlay">
         <button class="scan-btn" id="activate-btn">START AR SCANNER</button>
-        <div id="status-txt">TAP TO ACTIVATE REAL DEVICE CAMERA</div>
+        <div id="status-txt">TAP TO ACTIVATE MOBILE CAMERA</div>
     </div>
 
-    <div id="scan-hint">POINT CAMERA AT LAPTOP OBJECT TO SCAN</div>
+    <div id="scan-hint">POINT CAMERA AT LAPTOP OBJECT</div>
 
     <a-scene
         id="main-scene"
@@ -61,40 +60,40 @@
         <a-entity id="laptop-anchor" mindar-image-target="targetIndex: 0">
             
             <a-entity id="spatial-cards" scale="0.001 0.001 0.001"
-                      animation__in="property: scale; to: 1 1 1; dur: 550; easing: easeOutBack; startEvents: animateFound"
+                      animation__in="property: scale; to: 0.65 0.65 0.65; dur: 500; easing: easeOutBack; startEvents: animateFound"
                       animation__out="property: scale; to: 0.001 0.001 0.001; dur: 150; easing: linear; startEvents: animateLost">
 
-                <a-ring color="#00f0ff" radius-inner="0.75" radius-outer="0.8" rotation="-90 0 0" position="0 -0.25 0" opacity="0.6" shader="flat"></a-ring>
+                <a-ring color="#00f0ff" radius-inner="0.6" radius-outer="0.64" rotation="-90 0 0" position="0 -0.2 0" opacity="0.6" shader="flat"></a-ring>
                 
-                <a-entity position="0 0.85 -0.1" text="value: ASUS EXPERTBOOK; color: #00f0ff; align: center; width: 4.6; font: kelsonsans; bold: true"></a-entity>
+                <a-entity position="0 0.7 -0.1" text="value: ASUS EXPERTBOOK; color: #00f0ff; align: center; width: 3.8; font: kelsonsans; bold: true"></a-entity>
 
-                <a-entity position="-0.95 0.35 0.3" rotation="0 35 0">
-                    <a-plane width="1.35" height="0.32" color="#030b18" opacity="0.9" shader="flat">
-                        <a-text value="Intel Core i5\n11th Gen Processor" color="#00ff9c" align="center" width="2.3" position="0 0 0.01"></a-text>
+                <a-entity position="-0.65 0.3 0.2" rotation="0 30 0">
+                    <a-plane width="1.15" height="0.28" color="#030b18" opacity="0.9" shader="flat">
+                        <a-text value="Intel Core i5\n11th Gen Processor" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="0.95 0.35 0.3" rotation="0 -35 0">
-                    <a-plane width="1.2" height="0.32" color="#030b18" opacity="0.9" shader="flat">
-                        <a-text value="8GB DDR4 RAM\nHigh-Speed Memory" color="#00ff9c" align="center" width="2.3" position="0 0 0.01"></a-text>
+                <a-entity position="0.65 0.3 0.2" rotation="0 -30 0">
+                    <a-plane width="1.05" height="0.28" color="#030b18" opacity="0.9" shader="flat">
+                        <a-text value="8GB DDR4 RAM\nHigh-Speed Memory" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="-1.1 0.15 -0.4" rotation="0 65 0">
-                    <a-plane width="1.25" height="0.32" color="#030b18" opacity="0.9" shader="flat">
-                        <a-text value="512GB M.2 NVMe\nUltra-Fast SSD" color="#00f0ff" align="center" width="2.3" position="0 0 0.01"></a-text>
+                <a-entity position="-0.75 0.1 -0.3" rotation="0 55 0">
+                    <a-plane width="1.1" height="0.28" color="#030b18" opacity="0.9" shader="flat">
+                        <a-text value="512GB M.2 NVMe\nUltra-Fast SSD" color="#00f0ff" align="center" width="2.0" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="1.1 0.15 -0.4" rotation="0 -68 0">
-                    <a-plane width="1.35" height="0.32" color="#030b18" opacity="0.9" shader="flat">
-                        <a-text value="14 FHD Display\nAnti-Glare Screen" color="#00f0ff" align="center" width="2.3" position="0 0 0.01"></a-text>
+                <a-entity position="0.75 0.1 -0.3" rotation="0 -55 0">
+                    <a-plane width="1.15" height="0.28" color="#030b18" opacity="0.9" shader="flat">
+                        <a-text value="14 FHD Display\nAnti-Glare Screen" color="#00f0ff" align="center" width="2.0" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="0 1.25 -0.15" rotation="10 0 0">
-                    <a-plane width="1.25" height="0.32" color="#030b18" opacity="0.9" shader="flat">
-                        <a-text value="42Wh Battery\nLong-Life Runtime" color="#00ff9c" align="center" width="2.3" position="0 0 0.01"></a-text>
+                <a-entity position="0 0.98 -0.12" rotation="8 0 0">
+                    <a-plane width="1.1" height="0.28" color="#030b18" opacity="0.9" shader="flat">
+                        <a-text value="42Wh Battery\nLong-Life Runtime" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
@@ -111,9 +110,8 @@
         const cardsContainer = document.querySelector('#spatial-cards');
         const scanHint = document.querySelector('#scan-hint');
 
-        // Explicit event hook to initiate webcam device context transparently
         activateBtn.addEventListener('click', async () => {
-            statusTxt.innerText = "OPENING DEVICE WEBCAM STREAM...";
+            statusTxt.innerText = "OPENING MOBILE CAMERA LAYER...";
             try {
                 if (sceneEl.hasLoaded) {
                     await sceneEl.systems["mindar-image-system"].start();
@@ -122,24 +120,22 @@
                         await sceneEl.systems["mindar-image-system"].start();
                     });
                 }
-                overlay.style.display = 'none'; // Unveils the real world underneath 3D engine canvas
+                overlay.style.display = 'none'; 
                 scanHint.style.opacity = "1";
             } catch (err) {
-                console.error("Camera crashed:", err);
+                console.error(err);
                 statusTxt.innerText = "ERROR: SYSTEM WEBCAM PERMISSION DENIED.";
             }
         });
 
-        // Target matching triggers to scale up floating text panels around laptop
         anchorEl.addEventListener('targetFound', () => {
             cardsContainer.emit('animateFound');
-            scanHint.style.opacity = "0"; // Removes text info when object is active
+            scanHint.style.opacity = "0"; 
         });
 
-        // Trigger animations to instantly hide panels when camera is away
         anchorEl.addEventListener('targetLost', () => {
             cardsContainer.emit('animateLost');
-            scanHint.style.opacity = "1"; // Show text guide prompt again
+            scanHint.style.opacity = "1"; 
         });
     </script>
 </body>
