@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Yamaha FZ Smooth Bike AR Scanner</title>
+    <title>Bajaj Pulsar NS400 AR Scanner</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -12,76 +12,44 @@
 
         .mindar-ui-overlay { display: none !important; }
 
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 25px rgba(0, 240, 255, 0.4); }
-            50% { box-shadow: 0 0 45px rgba(0, 255, 156, 0.7); }
-        }
-
-        @keyframes bgDrift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(14px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes hintBob {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-6px); }
-        }
-
         /* Premium Interactive Overlay */
         #start-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #0e1e38 0%, #030a16 100%);
-            background-size: 200% 200%;
-            animation: bgDrift 8s ease-in-out infinite;
+            background: radial-gradient(circle, #1a0e05 0%, #030201 100%);
             z-index: 9999; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; font-family: 'Segoe UI', sans-serif;
-        }
-        #brand-title {
-            color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 4px;
-            margin-bottom: 8px; opacity: 0.9; animation: fadeUp 0.8s ease-out;
-        }
-        #brand-sub {
-            color: #7fdcff; font-size: 11px; letter-spacing: 3px; margin-bottom: 30px;
-            text-transform: uppercase; opacity: 0.7; animation: fadeUp 0.8s ease-out 0.1s backwards;
+            justify-content: center; align-items: center; font-family: sans-serif;
         }
         .scan-btn {
-            background: linear-gradient(45deg, #00f0ff, #00ff9c);
-            background-size: 200% 200%;
-            border: none; color: #020813; padding: 16px 45px; font-size: 18px;
+            background: linear-gradient(45deg, #ff3d1a, #ffb100);
+            border: none; color: #150800; padding: 16px 45px; font-size: 18px;
             font-weight: bold; border-radius: 35px; cursor: pointer; letter-spacing: 1px;
-            animation: pulseGlow 2.2s ease-in-out infinite, fadeUp 0.8s ease-out 0.2s backwards;
-            transition: 0.25s transform ease, 0.25s box-shadow ease;
+            box-shadow: 0 0 25px rgba(255, 61, 26, 0.45); transition: 0.2s;
+            animation: pulseBtn 1.8s ease-in-out infinite;
         }
-        .scan-btn:hover { transform: scale(1.06); }
-        .scan-btn:active { transform: scale(0.96); }
-        #status-txt {
-            color: #00f0ff; margin-top: 22px; font-size: 13px; letter-spacing: 2px;
-            animation: fadeUp 0.8s ease-out 0.3s backwards;
+        @keyframes pulseBtn {
+            0%, 100% { box-shadow: 0 0 25px rgba(255, 61, 26, 0.45); transform: scale(1); }
+            50% { box-shadow: 0 0 40px rgba(255, 177, 0, 0.65); transform: scale(1.03); }
         }
+        #status-txt { color: #ffb100; margin-top: 22px; font-size: 13px; letter-spacing: 2px; }
 
         /* Mobile HUD Scan Guide */
         #scan-hint {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            color: #00ff9c; background: rgba(2, 8, 19, 0.85); padding: 12px 25px;
+            color: #ffb100; background: rgba(21, 8, 0, 0.85); padding: 12px 25px;
             border-radius: 20px; font-size: 12px; font-family: sans-serif; z-index: 99;
-            border: 1px solid #00ff9c; pointer-events: none; opacity: 0; transition: opacity 0.4s;
+            border: 1px solid #ffb100; pointer-events: none; opacity: 0; transition: opacity 0.4s;
             text-align: center; width: 75%; max-width: 280px;
-            animation: hintBob 2s ease-in-out infinite;
-            box-shadow: 0 0 18px rgba(0, 255, 156, 0.35);
+            animation: hintFloat 2.4s ease-in-out infinite;
+        }
+        @keyframes hintFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-6px); }
         }
     </style>
 </head>
 <body>
 
     <div id="start-overlay">
-        <div id="brand-title">YAMAHA FZ SERIES</div>
-        <div id="brand-sub">Augmented Reality Experience</div>
         <button class="scan-btn" id="activate-btn">START BIKE SCANNER</button>
         <div id="status-txt">TAP TO ACTIVATE BIKE AR SCANNER</div>
     </div>
@@ -97,91 +65,85 @@
         vr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false"
     >
-        <a-assets>
-            <a-mixin id="cardMat" material="shader: flat; opacity: 0.9"></a-mixin>
-        </a-assets>
-
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity id="bike-anchor" mindar-image-target="targetIndex: 0">
 
             <a-entity id="spatial-cards" scale="0.001 0.001 0.001"
-                      animation__scale="property: scale; to: 0.65 0.65 0.65; dur: 750; easing: easeOutElastic; startEvents: animateFound"
+                      animation__scale="property: scale; to: 0.65 0.65 0.65; dur: 900; easing: easeOutElastic; startEvents: animateFound"
                       animation__out="property: scale; to: 0.001 0.001 0.001; dur: 200; easing: linear; startEvents: animateLost">
 
-                <!-- Rotating outer ring -->
-                <a-ring color="#00ff9c" radius-inner="0.65" radius-outer="0.69" rotation="-90 0 0" position="0 -0.35 0" opacity="0.5" shader="flat"
-                        animation__spin="property: rotation; to: -90 360 0; dur: 6000; loop: true; easing: linear"></a-ring>
+                <!-- Rotating energy ring -->
+                <a-ring color="#ff6a00" radius-inner="0.63" radius-outer="0.7" rotation="-90 0 0" position="0 -0.35 0" opacity="0.55" shader="flat"
+                        animation="property: rotation; to: -90 0 360; loop: true; dur: 6000; easing: linear"></a-ring>
+                <a-ring color="#ffb100" radius-inner="0.72" radius-outer="0.74" rotation="-90 0 0" position="0 -0.35 0" opacity="0.3" shader="flat"
+                        animation="property: rotation; to: -90 0 -360; loop: true; dur: 9000; easing: linear"></a-ring>
 
-                <!-- Inner accent ring, counter-rotating -->
-                <a-ring color="#00f0ff" radius-inner="0.72" radius-outer="0.735" rotation="-90 0 0" position="0 -0.35 0" opacity="0.25" shader="flat"
-                        animation__spin="property: rotation; to: -90 -360 0; dur: 9000; loop: true; easing: linear"></a-ring>
+                <!-- Title / model badge -->
+                <a-entity position="0 0.95 -0.1">
+                    <a-plane width="1.7" height="0.32" color="#150800" opacity="0.92" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.92; dur: 500; startEvents: animateFound"></a-plane>
+                    <a-text value="BAJAJ PULSAR NS400" color="#ffb100" align="center" width="3.4" position="0 0 0.01" font="kelsonsans"
+                            animation__pulse="property: color; from: #ffb100; to: #ff6a00; dir: alternate; loop: true; dur: 1400"></a-text>
+                </a-entity>
 
-                <!-- Title with glow-pulse -->
-                <a-entity position="0 0.85 -0.1" text="value: YAMAHA FZ SERIES; color: #00f0ff; align: center; width: 4.0; font: kelsonsans; bold: true"
-                          animation__pulse="property: scale; from: 1 1 1; to: 1.06 1.06 1.06; dir: alternate; loop: true; dur: 1400; easing: easeInOutSine"></a-entity>
-
-                <!-- Underline accent beneath title -->
-                <a-plane position="0 0.72 -0.1" width="1.6" height="0.012" color="#00ff9c" opacity="0.8" shader="flat"
-                         animation__stretch="property: geometry.width; from: 0; to: 1.6; dur: 700; easing: easeOutQuad; startEvents: animateFound"></a-plane>
-
-                <a-entity position="-0.7 0.1 0.2" rotation="0 25 0">
-                    <a-plane width="1.2" height="0.28" color="#030b18" opacity="0" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 80; startEvents: animateFound"
-                             animation__slide="property: position; from: -0.85 -0.05 0.2; to: -0.7 0.1 0.2; dur: 550; delay: 80; easing: easeOutBack; startEvents: animateFound">
-                        <a-plane width="1.2" height="0.28" position="0 0 -0.001" color="#00ff9c" opacity="0.6" shader="flat"
-                                 geometry="primitive: plane; width: 1.22; height: 0.30"></a-plane>
-                        <a-text value="149cc FI Engine\nBlue Core Technology" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
+                <!-- ENGINE -->
+                <a-entity position="-0.85 0.35 0.25" rotation="0 25 0">
+                    <a-plane width="1.35" height="0.55" color="#1a0e05" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 100; startEvents: animateFound"
+                             animation__slide="property: position; from: -1.2 0.35 0.25; to: -0.85 0.35 0.25; dur: 600; delay: 100; easing: easeOutCubic; startEvents: animateFound">
+                        <a-text value="⚙ ENGINE\n373.27cc Liquid-Cooled\n40 HP (30kW) / 35 Nm\n6-Speed Gearbox" color="#ffb100" align="center" width="2.1" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="0.7 0.0 0.3" rotation="0 -25 0">
-                    <a-plane width="1.15" height="0.28" color="#030b18" opacity="0" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 160; startEvents: animateFound"
-                             animation__slide="property: position; from: 0.85 -0.05 0.3; to: 0.7 0.0 0.3; dur: 550; delay: 160; easing: easeOutBack; startEvents: animateFound">
-                        <a-plane width="1.15" height="0.28" position="0 0 -0.001" color="#00f0ff" opacity="0.5" shader="flat"
-                                 geometry="primitive: plane; width: 1.17; height: 0.30"></a-plane>
-                        <a-text value="Single Channel ABS\nFront Disc Brake" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
+                <!-- CHASSIS / BRAKES -->
+                <a-entity position="0.85 0.15 0.3" rotation="0 -25 0">
+                    <a-plane width="1.3" height="0.5" color="#1a0e05" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 200; startEvents: animateFound"
+                             animation__slide="property: position; from: 1.2 0.15 0.3; to: 0.85 0.15 0.3; dur: 600; delay: 200; easing: easeOutCubic; startEvents: animateFound">
+                        <a-text value="🛞 CHASSIS\nDual Channel ABS + TC\n320mm F / 230mm R Disc\n110/70-17 · 140/70-17" color="#ff6a00" align="center" width="2.1" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="-0.75 -0.15 -0.2" rotation="0 50 0">
-                    <a-plane width="1.2" height="0.28" color="#030b18" opacity="0" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 240; startEvents: animateFound"
-                             animation__slide="property: position; from: -0.9 -0.3 -0.2; to: -0.75 -0.15 -0.2; dur: 550; delay: 240; easing: easeOutBack; startEvents: animateFound">
-                        <a-plane width="1.2" height="0.28" position="0 0 -0.001" color="#00ff9c" opacity="0.5" shader="flat"
-                                 geometry="primitive: plane; width: 1.22; height: 0.30"></a-plane>
-                        <a-text value="7-Step Adjustable\nMonocross Suspension" color="#00f0ff" align="center" width="2.0" position="0 0 0.01"></a-text>
+                <!-- DIMENSIONS -->
+                <a-entity position="-0.85 -0.35 -0.15" rotation="0 45 0">
+                    <a-plane width="1.35" height="0.5" color="#1a0e05" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 300; startEvents: animateFound"
+                             animation__slide="property: position; from: -0.85 -0.7 -0.15; to: -0.85 -0.35 -0.15; dur: 600; delay: 300; easing: easeOutCubic; startEvents: animateFound">
+                        <a-text value="📐 DIMENSIONS\nWheelbase 1344mm\nGround Clear. 168mm\nSeat Height 807mm" color="#ffb100" align="center" width="2.1" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="-0.5 0.5 0.1" rotation="0 15 0">
-                    <a-plane width="1.1" height="0.28" color="#030b18" opacity="0" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 320; startEvents: animateFound"
-                             animation__slide="property: position; from: -0.65 0.65 0.1; to: -0.5 0.5 0.1; dur: 550; delay: 320; easing: easeOutBack; startEvents: animateFound">
-                        <a-plane width="1.1" height="0.28" position="0 0 -0.001" color="#00f0ff" opacity="0.5" shader="flat"
-                                 geometry="primitive: plane; width: 1.12; height: 0.30"></a-plane>
-                        <a-text value="13 Liters Capacity\nMuscular Fuel Tank" color="#00f0ff" align="center" width="2.0" position="0 0 0.01"></a-text>
-                    </a-plane>
-                </a-entity>
-
-                <a-entity position="0.1 0.7 0.3" rotation="10 -10 0">
-                    <a-plane width="1.2" height="0.28" color="#030b18" opacity="0" shader="flat"
+                <!-- FUEL / TOP SPEED -->
+                <a-entity position="-0.45 0.75 0.15" rotation="10 -10 0">
+                    <a-plane width="1.25" height="0.45" color="#1a0e05" opacity="0.9" shader="flat"
                              animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 400; startEvents: animateFound"
-                             animation__slide="property: position; from: 0.25 0.85 0.3; to: 0.1 0.7 0.3; dur: 550; delay: 400; easing: easeOutBack; startEvents: animateFound">
-                        <a-plane width="1.2" height="0.28" position="0 0 -0.001" color="#00ff9c" opacity="0.5" shader="flat"
-                                 geometry="primitive: plane; width: 1.22; height: 0.30"></a-plane>
-                        <a-text value="Negative LCD Instrument\nCluster Console" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
+                             animation__pop="property: scale; from: 0.4 0.4 0.4; to: 1 1 1; dur: 500; delay: 400; easing: easeOutBack; startEvents: animateFound">
+                        <a-text value="⛽ 12L Tank\n🚀 Top Speed 170 km/h" color="#ff6a00" align="center" width="2.0" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <!-- Small floating particles for extra flair -->
-                <a-sphere radius="0.015" color="#00ff9c" position="0.3 0.3 0.4" opacity="0.8"
-                          animation__float="property: position; to: 0.3 0.42 0.4; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"></a-sphere>
-                <a-sphere radius="0.012" color="#00f0ff" position="-0.35 0.25 0.35" opacity="0.8"
-                          animation__float="property: position; to: -0.35 0.37 0.35; dir: alternate; loop: true; dur: 2100; easing: easeInOutSine"></a-sphere>
-                <a-sphere radius="0.01" color="#00ff9c" position="0.15 -0.2 0.45" opacity="0.7"
-                          animation__float="property: position; to: 0.15 -0.08 0.45; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"></a-sphere>
+                <!-- WEIGHT -->
+                <a-entity position="0.6 0.7 0.2" rotation="-10 -15 0">
+                    <a-plane width="1.15" height="0.4" color="#1a0e05" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 500; startEvents: animateFound"
+                             animation__pop="property: scale; from: 0.4 0.4 0.4; to: 1 1 1; dur: 500; delay: 500; easing: easeOutBack; startEvents: animateFound">
+                        <a-text value="⚖ Kerb Weight\n174 kg" color="#ffb100" align="center" width="2.0" position="0 0 0.01"></a-text>
+                    </a-plane>
+                </a-entity>
+
+                <!-- ELECTRONICS -->
+                <a-entity position="0.75 -0.4 -0.2" rotation="0 -45 0">
+                    <a-plane width="1.35" height="0.45" color="#1a0e05" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 600; startEvents: animateFound"
+                             animation__slide="property: position; from: 0.75 -0.75 -0.2; to: 0.75 -0.4 -0.2; dur: 600; delay: 600; easing: easeOutCubic; startEvents: animateFound">
+                        <a-text value="📟 Full LCD Console\n💡 Full-LED Lighting" color="#ff6a00" align="center" width="2.0" position="0 0 0.01"></a-text>
+                    </a-plane>
+                </a-entity>
+
+                <!-- Bottom glow accent line -->
+                <a-plane width="1.4" height="0.02" color="#ffb100" position="0 -0.55 0.05" opacity="0.6" shader="flat"
+                         animation__glow="property: material.opacity; from: 0.2; to: 0.8; dir: alternate; loop: true; dur: 1200; startEvents: animateFound"></a-plane>
 
             </a-entity>
         </a-entity>
