@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Premium Smooth Fixed AR Scanner</title>
+    <title>Yamaha FZ Smooth Bike AR Scanner</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -12,9 +12,10 @@
         
         .mindar-ui-overlay { display: none !important; }
         
+        /* Premium Interactive Overlay */
         #start-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #0c1a30 0%, #020813 100%);
+            background: radial-gradient(circle, #0e1e38 0%, #030a16 100%);
             z-index: 9999; display: flex; flex-direction: column;
             justify-content: center; align-items: center; font-family: sans-serif;
         }
@@ -26,28 +27,29 @@
         }
         #status-txt { color: #00f0ff; margin-top: 22px; font-size: 13px; letter-spacing: 2px; }
         
+        /* Mobile HUD Scan Guide */
         #scan-hint {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             color: #00ff9c; background: rgba(2, 8, 19, 0.85); padding: 12px 25px;
             border-radius: 20px; font-size: 12px; font-family: sans-serif; z-index: 99;
             border: 1px solid #00ff9c; pointer-events: none; opacity: 0; transition: opacity 0.4s;
-            text-align: center; width: 70%; max-width: 280px;
+            text-align: center; width: 75%; max-width: 280px;
         }
     </style>
 </head>
 <body>
 
     <div id="start-overlay">
-        <button class="scan-btn" id="activate-btn">START AR SCANNER</button>
-        <div id="status-txt">TAP TO ACTIVATE MOBILE CAMERA</div>
+        <button class="scan-btn" id="activate-btn">START BIKE SCANNER</button>
+        <div id="status-txt">TAP TO ACTIVATE BIKE AR SCANNER</div>
     </div>
 
-    <div id="scan-hint">POINT CAMERA AT LAPTOP OBJECT</div>
+    <div id="scan-hint">POINT CAMERA AT THE BIKE TO SCAN</div>
 
     <a-scene
         id="main-scene"
         embedded
-        mindar-image="imageTargetSrc: targets.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0005; filterBeta: 0.05;"
+        mindar-image="imageTargetSrc: targets.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0003; filterBeta: 0.06;"
         color-space="sRGB"
         renderer="colorManagement: true; antialias: true; alpha: true; precision: mediump;"
         vr-mode-ui="enabled: false"
@@ -55,48 +57,48 @@
     >
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity id="laptop-anchor" mindar-image-target="targetIndex: 0">
+        <a-entity id="bike-anchor" mindar-image-target="targetIndex: 0">
             
             <a-entity id="spatial-cards" scale="0.001 0.001 0.001"
-                      animation__scale="property: scale; to: 0.65 0.65 0.65; dur: 800; easing: easeOutElastic; startEvents: animateFound"
+                      animation__scale="property: scale; to: 0.65 0.65 0.65; dur: 750; easing: easeOutElastic; startEvents: animateFound"
                       animation__out="property: scale; to: 0.001 0.001 0.001; dur: 200; easing: linear; startEvents: animateLost">
 
-                <a-ring color="#00f0ff" radius-inner="0.6" radius-outer="0.64" rotation="-90 0 0" position="0 -0.2 0" opacity="0.6" shader="flat"></a-ring>
+                <a-ring color="#00ff9c" radius-inner="0.65" radius-outer="0.69" rotation="-90 0 0" position="0 -0.35 0" opacity="0.5" shader="flat"></a-ring>
                 
-                <a-entity position="0 0.7 -0.1" text="value: ASUS EXPERTBOOK; color: #00f0ff; align: center; width: 3.8; font: kelsonsans; bold: true"></a-entity>
+                <a-entity position="0 0.85 -0.1" text="value: YAMAHA FZ SERIES; color: #00f0ff; align: center; width: 4.0; font: kelsonsans; bold: true"></a-entity>
 
-                <a-entity position="-0.65 0.3 0.2" rotation="0 30 0">
+                <a-entity position="-0.7 0.1 0.2" rotation="0 25 0">
+                    <a-plane width="1.2" height="0.28" color="#030b18" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; startEvents: animateFound">
+                        <a-text value="149cc FI Engine\nBlue Core Technology" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
+                    </a-plane>
+                </a-entity>
+
+                <a-entity position="0.7 0.0 0.3" rotation="0 -25 0">
                     <a-plane width="1.15" height="0.28" color="#030b18" opacity="0.9" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 600; startEvents: animateFound">
-                        <a-text value="Intel Core i5\n11th Gen Processor" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; startEvents: animateFound">
+                        <a-text value="Single Channel ABS\nFront Disc Brake" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="0.65 0.3 0.2" rotation="0 -30 0">
-                    <a-plane width="1.05" height="0.28" color="#030b18" opacity="0.9" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 600; startEvents: animateFound">
-                        <a-text value="8GB DDR4 RAM\nHigh-Speed Memory" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
+                <a-entity position="-0.75 -0.15 -0.2" rotation="0 50 0">
+                    <a-plane width="1.2" height="0.28" color="#030b18" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; startEvents: animateFound">
+                        <a-text value="7-Step Adjustable\nMonocross Suspension" color="#00f0ff" align="center" width="2.0" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="-0.75 0.1 -0.3" rotation="0 55 0">
+                <a-entity position="-0.5 0.5 0.1" rotation="0 15 0">
                     <a-plane width="1.1" height="0.28" color="#030b18" opacity="0.9" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 600; startEvents: animateFound">
-                        <a-text value="512GB M.2 NVMe\nUltra-Fast SSD" color="#00f0ff" align="center" width="2.0" position="0 0 0.01"></a-text>
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; startEvents: animateFound">
+                        <a-text value="13 Liters Capacity\nMuscular Fuel Tank" color="#00f0ff" align="center" width="2.0" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="0.75 0.1 -0.3" rotation="0 -55 0">
-                    <a-plane width="1.15" height="0.28" color="#030b18" opacity="0.9" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 600; startEvents: animateFound">
-                        <a-text value="14 FHD Display\nAnti-Glare Screen" color="#00f0ff" align="center" width="2.0" position="0 0 0.01"></a-text>
-                    </a-plane>
-                </a-entity>
-
-                <a-entity position="0 0.98 -0.12" rotation="8 0 0">
-                    <a-plane width="1.1" height="0.28" color="#030b18" opacity="0.9" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 600; startEvents: animateFound">
-                        <a-text value="42Wh Battery\nLong-Life Runtime" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
+                <a-entity position="0.1 0.7 0.3" rotation="10 -10 0">
+                    <a-plane width="1.2" height="0.28" color="#030b18" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; startEvents: animateFound">
+                        <a-text value="Negative LCD Instrument\nCluster Console" color="#00ff9c" align="center" width="2.0" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
@@ -109,12 +111,12 @@
         const activateBtn = document.querySelector('#activate-btn');
         const overlay = document.querySelector('#start-overlay');
         const statusTxt = document.querySelector('#status-txt');
-        const anchorEl = document.querySelector('#laptop-anchor');
+        const anchorEl = document.querySelector('#bike-anchor');
         const cardsContainer = document.querySelector('#spatial-cards');
         const scanHint = document.querySelector('#scan-hint');
 
         activateBtn.addEventListener('click', async () => {
-            statusTxt.innerText = "OPENING STABILIZED AR CAMERA...";
+            statusTxt.innerText = "INITIALIZING BIKE SCAN CORE...";
             try {
                 if (sceneEl.hasLoaded) {
                     await sceneEl.systems["mindar-image-system"].start();
@@ -127,7 +129,7 @@
                 scanHint.style.opacity = "1";
             } catch (err) {
                 console.error(err);
-                statusTxt.innerText = "ERROR: CAMERA PERMISSION DENIED.";
+                statusTxt.innerText = "ERROR: CAMERA LAYER DENIED.";
             }
         });
 
