@@ -79,65 +79,78 @@
                 <a-ring color="#ffb100" radius-inner="0.72" radius-outer="0.74" rotation="-90 0 0" position="0 -0.35 0" opacity="0.3" shader="flat"
                         animation="property: rotation; to: -90 0 -360; loop: true; dur: 9000; easing: linear"></a-ring>
 
-                <!-- Title / model badge -->
-                <a-entity position="0 0.95 -0.1">
-                    <a-plane width="1.7" height="0.32" color="#150800" opacity="0.92" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.92; dur: 500; startEvents: animateFound"></a-plane>
-                    <a-text value="BAJAJ PULSAR NS400" color="#ffb100" align="center" width="3.4" position="0 0 0.01" font="kelsonsans"
+                <!-- Title / model badge : moved higher + stronger highlight treatment -->
+                <a-entity position="0 1.25 -0.1">
+                    <!-- outer glow halo behind badge -->
+                    <a-plane width="2.05" height="0.46" color="#ff6a00" opacity="0" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.35; dur: 500; startEvents: animateFound"
+                             animation__glow="property: material.opacity; from: 0.2; to: 0.5; dir: alternate; loop: true; dur: 1400; startEvents: animateFound"></a-plane>
+                    <!-- thin accent border -->
+                    <a-plane width="1.85" height="0.36" color="#ffb100" opacity="0" position="0 0 0.005" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 400; startEvents: animateFound"></a-plane>
+                    <!-- dark badge body -->
+                    <a-plane width="1.78" height="0.30" color="#150800" opacity="0" shader="flat" position="0 0 0.01"
+                             animation__fade="property: material.opacity; from: 0; to: 0.95; dur: 400; delay: 60; startEvents: animateFound"></a-plane>
+                    <a-text value="BAJAJ PULSAR NS400" color="#ffb100" align="center" width="3.7" position="0 0.02 0.02" font="kelsonsans"
                             animation__pulse="property: color; from: #ffb100; to: #ff6a00; dir: alternate; loop: true; dur: 1400"></a-text>
+                    <a-text value="STREET NAKED · ADVENTURE SPORT" color="#ff9d3d" align="center" width="1.6" position="0 -0.1 0.02" opacity="0.85"></a-text>
                 </a-entity>
 
-                <!-- ENGINE -->
-                <a-entity position="-0.85 0.35 0.25" rotation="0 25 0">
-                    <a-plane width="1.35" height="0.55" color="#1a0e05" opacity="0.9" shader="flat"
+                <!-- Modern symmetric halo layout: 3 cards left / 3 cards right, evenly spaced -->
+
+                <!-- LEFT COLUMN -->
+                <!-- ENGINE (upper-left) -->
+                <a-entity position="-0.95 0.45 0.3" rotation="0 25 0">
+                    <a-plane width="1.4" height="0.5" color="#1a0e05" opacity="0.9" shader="flat"
                              animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 100; startEvents: animateFound"
-                             animation__slide="property: position; from: -1.2 0.35 0.25; to: -0.85 0.35 0.25; dur: 600; delay: 100; easing: easeOutCubic; startEvents: animateFound">
-                        <a-text value="⚙ ENGINE\n373.27cc Liquid-Cooled\n40 HP (30kW) / 35 Nm\n6-Speed Gearbox" color="#ffb100" align="center" width="2.1" position="0 0 0.01"></a-text>
+                             animation__slide="property: position; from: -1.3 0.45 0.3; to: -0.95 0.45 0.3; dur: 600; delay: 100; easing: easeOutCubic; startEvents: animateFound">
+                        <a-text value="⚙ ENGINE\n373.27cc Liquid-Cooled\n40 HP (30kW) / 35 Nm\n6-Speed Gearbox" color="#ffb100" align="center" width="2.15" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <!-- CHASSIS / BRAKES -->
-                <a-entity position="0.85 0.15 0.3" rotation="0 -25 0">
-                    <a-plane width="1.3" height="0.5" color="#1a0e05" opacity="0.9" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 200; startEvents: animateFound"
-                             animation__slide="property: position; from: 1.2 0.15 0.3; to: 0.85 0.15 0.3; dur: 600; delay: 200; easing: easeOutCubic; startEvents: animateFound">
-                        <a-text value="🛞 CHASSIS\nDual Channel ABS + TC\n320mm F / 230mm R Disc\n110/70-17 · 140/70-17" color="#ff6a00" align="center" width="2.1" position="0 0 0.01"></a-text>
+                <!-- DIMENSIONS (mid-left) -->
+                <a-entity position="-0.95 0 0.18" rotation="0 25 0">
+                    <a-plane width="1.4" height="0.5" color="#1a0e05" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 250; startEvents: animateFound"
+                             animation__slide="property: position; from: -1.3 0 0.18; to: -0.95 0 0.18; dur: 600; delay: 250; easing: easeOutCubic; startEvents: animateFound">
+                        <a-text value="📐 DIMENSIONS\nWheelbase 1344mm\nGround Clear. 168mm\nSeat Height 807mm" color="#ff6a00" align="center" width="2.15" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <!-- DIMENSIONS -->
-                <a-entity position="-0.85 -0.35 -0.15" rotation="0 45 0">
-                    <a-plane width="1.35" height="0.5" color="#1a0e05" opacity="0.9" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 300; startEvents: animateFound"
-                             animation__slide="property: position; from: -0.85 -0.7 -0.15; to: -0.85 -0.35 -0.15; dur: 600; delay: 300; easing: easeOutCubic; startEvents: animateFound">
-                        <a-text value="📐 DIMENSIONS\nWheelbase 1344mm\nGround Clear. 168mm\nSeat Height 807mm" color="#ffb100" align="center" width="2.1" position="0 0 0.01"></a-text>
-                    </a-plane>
-                </a-entity>
-
-                <!-- FUEL / TOP SPEED -->
-                <a-entity position="-0.45 0.75 0.15" rotation="10 -10 0">
-                    <a-plane width="1.25" height="0.45" color="#1a0e05" opacity="0.9" shader="flat"
+                <!-- ELECTRONICS (lower-left) -->
+                <a-entity position="-0.95 -0.45 0.3" rotation="0 25 0">
+                    <a-plane width="1.4" height="0.42" color="#1a0e05" opacity="0.9" shader="flat"
                              animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 400; startEvents: animateFound"
-                             animation__pop="property: scale; from: 0.4 0.4 0.4; to: 1 1 1; dur: 500; delay: 400; easing: easeOutBack; startEvents: animateFound">
-                        <a-text value="⛽ 12L Tank\n🚀 Top Speed 170 km/h" color="#ff6a00" align="center" width="2.0" position="0 0 0.01"></a-text>
+                             animation__slide="property: position; from: -1.3 -0.45 0.3; to: -0.95 -0.45 0.3; dur: 600; delay: 400; easing: easeOutCubic; startEvents: animateFound">
+                        <a-text value="📟 Full LCD Console\n💡 Full-LED Lighting" color="#ffb100" align="center" width="2.05" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <!-- WEIGHT -->
-                <a-entity position="0.6 0.7 0.2" rotation="-10 -15 0">
-                    <a-plane width="1.15" height="0.4" color="#1a0e05" opacity="0.9" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 500; startEvents: animateFound"
-                             animation__pop="property: scale; from: 0.4 0.4 0.4; to: 1 1 1; dur: 500; delay: 500; easing: easeOutBack; startEvents: animateFound">
-                        <a-text value="⚖ Kerb Weight\n174 kg" color="#ffb100" align="center" width="2.0" position="0 0 0.01"></a-text>
+                <!-- RIGHT COLUMN -->
+                <!-- CHASSIS / BRAKES (upper-right) -->
+                <a-entity position="0.95 0.45 0.3" rotation="0 -25 0">
+                    <a-plane width="1.4" height="0.5" color="#1a0e05" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 175; startEvents: animateFound"
+                             animation__slide="property: position; from: 1.3 0.45 0.3; to: 0.95 0.45 0.3; dur: 600; delay: 175; easing: easeOutCubic; startEvents: animateFound">
+                        <a-text value="🛞 CHASSIS\nDual Channel ABS + TC\n320mm F / 230mm R Disc\n110/70-17 · 140/70-17" color="#ff6a00" align="center" width="2.15" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
-                <!-- ELECTRONICS -->
-                <a-entity position="0.75 -0.4 -0.2" rotation="0 -45 0">
-                    <a-plane width="1.35" height="0.45" color="#1a0e05" opacity="0.9" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 600; startEvents: animateFound"
-                             animation__slide="property: position; from: 0.75 -0.75 -0.2; to: 0.75 -0.4 -0.2; dur: 600; delay: 600; easing: easeOutCubic; startEvents: animateFound">
-                        <a-text value="📟 Full LCD Console\n💡 Full-LED Lighting" color="#ff6a00" align="center" width="2.0" position="0 0 0.01"></a-text>
+                <!-- FUEL / TOP SPEED (mid-right) -->
+                <a-entity position="0.95 0 0.18" rotation="0 -25 0">
+                    <a-plane width="1.4" height="0.42" color="#1a0e05" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 325; startEvents: animateFound"
+                             animation__slide="property: position; from: 1.3 0 0.18; to: 0.95 0 0.18; dur: 600; delay: 325; easing: easeOutCubic; startEvents: animateFound">
+                        <a-text value="⛽ 12L Tank\n🚀 Top Speed 170 km/h" color="#ffb100" align="center" width="2.05" position="0 0 0.01"></a-text>
+                    </a-plane>
+                </a-entity>
+
+                <!-- WEIGHT (lower-right) -->
+                <a-entity position="0.95 -0.45 0.3" rotation="0 -25 0">
+                    <a-plane width="1.2" height="0.4" color="#1a0e05" opacity="0.9" shader="flat"
+                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 500; delay: 475; startEvents: animateFound"
+                             animation__slide="property: position; from: 1.3 -0.45 0.3; to: 0.95 -0.45 0.3; dur: 600; delay: 475; easing: easeOutCubic; startEvents: animateFound">
+                        <a-text value="⚖ Kerb Weight\n174 kg" color="#ff6a00" align="center" width="2.0" position="0 0 0.01"></a-text>
                     </a-plane>
                 </a-entity>
 
