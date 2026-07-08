@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Bajaj Pulsar NS400 AR Scanner</title>
+    <title>Bajaj Pulsar NS400 Real-World AR Scanner</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -32,7 +32,19 @@
         }
         #status-txt { color: #ffb100; margin-top: 22px; font-size: 13px; letter-spacing: 2px; }
 
-        /* Mobile HUD Scan Guide */
+        /* Tech HUD Target Box for Real-World Alignment */
+        #hud-scanner-frame {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85vw; height: 55vw; max-width: 360px; max-height: 240px;
+            border: 2px dashed rgba(255, 177, 0, 0.4); border-radius: 12px;
+            z-index: 99; pointer-events: none; opacity: 0; transition: all 0.4s ease;
+        }
+        #hud-scanner-frame::before, #hud-scanner-frame::after {
+            content: ''; position: absolute; width: 20px; height: 20px; border-color: #ff3d1a; border-style: solid;
+        }
+        #hud-scanner-frame::before { top: -2px; left: -2px; border-width: 3px 0 0 3px; }
+        #hud-scanner-frame::after { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; }
+
         #scan-hint {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             color: #ffb100; background: rgba(21, 8, 0, 0.85); padding: 12px 25px;
@@ -54,12 +66,15 @@
         <div id="status-txt">TAP TO ACTIVATE BIKE AR SCANNER</div>
     </div>
 
-    <div id="scan-hint">POINT CAMERA AT THE BIKE TO SCAN</div>
+    <!-- Real World Guide HUD Box -->
+    <div id="hud-scanner-frame"></div>
+    <div id="scan-hint">ALIGN PULSAR NS400 SIDE-VIEW IN HUD BOX</div>
 
+    <!-- Optimized WebAR Engine to reduce real-world tracking jitters -->
     <a-scene
         id="main-scene"
         embedded
-        mindar-image="imageTargetSrc: targets.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0003; filterBeta: 0.06;"
+        mindar-image="imageTargetSrc: targets.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.09;"
         color-space="sRGB"
         renderer="colorManagement: true; antialias: true; alpha: true; precision: mediump;"
         vr-mode-ui="enabled: false"
@@ -69,181 +84,92 @@
 
         <a-entity id="bike-anchor" mindar-image-target="targetIndex: 0">
 
+            <!-- Scale calibrated to look proportionate against an actual physical motorcycle -->
             <a-entity id="spatial-cards" scale="0.001 0.001 0.001"
-                      animation__scale="property: scale; to: 0.65 0.65 0.65; dur: 900; easing: easeOutElastic; startEvents: animateFound"
+                      animation__scale="property: scale; to: 1 1 1; dur: 850; easing: easeOutElastic; startEvents: animateFound"
                       animation__out="property: scale; to: 0.001 0.001 0.001; dur: 200; easing: linear; startEvents: animateLost">
 
-                <!-- Rotating energy ring -->
-                <a-ring color="#ff6a00" radius-inner="0.63" radius-outer="0.7" rotation="-90 0 0" position="0 -0.35 0" opacity="0.45" shader="flat"
+                <!-- Rotating energy rings sitting under the bike frame -->
+                <a-ring color="#ff6a00" radius-inner="0.9" radius-outer="0.96" rotation="-90 0 0" position="0 -0.6 0" opacity="0.5" shader="flat"
                         animation="property: rotation; to: -90 0 360; loop: true; dur: 6000; easing: linear"></a-ring>
-                <a-ring color="#ffb100" radius-inner="0.72" radius-outer="0.74" rotation="-90 0 0" position="0 -0.35 0" opacity="0.25" shader="flat"
+                <a-ring color="#ffb100" radius-inner="1.02" radius-outer="1.05" rotation="-90 0 0" position="0 -0.6 0" opacity="0.3" shader="flat"
                         animation="property: rotation; to: -90 0 -360; loop: true; dur: 9000; easing: linear"></a-ring>
 
                 <!-- ================= FLOATING HEADER BADGE ================= -->
-                <a-entity id="title-float" position="0 1.35 -0.05"
-                          animation__bob="property: position; from: 0 1.35 -0.05; to: 0 1.45 -0.05; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine">
-
-                    <!-- soft outer glow halo -->
-                    <a-plane width="2.2" height="0.5" color="#ff6a00" opacity="0" shader="flat" position="0 0 -0.02"
-                             animation__fade="property: material.opacity; from: 0; to: 0.3; dur: 500; startEvents: animateFound"
-                             animation__glow="property: material.opacity; from: 0.15; to: 0.4; dir: alternate; loop: true; dur: 1600; startEvents: animateFound"></a-plane>
-
-                    <!-- glass pill body -->
-                    <a-entity geometry="primitive: plane; width: 1.9; height: 0.42" material="color: #150800; opacity: 0; shader: flat"
-                              animation__fade="property: material.opacity; from: 0; to: 0.88; dur: 400; delay: 60; startEvents: animateFound"></a-entity>
-
-                    <!-- top accent hairline -->
-                    <a-plane width="1.9" height="0.014" color="#ffb100" opacity="0" position="0 0.205 0.01" shader="flat"
-                              animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 350; delay: 150; startEvents: animateFound"></a-plane>
-                    <!-- bottom accent hairline -->
-                    <a-plane width="1.9" height="0.014" color="#ff6a00" opacity="0" position="0 -0.205 0.01" shader="flat"
-                              animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 350; delay: 150; startEvents: animateFound"></a-plane>
-
-                    <!-- small side ticks either side of the badge -->
-                    <a-plane width="0.05" height="0.42" color="#ffb100" opacity="0" position="-0.975 0 0.01" shader="flat"
-                              animation__fade="property: material.opacity; from: 0; to: 0.8; dur: 300; delay: 200; startEvents: animateFound"></a-plane>
-                    <a-plane width="0.05" height="0.42" color="#ffb100" opacity="0" position="0.975 0 0.01" shader="flat"
-                              animation__fade="property: material.opacity; from: 0; to: 0.8; dur: 300; delay: 200; startEvents: animateFound"></a-plane>
-
-                    <a-text value="BAJAJ PULSAR NS400" color="#ffb100" align="center" width="3.55" position="0 0.075 0.02" font="kelsonsans"
-                            animation__pulse="property: color; from: #ffb100; to: #ff6a00; dir: alternate; loop: true; dur: 1600"></a-text>
-                    <a-text value="· STREET NAKED · ADVENTURE SPORT ·" color="#ff9d3d" align="center" width="1.55" position="0 -0.095 0.02" opacity="0.9"></a-text>
+                <a-entity id="title-float" position="0 1.6 0"
+                          animation__bob="property: position; from: 0 1.6 0; to: 0 1.7 0; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine">
+                    <a-plane width="2.4" height="0.5" color="#ff6a00" opacity="0.2" shader="flat" position="0 0 -0.02"></a-plane>
+                    <a-entity geometry="primitive: plane; width: 2.1; height: 0.45" material="color: #150800; opacity: 0.9; shader: flat"></a-entity>
+                    <a-text value="BAJAJ PULSAR NS400" color="#ffb100" align="center" width="4.0" position="0 0.08 0.02" font="kelsonsans"></a-text>
+                    <a-text value="· STREET NAKED · ADVENTURE SPORT ·" color="#ff9d3d" align="center" width="1.8" position="0 -0.1 0.02" opacity="0.9"></a-text>
                 </a-entity>
 
-                <!-- ================= CALLOUT CONNECTOR LINES ================= -->
-                <!-- Left column anchor points (near bike centerline) -->
-                <a-entity line="start: -0.08 0.42 0.08; end: -0.62 0.45 0.22; color: #ffb100; opacity: 0.75"
-                          animation__fade="property: material.opacity; from: 0; to: 0.75; dur: 400; delay: 250; startEvents: animateFound"></a-entity>
-                <a-entity line="start: -0.06 0.02 0.05; end: -0.62 0 0.14; color: #ff6a00; opacity: 0.75"
-                          animation__fade="property: material.opacity; from: 0; to: 0.75; dur: 400; delay: 400; startEvents: animateFound"></a-entity>
-                <a-entity line="start: -0.05 -0.28 0.08; end: -0.62 -0.45 0.22; color: #ffb100; opacity: 0.75"
-                          animation__fade="property: material.opacity; from: 0; to: 0.75; dur: 400; delay: 550; startEvents: animateFound"></a-entity>
+                <!-- ================= REAL WORLD CALIBRATED CALLOUT LINES ================= -->
+                <!-- Lines extend accurately from bike engine/wheels outwards -->
+                <a-entity line="start: -0.1 0.1 0.1; end: -1.0 0.4 0.3; color: #ffb100; opacity: 0.8" animation__fade="startEvents: animateFound"></a-entity>
+                <a-entity line="start: -0.3 -0.3 0.1; end: -1.0 -0.1 0.2; color: #ff6a00; opacity: 0.8" animation__fade="startEvents: animateFound"></a-entity>
+                <a-entity line="start: -0.4 -0.5 0.1; end: -1.0 -0.6 0.3; color: #ffb100; opacity: 0.8" animation__fade="startEvents: animateFound"></a-entity>
 
-                <!-- Right column anchor points -->
-                <a-entity line="start: 0.08 0.42 0.08; end: 0.62 0.45 0.22; color: #ff6a00; opacity: 0.75"
-                          animation__fade="property: material.opacity; from: 0; to: 0.75; dur: 400; delay: 325; startEvents: animateFound"></a-entity>
-                <a-entity line="start: 0.06 0.02 0.05; end: 0.62 0 0.14; color: #ffb100; opacity: 0.75"
-                          animation__fade="property: material.opacity; from: 0; to: 0.75; dur: 400; delay: 475; startEvents: animateFound"></a-entity>
-                <a-entity line="start: 0.05 -0.28 0.08; end: 0.62 -0.45 0.22; color: #ff6a00; opacity: 0.75"
-                          animation__fade="property: material.opacity; from: 0; to: 0.75; dur: 400; delay: 625; startEvents: animateFound"></a-entity>
+                <a-entity line="start: 0.3 0.4 0.1; end: 1.0 0.4 0.3; color: #ff6a00; opacity: 0.8" animation__fade="startEvents: animateFound"></a-entity>
+                <a-entity line="start: 0.2 0.0 0.1; end: 1.0 -0.1 0.2; color: #ffb100; opacity: 0.8" animation__fade="startEvents: animateFound"></a-entity>
+                <a-entity line="start: 0.4 -0.4 0.1; end: 1.0 -0.6 0.3; color: #ff6a00; opacity: 0.8" animation__fade="startEvents: animateFound"></a-entity>
 
-                <!-- Glowing anchor node dots on the bike itself, pulsing like a scan point -->
-                <a-entity id="dot-1" position="-0.08 0.42 0.08">
-                    <a-ring color="#ffb100" radius-inner="0.018" radius-outer="0.03" opacity="0" shader="flat"
-                            animation__fade="property: material.opacity; from: 0; to: 0.95; dur: 300; delay: 250; startEvents: animateFound"
-                            animation__pulse="property: scale; from: 1 1 1; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 1000; startEvents: animateFound"></a-ring>
-                </a-entity>
-                <a-entity id="dot-2" position="-0.06 0.02 0.05">
-                    <a-ring color="#ff6a00" radius-inner="0.018" radius-outer="0.03" opacity="0" shader="flat"
-                            animation__fade="property: material.opacity; from: 0; to: 0.95; dur: 300; delay: 400; startEvents: animateFound"
-                            animation__pulse="property: scale; from: 1 1 1; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 1000; startEvents: animateFound"></a-ring>
-                </a-entity>
-                <a-entity id="dot-3" position="-0.05 -0.28 0.08">
-                    <a-ring color="#ffb100" radius-inner="0.018" radius-outer="0.03" opacity="0" shader="flat"
-                            animation__fade="property: material.opacity; from: 0; to: 0.95; dur: 300; delay: 550; startEvents: animateFound"
-                            animation__pulse="property: scale; from: 1 1 1; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 1000; startEvents: animateFound"></a-ring>
-                </a-entity>
-                <a-entity id="dot-4" position="0.08 0.42 0.08">
-                    <a-ring color="#ff6a00" radius-inner="0.018" radius-outer="0.03" opacity="0" shader="flat"
-                            animation__fade="property: material.opacity; from: 0; to: 0.95; dur: 300; delay: 325; startEvents: animateFound"
-                            animation__pulse="property: scale; from: 1 1 1; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 1000; startEvents: animateFound"></a-ring>
-                </a-entity>
-                <a-entity id="dot-5" position="0.06 0.02 0.05">
-                    <a-ring color="#ffb100" radius-inner="0.018" radius-outer="0.03" opacity="0" shader="flat"
-                            animation__fade="property: material.opacity; from: 0; to: 0.95; dur: 300; delay: 475; startEvents: animateFound"
-                            animation__pulse="property: scale; from: 1 1 1; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 1000; startEvents: animateFound"></a-ring>
-                </a-entity>
-                <a-entity id="dot-6" position="0.05 -0.28 0.08">
-                    <a-ring color="#ff6a00" radius-inner="0.018" radius-outer="0.03" opacity="0" shader="flat"
-                            animation__fade="property: material.opacity; from: 0; to: 0.95; dur: 300; delay: 625; startEvents: animateFound"
-                            animation__pulse="property: scale; from: 1 1 1; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 1000; startEvents: animateFound"></a-ring>
-                </a-entity>
-
-                <!-- ================= INFO CALLOUT CARDS ================= -->
-
+                <!-- ================= INFO CALLOUT CARDS (POINTERS OUTSIDE BODY) ================= -->
                 <!-- LEFT COLUMN -->
-                <!-- ENGINE (upper-left) -->
-                <a-entity position="-1.05 0.45 0.3" rotation="0 25 0">
-                    <a-plane width="0.06" height="0.06" color="#ffb100" opacity="0" shader="flat" position="0 0.18 0.02"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 300; delay: 220; startEvents: animateFound"></a-plane>
-                    <a-plane width="1.3" height="0.05" color="#ffb100" opacity="0" position="0 0.155 0" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 1; dur: 350; delay: 250; startEvents: animateFound"></a-plane>
-                    <a-text value="ENGINE" color="#150800" align="center" width="1.6" position="0 0.155 0.01"></a-text>
-                    <a-plane width="1.3" height="0.42" color="#1a0e05" opacity="0" shader="flat" position="0 -0.09 -0.005"
-                             animation__fade="property: material.opacity; from: 0; to: 0.92; dur: 500; delay: 100; startEvents: animateFound"
-                             animation__slide="property: position; from: -0.35 0.45 0.3; to: 0 -0.09 -0.005; dur: 600; delay: 100; easing: easeOutCubic; startEvents: animateFound"></a-plane>
-                    <a-text value="373.27cc Liquid-Cooled\n40 HP (30kW) · 35 Nm\n6-Speed Gearbox" color="#ffb100" align="center" width="1.9" position="0 -0.09 0.02"></a-text>
+                <!-- ENGINE (Calibrated to real engine position) -->
+                <a-entity position="-1.6 0.4 0.3" rotation="0 15 0">
+                    <a-plane width="1.4" height="0.06" color="#ffb100" shader="flat" position="0 0.16 0.01"></a-plane>
+                    <a-text value="ENGINE" color="#150800" align="center" width="1.8" position="0 0.16 0.02"></a-text>
+                    <a-plane width="1.4" height="0.45" color="#1a0e05" opacity="0.9" shader="flat">
+                        <a-text value="373.27cc Liquid-Cooled\n40 HP (30kW) · 35 Nm\n6-Speed Gearbox" color="#ffb100" align="center" width="2.0"></a-text>
+                    </a-plane>
                 </a-entity>
 
-                <!-- DIMENSIONS (mid-left) -->
-                <a-entity position="-1.05 0 0.18" rotation="0 25 0">
-                    <a-plane width="0.06" height="0.06" color="#ff6a00" opacity="0" shader="flat" position="0 0.18 0.02"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 300; delay: 370; startEvents: animateFound"></a-plane>
-                    <a-plane width="1.3" height="0.05" color="#ff6a00" opacity="0" position="0 0.155 0" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 1; dur: 350; delay: 400; startEvents: animateFound"></a-plane>
-                    <a-text value="DIMENSIONS" color="#150800" align="center" width="1.6" position="0 0.155 0.01"></a-text>
-                    <a-plane width="1.3" height="0.42" color="#1a0e05" opacity="0" shader="flat" position="0 -0.09 -0.005"
-                             animation__fade="property: material.opacity; from: 0; to: 0.92; dur: 500; delay: 250; startEvents: animateFound"
-                             animation__slide="property: position; from: -0.35 0 0.18; to: 0 -0.09 -0.005; dur: 600; delay: 250; easing: easeOutCubic; startEvents: animateFound"></a-plane>
-                    <a-text value="Wheelbase 1344mm\nGround Clear. 168mm\nSeat Height 807mm" color="#ff6a00" align="center" width="1.9" position="0 -0.09 0.02"></a-text>
+                <!-- DIMENSIONS -->
+                <a-entity position="-1.6 -0.1 0.2" rotation="0 15 0">
+                    <a-plane width="1.4" height="0.06" color="#ff6a00" shader="flat" position="0 0.16 0.01"></a-plane>
+                    <a-text value="DIMENSIONS" color="#150800" align="center" width="1.8" position="0 0.16 0.02"></a-text>
+                    <a-plane width="1.4" height="0.45" color="#1a0e05" opacity="0.9" shader="flat">
+                        <a-text value="Wheelbase 1344mm\nGround Clear. 168mm\nSeat Height 807mm" color="#ff6a00" align="center" width="2.0"></a-text>
+                    </a-plane>
                 </a-entity>
 
-                <!-- ELECTRONICS (lower-left) -->
-                <a-entity position="-1.05 -0.45 0.3" rotation="0 25 0">
-                    <a-plane width="0.06" height="0.06" color="#ffb100" opacity="0" shader="flat" position="0 0.15 0.02"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 300; delay: 520; startEvents: animateFound"></a-plane>
-                    <a-plane width="1.3" height="0.05" color="#ffb100" opacity="0" position="0 0.125 0" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 1; dur: 350; delay: 550; startEvents: animateFound"></a-plane>
-                    <a-text value="ELECTRONICS" color="#150800" align="center" width="1.6" position="0 0.125 0.01"></a-text>
-                    <a-plane width="1.3" height="0.32" color="#1a0e05" opacity="0" shader="flat" position="0 -0.08 -0.005"
-                             animation__fade="property: material.opacity; from: 0; to: 0.92; dur: 500; delay: 400; startEvents: animateFound"
-                             animation__slide="property: position; from: -0.35 -0.45 0.3; to: 0 -0.08 -0.005; dur: 600; delay: 400; easing: easeOutCubic; startEvents: animateFound"></a-plane>
-                    <a-text value="Full LCD Console\nFull-LED Lighting" color="#ffb100" align="center" width="1.85" position="0 -0.08 0.02"></a-text>
+                <!-- ELECTRONICS -->
+                <a-entity position="-1.6 -0.6 0.3" rotation="0 15 0">
+                    <a-plane width="1.4" height="0.06" color="#ffb100" shader="flat" position="0 0.13 0.01"></a-plane>
+                    <a-text value="ELECTRONICS" color="#150800" align="center" width="1.8" position="0 0.13 0.02"></a-text>
+                    <a-plane width="1.4" height="0.35" color="#1a0e05" opacity="0.9" shader="flat">
+                        <a-text value="Full LCD Console\nFull-LED Lighting" color="#ffb100" align="center" width="1.9"></a-text>
+                    </a-plane>
                 </a-entity>
 
                 <!-- RIGHT COLUMN -->
-                <!-- CHASSIS / BRAKES (upper-right) -->
-                <a-entity position="1.05 0.45 0.3" rotation="0 -25 0">
-                    <a-plane width="0.06" height="0.06" color="#ff6a00" opacity="0" shader="flat" position="0 0.18 0.02"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 300; delay: 295; startEvents: animateFound"></a-plane>
-                    <a-plane width="1.3" height="0.05" color="#ff6a00" opacity="0" position="0 0.155 0" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 1; dur: 350; delay: 325; startEvents: animateFound"></a-plane>
-                    <a-text value="CHASSIS" color="#150800" align="center" width="1.6" position="0 0.155 0.01"></a-text>
-                    <a-plane width="1.3" height="0.42" color="#1a0e05" opacity="0" shader="flat" position="0 -0.09 -0.005"
-                             animation__fade="property: material.opacity; from: 0; to: 0.92; dur: 500; delay: 175; startEvents: animateFound"
-                             animation__slide="property: position; from: 0.35 0.45 0.3; to: 0 -0.09 -0.005; dur: 600; delay: 175; easing: easeOutCubic; startEvents: animateFound"></a-plane>
-                    <a-text value="Dual Channel ABS + TC\n320mm F · 230mm R Disc\n110/70-17 · 140/70-17" color="#ff6a00" align="center" width="1.9" position="0 -0.09 0.02"></a-text>
+                <!-- CHASSIS -->
+                <a-entity position="1.6 0.4 0.3" rotation="0 -15 0">
+                    <a-plane width="1.4" height="0.06" color="#ff6a00" shader="flat" position="0 0.16 0.01"></a-plane>
+                    <a-text value="CHASSIS" color="#150800" align="center" width="1.8" position="0 0.16 0.02"></a-text>
+                    <a-plane width="1.4" height="0.45" color="#1a0e05" opacity="0.9" shader="flat">
+                        <a-text value="Dual Channel ABS + TC\n320mm F · 230mm R Disc\n110/70-17 · 140/70-17" color="#ff6a00" align="center" width="2.0"></a-text>
+                    </a-plane>
                 </a-entity>
 
-                <!-- FUEL / TOP SPEED (mid-right) -->
-                <a-entity position="1.05 0 0.18" rotation="0 -25 0">
-                    <a-plane width="0.06" height="0.06" color="#ffb100" opacity="0" shader="flat" position="0 0.15 0.02"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 300; delay: 445; startEvents: animateFound"></a-plane>
-                    <a-plane width="1.3" height="0.05" color="#ffb100" opacity="0" position="0 0.125 0" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 1; dur: 350; delay: 475; startEvents: animateFound"></a-plane>
-                    <a-text value="PERFORMANCE" color="#150800" align="center" width="1.6" position="0 0.125 0.01"></a-text>
-                    <a-plane width="1.3" height="0.32" color="#1a0e05" opacity="0" shader="flat" position="0 -0.08 -0.005"
-                             animation__fade="property: material.opacity; from: 0; to: 0.92; dur: 500; delay: 325; startEvents: animateFound"
-                             animation__slide="property: position; from: 0.35 0 0.18; to: 0 -0.08 -0.005; dur: 600; delay: 325; easing: easeOutCubic; startEvents: animateFound"></a-plane>
-                    <a-text value="12L Fuel Tank\nTop Speed 170 km/h" color="#ffb100" align="center" width="1.85" position="0 -0.08 0.02"></a-text>
+                <!-- PERFORMANCE -->
+                <a-entity position="1.6 -0.1 0.2" rotation="0 -15 0">
+                    <a-plane width="1.4" height="0.06" color="#ffb100" shader="flat" position="0 0.13 0.01"></a-plane>
+                    <a-text value="PERFORMANCE" color="#150800" align="center" width="1.8" position="0 0.13 0.02"></a-text>
+                    <a-plane width="1.4" height="0.35" color="#1a0e05" opacity="0.9" shader="flat">
+                        <a-text value="12L Fuel Tank\nTop Speed 170 km/h" color="#ffb100" align="center" width="1.9"></a-text>
+                    </a-plane>
                 </a-entity>
 
-                <!-- WEIGHT (lower-right) -->
-                <a-entity position="1.05 -0.45 0.3" rotation="0 -25 0">
-                    <a-plane width="0.06" height="0.06" color="#ff6a00" opacity="0" shader="flat" position="0 0.13 0.02"
-                             animation__fade="property: material.opacity; from: 0; to: 0.9; dur: 300; delay: 595; startEvents: animateFound"></a-plane>
-                    <a-plane width="1.1" height="0.05" color="#ff6a00" opacity="0" position="0 0.105 0" shader="flat"
-                             animation__fade="property: material.opacity; from: 0; to: 1; dur: 350; delay: 625; startEvents: animateFound"></a-plane>
-                    <a-text value="WEIGHT" color="#150800" align="center" width="1.6" position="0 0.105 0.01"></a-text>
-                    <a-plane width="1.1" height="0.24" color="#1a0e05" opacity="0" shader="flat" position="0 -0.06 -0.005"
-                             animation__fade="property: material.opacity; from: 0; to: 0.92; dur: 500; delay: 475; startEvents: animateFound"
-                             animation__slide="property: position; from: 0.35 -0.45 0.3; to: 0 -0.06 -0.005; dur: 600; delay: 475; easing: easeOutCubic; startEvents: animateFound"></a-plane>
-                    <a-text value="Kerb Weight 174 kg" color="#ff6a00" align="center" width="1.7" position="0 -0.06 0.02"></a-text>
+                <!-- WEIGHT -->
+                <a-entity position="1.6 -0.6 0.3" rotation="0 -15 0">
+                    <a-plane width="1.4" height="0.06" color="#ff6a00" shader="flat" position="0 0.11 0.01"></a-plane>
+                    <a-text value="WEIGHT" color="#150800" align="center" width="1.8" position="0 0.11 0.02"></a-text>
+                    <a-plane width="1.4" height="0.3" color="#1a0e05" opacity="0.9" shader="flat">
+                        <a-text value="Kerb Weight 174 kg" color="#ff6a00" align="center" width="1.8"></a-text>
+                    </a-plane>
                 </a-entity>
-
-                <!-- Bottom glow accent line -->
-                <a-plane width="1.4" height="0.02" color="#ffb100" position="0 -0.55 0.05" opacity="0.6" shader="flat"
-                         animation__glow="property: material.opacity; from: 0.2; to: 0.8; dir: alternate; loop: true; dur: 1200; startEvents: animateFound"></a-plane>
 
             </a-entity>
         </a-entity>
@@ -257,6 +183,7 @@
         const anchorEl = document.querySelector('#bike-anchor');
         const cardsContainer = document.querySelector('#spatial-cards');
         const scanHint = document.querySelector('#scan-hint');
+        const hudFrame = document.querySelector('#hud-scanner-frame');
 
         activateBtn.addEventListener('click', async () => {
             statusTxt.innerText = "INITIALIZING BIKE SCAN CORE...";
@@ -270,6 +197,7 @@
                 }
                 overlay.style.display = 'none';
                 scanHint.style.opacity = "1";
+                hudFrame.style.opacity = "1";
             } catch (err) {
                 console.error(err);
                 statusTxt.innerText = "ERROR: CAMERA LAYER DENIED.";
@@ -279,11 +207,13 @@
         anchorEl.addEventListener('targetFound', () => {
             cardsContainer.emit('animateFound');
             scanHint.style.opacity = "0";
+            hudFrame.style.opacity = "0"; // HUD frame disappears smoothly upon tracking lock
         });
 
         anchorEl.addEventListener('targetLost', () => {
             cardsContainer.emit('animateLost');
             scanHint.style.opacity = "1";
+            hudFrame.style.opacity = "1";
         });
     </script>
 </body>
