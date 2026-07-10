@@ -8,98 +8,48 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
         :root {
-            --brand-amber: #ffb100;
             --brand-orange: #ff4500;
-            --brand-dark: #0a0401;
-            --neon-blue: #00f3ff;
+            --brand-amber: #ffb100;
         }
-        html, body { margin: 0; overflow: hidden; width: 100%; height: 100%; background-color: transparent; font-family: 'Segoe UI', system-ui, sans-serif; }
+        html, body { margin: 0; overflow: hidden; width: 100%; height: 100%; background-color: transparent; font-family: system-ui, sans-serif; }
         a-scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 
         /* START SCREEN OVERLAY */
         #start-overlay {
             position: fixed; inset: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, #1a0b02 0%, #050201 100%);
+            background: radial-gradient(circle at 50% 50%, #140701 0%, #000000 100%);
             z-index: 9999; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; padding: 24px; box-sizing: border-box;
-            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+            transition: opacity 0.5s ease;
         }
-        .brand-mark { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 4vh; }
-        .brand-title { color: #fff; font-size: clamp(24px, 5vw, 36px); letter-spacing: 5px; font-weight: 900; text-align: center; text-transform: uppercase; }
-        .brand-title span { color: var(--brand-orange); text-shadow: 0 0 15px var(--brand-orange); }
+        .brand-title { color: #fff; font-size: 28px; letter-spacing: 4px; font-weight: 900; text-align: center; text-transform: uppercase; margin-bottom: 30px; }
+        .brand-title span { color: var(--brand-orange); text-shadow: 0 0 10px var(--brand-orange); }
         
-        .scan-ring-wrap { position: relative; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; margin-bottom: 4vh; }
-        .scan-ring-wrap svg { position: absolute; width: 100%; height: 100%; animation: rotateRing 8s linear infinite; }
-        @keyframes rotateRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .scan-bike-emoji { font-size: 50px; animation: float 2s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-
         .scan-btn { 
             background: linear-gradient(135deg, var(--brand-orange), var(--brand-amber)); 
-            border: none; color: #000; padding: 16px 45px; font-size: 16px; font-weight: 800; 
-            border-radius: 50px; cursor: pointer; letter-spacing: 2px; transition: all 0.3s ease;
-            box-shadow: 0 0 30px rgba(255, 69, 0, 0.4); 
-        }
-        .scan-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 177, 0, 0.7); }
-        
-        #status-txt { color: var(--brand-amber); margin-top: 20px; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 8px rgba(255,177,0,0.4); }
-
-        /* CREATIVE FLOATING TOP TITLE BAR */
-        #top-bar { 
-            position: fixed; top: max(20px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); 
-            z-index: 98; opacity: 0; transition: all 0.5s ease; pointer-events: none; text-align: center; width: 90%;
-        }
-        #top-bar h1 { 
-            margin: 0; background: rgba(10, 4, 1, 0.85); border: 2px solid var(--brand-orange); 
-            color: #fff; padding: 10px 30px; border-radius: 50px; font-size: clamp(16px, 4vw, 22px); 
-            font-weight: 900; letter-spacing: 4px; display: inline-block;
-            box-shadow: 0 0 20px rgba(255, 69, 0, 0.6), inset 0 0 10px rgba(255, 69, 0, 0.3);
-            animation: neonGlow 2s ease-in-out infinite alternate;
-        }
-        @keyframes neonGlow {
-            0% { box-shadow: 0 0 15px rgba(255, 69, 0, 0.5); border-color: var(--brand-orange); }
-            100% { box-shadow: 0 0 30px rgba(255, 177, 0, 0.9); border-color: var(--brand-amber); }
+            border: none; color: #000; padding: 16px 40px; font-size: 15px; font-weight: 800; 
+            border-radius: 50px; cursor: pointer; letter-spacing: 2px; box-shadow: 0 0 25px rgba(255, 69, 0, 0.4); 
         }
 
         /* BOTTOM SCAN HINT */
         #scan-hint { 
-            position: fixed; bottom: max(30px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); 
-            color: #fff; background: rgba(0, 0, 0, 0.85); padding: 12px 28px; border-radius: 30px; 
-            font-size: 13px; font-weight: 600; z-index: 99; border: 1px solid rgba(255,255,255,0.2); 
-            pointer-events: none; opacity: 0; transition: opacity 0.4s; text-align: center; letter-spacing: 1px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            position: fixed; bottom: max(40px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); 
+            color: #fff; background: rgba(0, 0, 0, 0.85); padding: 14px 30px; border-radius: 30px; 
+            font-size: 13px; font-weight: 700; z-index: 99; border: 2px solid var(--brand-orange); 
+            pointer-events: none; text-align: center; letter-spacing: 2px;
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
         }
-
-        /* AMBIENT PARTICLES */
-        #particle-field { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
-        .spark { position: absolute; bottom: -10px; width: 4px; height: 4px; border-radius: 50%; background: var(--brand-orange); opacity: 0; animation: rise 5s linear infinite; }
-        @keyframes rise { 0% { transform: translateY(0) scale(0); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: translateY(-105vh) scale(1.2); opacity: 0; } }
     </style>
 </head>
 <body>
 
     <!-- Onboarding Screen -->
     <div id="start-overlay">
-        <div id="particle-field"></div>
-        <div class="brand-mark">
-            <div class="brand-title">BAJAJ PULSAR<br><span>NS200 AR EXPERIENCE</span></div>
-        </div>
-        <div class="scan-ring-wrap">
-            <svg viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="46" fill="none" stroke="#ff4500" stroke-width="2" stroke-dasharray="15 10"/>
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#ffb100" stroke-width="1" stroke-dasharray="5 5"/>
-            </svg>
-            <div class="scan-bike-emoji">🏍️</div>
-        </div>
-        <button class="scan-btn" id="activate-btn">ALLOW CAMERA & START</button>
-        <div id="status-txt">Ready to Scan Real World or Image</div>
+        <div class="brand-title">PULSAR NS200<br><span>AR SCANNER</span></div>
+        <button class="scan-btn" id="activate-btn">START SCANNER</button>
     </div>
 
-    <!-- Live Animated Top Title -->
-    <div id="top-bar">
-        <h1>BAJAJ PULSAR NS200</h1>
-    </div>
-
+    <!-- Scan Hint Overlay -->
     <div id="scan-hint">ALIGN CAMERA WITH THE PULSAR IMAGE</div>
 
     <!-- AR Scene -->
@@ -113,98 +63,68 @@
     >
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- AR Target Anchor -->
+        <!-- AR Target Anchor (Bike Center) -->
         <a-entity id="bike-anchor" mindar-image-target="targetIndex: 0">
             
-            <!-- 360 DEGREE HUD BACKGROUND RING -->
-            <a-ring color="#ff4500" radius-inner="0.48" radius-outer="0.50" opacity="0.6" shader="flat" rotation="0 0 0"
-                    animation="property: rotation; to: 0 0 360; loop: true; dur: 10000; easing: linear">
-            </a-ring>
-            <a-ring color="#ffb100" radius-inner="0.52" radius-outer="0.525" opacity="0.3" shader="flat" rotation="0 0 0"
-                    animation="property: rotation; to: 0 0 -360; loop: true; dur: 15000; easing: linear">
-            </a-ring>
+            <!-- 1. MAIN ANIMATED TOP TITLE (Fired right above the bike) -->
+            <a-entity position="0 0.65 0" id="main-title-group" scale="0 0 0">
+                <!-- Outer Neon Border Glow -->
+                <a-plane width="0.9" height="0.16" color="#ff4500" shader="flat" opacity="0.8"></a-plane>
+                <!-- Inner Dark Core -->
+                <a-plane width="0.86" height="0.12" color="#050201" shader="flat" position="0 0 0.001"></a-plane>
+                <!-- Text inside -->
+                <a-text value="BAJAJ PULSAR NS200" color="#ffffff" align="center" width="2.2" font="exo2bold" position="0 0 0.002"
+                        animation="property: scale; to: 1.05 1.05 1.05; dir: alternate; dur: 1000; loop: true; easing: easeInOutQuad">
+                </a-text>
+            </a-entity>
+
+            <!-- Tech HUD Circle under/around the elements -->
+            <a-circle radius="0.5" color="#ffb100" opacity="0.2" shader="flat" position="0 0 -0.01"
+                      animation="property: rotation; to: 0 0 360; dur: 12000; loop: true; easing: linear">
+            </a-circle>
 
             <!-- =========================================================
-                 360° RADIAL (CIRCULAR) SPECIFICATION CARDS
-                 Cards are arranged in a perfect circle surrounding the bike
+                 SPEC CARDS PLACED BEAUTIFULLY AROUND THE BIKE
                  ========================================================= -->
 
-            <!-- 1. ENGINE (Top Right - 45°) -->
-            <a-entity class="hotspot" position="0.42 0.42 0.02" data-delay="100">
-                <a-line start="-0.15 -0.15 0" end="0 0 0" color="#ffb100" opacity="0.8"></a-line>
-                <a-circle radius="0.015" color="#ffb100" position="-0.15 -0.15 0"></a-circle>
-                <a-entity class="card-root" scale="0.001 0.001 0.001">
-                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat" class="clickable">
-                        <a-plane width="0.38" height="0.02" color="#ff4500" position="0 0.07 0.001"></a-plane>
-                        <a-text value="ENGINE" color="#ffb100" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
-                        <a-text value="199.5cc Liquid-Cooled\n24.5 PS @ 9750 RPM\n18.74 Nm Torque . 6-Speed" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
-                    </a-plane>
-                </a-entity>
+            <!-- CARD 1: ENGINE (Top Right) -->
+            <a-entity position="0.55 0.35 0" class="spec-card" scale="0 0 0">
+                <a-line start="-0.15 -0.1 0" end="0 0 0" color="#ff4500"></a-line>
+                <a-plane width="0.36" height="0.15" color="#0a0401" opacity="0.9" shader="flat">
+                    <a-plane width="0.36" height="0.015" color="#ff4500" position="0 0.067 0.001"></a-plane>
+                    <a-text value="ENGINE" color="#ffb100" align="center" width="1.1" position="0 0.04 0.002" font="exo2bold"></a-text>
+                    <a-text value="199.5cc Liquid Cooled\n24.5 PS Power\n18.74 Nm Torque" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
+                </a-plane>
             </a-entity>
 
-            <!-- 2. CHASSIS & BRAKES (Mid Right - 90°) -->
-            <a-entity class="hotspot" position="0.58 0 0.02" data-delay="300">
-                <a-line start="-0.2 0 0" end="0 0 0" color="#ff4500" opacity="0.8"></a-line>
-                <a-circle radius="0.015" color="#ff4500" position="-0.2 0 0"></a-circle>
-                <a-entity class="card-root" scale="0.001 0.001 0.001">
-                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat">
-                        <a-plane width="0.38" height="0.02" color="#ffb100" position="0 0.07 0.001"></a-plane>
-                        <a-text value="CHASSIS & BRAKES" color="#ff4500" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
-                        <a-text value="Perimeter Frame\nDual Channel ABS\n300mm Front / 230mm Rear" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
-                    </a-plane>
-                </a-entity>
+            <!-- CARD 2: BRAKES & SAFETY (Mid Right) -->
+            <a-entity position="0.6 0 0" class="spec-card" scale="0 0 0">
+                <a-line start="-0.15 0 0" end="0 0 0" color="#ffb100"></a-line>
+                <a-plane width="0.36" height="0.15" color="#0a0401" opacity="0.9" shader="flat">
+                    <a-plane width="0.36" height="0.015" color="#ffb100" position="0 0.067 0.001"></a-plane>
+                    <a-text value="BRAKES & SAFETY" color="#ff4500" align="center" width="1.1" position="0 0.04 0.002" font="exo2bold"></a-text>
+                    <a-text value="Dual Channel ABS\n300mm Front Disc\n230mm Rear Disc" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
+                </a-plane>
             </a-entity>
 
-            <!-- 3. DIMENSIONS (Bottom Right - 135°) -->
-            <a-entity class="hotspot" position="0.42 -0.42 0.02" data-delay="500">
-                <a-line start="-0.15 0.15 0" end="0 0 0" color="#ffb100" opacity="0.8"></a-line>
-                <a-circle radius="0.015" color="#ffb100" position="-0.15 0.15 0"></a-circle>
-                <a-entity class="card-root" scale="0.001 0.001 0.001">
-                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat">
-                        <a-plane width="0.38" height="0.02" color="#ff4500" position="0 0.07 0.001"></a-plane>
-                        <a-text value="DIMENSIONS" color="#ffb100" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
-                        <a-text value="Ground Clearance: 168mm\nWheelbase: 1363mm\nSeat Height: 805mm" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
-                    </a-plane>
-                </a-entity>
+            <!-- CARD 3: SUSPENSION (Top Left) -->
+            <a-entity position="-0.55 0.35 0" class="spec-card" scale="0 0 0">
+                <a-line start="0.15 -0.1 0" end="0 0 0" color="#ffb100"></a-line>
+                <a-plane width="0.36" height="0.15" color="#0a0401" opacity="0.9" shader="flat">
+                    <a-plane width="0.36" height="0.015" color="#ffb100" position="0 0.067 0.001"></a-plane>
+                    <a-text value="SUSPENSION" color="#ff4500" align="center" width="1.1" position="0 0.04 0.002" font="exo2bold"></a-text>
+                    <a-text value="USD Front Forks\nNitrox Monoshock\nRear Absorber" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
+                </a-plane>
             </a-entity>
 
-            <!-- 4. SUSPENSION (Bottom Left - 225°) -->
-            <a-entity class="hotspot" position="-0.42 -0.42 0.02" data-delay="700">
-                <a-line start="0.15 0.15 0" end="0 0 0" color="#ff4500" opacity="0.8"></a-line>
-                <a-circle radius="0.015" color="#ff4500" position="0.15 0.15 0"></a-circle>
-                <a-entity class="card-root" scale="0.001 0.001 0.001">
-                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat">
-                        <a-plane width="0.38" height="0.02" color="#ffb100" position="0 0.07 0.001"></a-plane>
-                        <a-text value="SUSPENSION" color="#ff4500" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
-                        <a-text value="Front: Up Side Down Fork\nRear: Nitrox Monoshock\nwith Canister" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
-                    </a-plane>
-                </a-entity>
-            </a-entity>
-
-            <!-- 5. TYRES & FUEL (Mid Left - 270°) -->
-            <a-entity class="hotspot" position="-0.58 0 0.02" data-delay="900">
-                <a-line start="0.2 0 0" end="0 0 0" color="#ffb100" opacity="0.8"></a-line>
-                <a-circle radius="0.015" color="#ffb100" position="0.2 0 0"></a-circle>
-                <a-entity class="card-root" scale="0.001 0.001 0.001">
-                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat">
-                        <a-plane width="0.38" height="0.02" color="#ff4500" position="0 0.07 0.001"></a-plane>
-                        <a-text value="TYRES & FUEL" color="#ffb100" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
-                        <a-text value="100/80-17 Tubeless Front\n130/70-17 Tubeless Rear\n12 Liters Fuel Tank Capacity" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
-                    </a-plane>
-                </a-entity>
-            </a-entity>
-
-            <!-- 6. CONSOLE (Top Left - 315°) -->
-            <a-entity class="hotspot" position="-0.42 0.42 0.02" data-delay="1100">
-                <a-line start="0.15 -0.15 0" end="0 0 0" color="#ff4500" opacity="0.8"></a-line>
-                <a-circle radius="0.015" color="#ff4500" position="0.15 -0.15 0"></a-circle>
-                <a-entity class="card-root" scale="0.001 0.001 0.001">
-                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat">
-                        <a-plane width="0.38" height="0.02" color="#ffb100" position="0 0.07 0.001"></a-plane>
-                        <a-text value="CONSOLE & LIGHTS" color="#ff4500" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
-                        <a-text value="Full LCD Digital Console\nDistance-to-Empty Indicator\nAggressive LED Headlamp" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
-                    </a-plane>
-                </a-entity>
+            <!-- CARD 4: CONSOLE (Mid Left) -->
+            <a-entity position="-0.6 0 0" class="spec-card" scale="0 0 0">
+                <a-line start="0.15 0 0" end="0 0 0" color="#ff4500"></a-line>
+                <a-plane width="0.36" height="0.15" color="#0a0401" opacity="0.9" shader="flat">
+                    <a-plane width="0.36" height="0.015" color="#ff4500" position="0 0.067 0.001"></a-plane>
+                    <a-text value="CONSOLE" color="#ffb100" align="center" width="1.1" position="0 0.04 0.002" font="exo2bold"></a-text>
+                    <a-text value="Digital LCD Console\nGear Indicator\nBluetooth Connectivity" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
+                </a-plane>
             </a-entity>
 
         </a-entity>
@@ -214,77 +134,53 @@
         const sceneEl = document.querySelector('#main-scene');
         const activateBtn = document.querySelector('#activate-btn');
         const overlay = document.querySelector('#start-overlay');
-        const statusTxt = document.querySelector('#status-txt');
         const scanHint = document.querySelector('#scan-hint');
-        const topBar = document.querySelector('#top-bar');
         const anchor = document.querySelector('#bike-anchor');
-        const hotspots = document.querySelectorAll('.hotspot');
+        
+        const mainTitle = document.querySelector('#main-title-group');
+        const specCards = document.querySelectorAll('.spec-card');
 
-        // Spawn ambient embers
-        (function initSparks(){
-            const field = document.querySelector('#particle-field');
-            for (let i = 0; i < 30; i++) {
-                const spark = document.createElement('div');
-                spark.className = 'spark';
-                spark.style.left = (Math.random() * 100) + '%';
-                spark.style.animationDuration = (2 + Math.random() * 4) + 's';
-                spark.style.animationDelay = (Math.random() * 3) + 's';
-                if(Math.random() > 0.5) spark.style.background = '#ffb100';
-                field.appendChild(spark);
-            }
-        })();
-
-        // Staggered Elastic Pop-in Animation
-        function animateCardsIn() {
-            hotspots.forEach(h => {
-                const card = h.querySelector('.card-root');
-                const delay = parseInt(h.getAttribute('data-delay'));
-                if (card) {
-                    card.setAttribute('animation', {
-                        property: 'scale', from: '0.001 0.001 0.001', to: '1 1 1',
-                        dur: 800, delay: delay, easing: 'easeOutElastic'
-                    });
-                }
-            });
-        }
-
-        function hideCards() {
-            hotspots.forEach(h => {
-                const card = h.querySelector('.card-root');
-                if (card) card.setAttribute('scale', '0.001 0.001 0.001');
-            });
-        }
-
-        // Camera Activation and Start AR
+        // Start AR System on Button Click
         activateBtn.addEventListener('click', async () => {
-            activateBtn.disabled = true;
-            statusTxt.innerText = "ACCESSING SMARTPHONE CAMERA...";
             try {
                 if (!sceneEl.hasLoaded) {
                     await new Promise(resolve => sceneEl.addEventListener('loaded', resolve, { once: true }));
                 }
                 await sceneEl.systems['mindar-image-system'].start();
                 overlay.style.opacity = '0';
-                setTimeout(() => { overlay.style.display = 'none'; }, 600);
-                scanHint.style.opacity = '1';
+                setTimeout(() => { overlay.style.display = 'none'; }, 500);
             } catch (err) {
                 console.error(err);
-                statusTxt.innerText = "CAMERA ERROR: PLEASE ALLOW ACCESS";
-                activateBtn.disabled = false;
+                alert("Camera access is required for AR!");
             }
         });
 
-        // Target Recognition Events
+        // Trigger Animations When Image is Tracked Perfectly
         anchor.addEventListener('targetFound', () => {
-            scanHint.style.opacity = '0';
-            topBar.style.opacity = '1'; // Show animated Bajaj Pulsar Title
-            animateCardsIn();
+            scanHint.style.display = 'none';
+            
+            // Pop up Main Title
+            mainTitle.setAttribute('animation', {
+                property: 'scale', from: '0 0 0', to: '1 1 1', dur: 600, easing: 'easeOutBack'
+            });
+
+            // Staggered pop up for Spec Cards
+            specCards.forEach((card, index) => {
+                card.setAttribute('animation', {
+                    property: 'scale', from: '0 0 0', to: '1 1 1', dur: 500, delay: index * 200, easing: 'easeOutElastic'
+                });
+            });
         });
 
+        // Hide when target is lost
         anchor.addEventListener('targetLost', () => {
-            scanHint.style.opacity = '1';
-            topBar.style.opacity = '0'; // Hide title
-            hideCards();
+            scanHint.style.display = 'block';
+            mainTitle.setAttribute('scale', '0 0 0');
+            mainTitle.removeAttribute('animation');
+            specCards.forEach(card => {
+                card.setAttribute('scale', '0 0 0');
+                card.removeAttribute('animation');
+            });
         });
     </script>
 </body>
