@@ -148,6 +148,8 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     
     <a-ring color="#00e0ff" radius-inner="0.6" radius-outer="0.61" position="0 0 0.01" opacity="0.4"></a-ring>
 
+    <a-entity id="brand-title" position="0 0.78 0.05"></a-entity>
+
     <a-entity id="specs-container" position="0 0 0" visible="true">
        </a-entity>
 
@@ -194,60 +196,119 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       gridContainer.appendChild(statBlock);
     });
 
+    // FLOATING BRAND TITLE ABOVE OBJECT
+    const brandTitleEntity = document.getElementById('brand-title');
+    const brandBg = document.createElement('a-plane');
+    brandBg.setAttribute('width', '0.62');
+    brandBg.setAttribute('height', '0.14');
+    brandBg.setAttribute('color', '#0a0a0c');
+    brandBg.setAttribute('opacity', '0.78');
+    brandBg.setAttribute('material', 'transparent: true; side: double');
+    brandBg.setAttribute('position', '0 0 0');
+
+    const brandAccentTop = document.createElement('a-entity');
+    brandAccentTop.setAttribute('line', 'start: -0.31 0.07 0.001; end: 0.31 0.07 0.001; color: #ff4b12');
+    const brandAccentBottom = document.createElement('a-entity');
+    brandAccentBottom.setAttribute('line', 'start: -0.31 -0.07 0.001; end: 0.31 -0.07 0.001; color: #00e0ff');
+
+    const brandText = document.createElement('a-text');
+    brandText.setAttribute('value', `${backendJsonData.brandName.toUpperCase()} ${backendJsonData.modelName.toUpperCase()}`);
+    brandText.setAttribute('color', '#ffb400');
+    brandText.setAttribute('align', 'center');
+    brandText.setAttribute('position', '0 -0.008 0.01');
+    brandText.setAttribute('width', '1.1');
+    brandText.setAttribute('font', 'roboto');
+    brandText.setAttribute('letter-spacing', '2');
+
+    brandTitleEntity.appendChild(brandBg);
+    brandTitleEntity.appendChild(brandAccentTop);
+    brandTitleEntity.appendChild(brandAccentBottom);
+    brandTitleEntity.appendChild(brandText);
+
     // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA
     const cardsData = backendJsonData.arSeparateCards;
     const totalCards = cardsData.length;
-    const radius = 0.65; // Distance from center object
+    const radius = 0.72; // Distance from center object
+
+    // Distinct accent colors per card, cycling through the brand + telemetry palette
+    const accentPalette = ['#ff4b12', '#00e0ff', '#ffb400', '#ff4b12', '#00e0ff', '#ffb400'];
 
     cardsData.forEach((card, index) => {
       // Calculate angular distribution symmetrically (360 degrees division)
       const angle = (index / totalCards) * Math.PI * 2;
       const posX = Math.cos(angle) * radius;
       const posY = Math.sin(angle) * radius;
+      const accent = accentPalette[index % accentPalette.length];
 
       // Outer Card Component Group
       const cardEntity = document.createElement('a-entity');
+      cardEntity.setAttribute('class', 'spec-card');
       cardEntity.setAttribute('position', `${posX} ${posY} 0.15`);
-      
+
       // Make each individual card face forward towards its angle position naturally
       const angleDegrees = (angle * 180) / Math.PI;
       cardEntity.setAttribute('rotation', `0 0 ${angleDegrees - 90}`);
 
+      // Soft glow backdrop (slightly larger, low opacity, accent tinted)
+      const glowPlane = document.createElement('a-plane');
+      glowPlane.setAttribute('width', '0.52');
+      glowPlane.setAttribute('height', '0.24');
+      glowPlane.setAttribute('color', accent);
+      glowPlane.setAttribute('opacity', '0.16');
+      glowPlane.setAttribute('material', 'transparent: true; side: double; shader: flat');
+      glowPlane.setAttribute('position', '0 0 -0.004');
+
       // Futuristic Background Plane for readability
       const bgPlane = document.createElement('a-plane');
-      bgPlane.setAttribute('width', '0.45');
-      bgPlane.setAttribute('height', '0.18');
-      bgPlane.setAttribute('color', '#0a0a0c');
-      bgPlane.setAttribute('opacity', '0.85');
-      bgPlane.setAttribute('material', 'transparent: true; side: double');
-      
-      // Card Frame Border
-      const frame = document.createElement('a-rect');
-      bgPlane.innerHTML = `
-        <a-entity line="start: -0.225 -0.09 0; end: 0.225 -0.09 0; color: #ff4b12"></a-entity>
-        <a-entity line="start: -0.225 0.09 0; end: 0.225 0.09 0; color: #00e0ff"></a-entity>
-      `;
+      bgPlane.setAttribute('width', '0.46');
+      bgPlane.setAttribute('height', '0.2');
+      bgPlane.setAttribute('color', '#0e0e10');
+      bgPlane.setAttribute('opacity', '0.9');
+      bgPlane.setAttribute('material', 'transparent: true; side: double; shader: flat');
+
+      // Card Frame Border (top/bottom accent lines + full outline)
+      const outline = document.createElement('a-entity');
+      outline.setAttribute('line', `start: -0.23 0.1 0.002; end: 0.23 0.1 0.002; color: ${accent}`);
+      const outlineBottom = document.createElement('a-entity');
+      outlineBottom.setAttribute('line', `start: -0.23 -0.1 0.002; end: 0.23 -0.1 0.002; color: ${accent}`);
+      const outlineLeft = document.createElement('a-entity');
+      outlineLeft.setAttribute('line', `start: -0.23 -0.1 0.002; end: -0.23 0.1 0.002; color: ${accent}`);
+      const outlineRight = document.createElement('a-entity');
+      outlineRight.setAttribute('line', `start: 0.23 -0.1 0.002; end: 0.23 0.1 0.002; color: ${accent}`);
+
+      // Small accent dot / chip in top-left corner for a "telemetry" feel
+      const chip = document.createElement('a-circle');
+      chip.setAttribute('radius', '0.012');
+      chip.setAttribute('color', accent);
+      chip.setAttribute('position', '-0.19 0.075 0.003');
 
       // Header Text inside Card
       const titleText = document.createElement('a-text');
       titleText.setAttribute('value', card.title);
-      titleText.setAttribute('color', '#00e0ff');
+      titleText.setAttribute('color', accent);
       titleText.setAttribute('align', 'center');
-      titleText.setAttribute('position', '0 0.04 0.01');
-      titleText.setAttribute('width', '0.8');
+      titleText.setAttribute('position', '0 0.045 0.01');
+      titleText.setAttribute('width', '0.85');
       titleText.setAttribute('font', 'roboto');
+      titleText.setAttribute('letter-spacing', '1');
 
       // Description Text inside Card
       const descText = document.createElement('a-text');
       descText.setAttribute('value', card.desc);
-      descText.setAttribute('color', '#ffffff');
+      descText.setAttribute('color', '#f3efe6');
       descText.setAttribute('align', 'center');
-      descText.setAttribute('position', '0 -0.03 0.01');
-      descText.setAttribute('width', '0.65');
+      descText.setAttribute('position', '0 -0.035 0.01');
+      descText.setAttribute('width', '0.68');
       descText.setAttribute('font', 'roboto');
 
       // Assemble Entities
+      cardEntity.appendChild(glowPlane);
       cardEntity.appendChild(bgPlane);
+      cardEntity.appendChild(outline);
+      cardEntity.appendChild(outlineBottom);
+      cardEntity.appendChild(outlineLeft);
+      cardEntity.appendChild(outlineRight);
+      cardEntity.appendChild(chip);
       cardEntity.appendChild(titleText);
       cardEntity.appendChild(descText);
       specsContainer.appendChild(cardEntity);
