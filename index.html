@@ -4,12 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Bajaj Pulsar NS200 — AR Spec Scanner</title>
-<!-- A-Frame Core and MindAR Component -->
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-<!-- A-Frame Look-At Component to keep text facing user always -->
-<script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -28,9 +24,10 @@
 html,body{margin:0;overflow:hidden;width:100%;height:100%;background-color:transparent;font-family:'Rajdhani',sans-serif;}
 a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
+/* Hide Default MindAR UI elements */
 #mindar-ui-scanning, .mindar-ui-overlay { display: none !important; }
 
-/* ============ ULTRA-MODERN ONBOARDING DASHBOARD ============ */
+/* ============ MODERN LOADING SCREEN ============ */
 #start-overlay{
   position:fixed;inset:0;width:100%;height:100%;z-index:9999;
   background:radial-gradient(circle at center, #141416 0%, #050506 100%);
@@ -127,9 +124,9 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     <div>
       <div class="eyebrow-row">
         <div class="led-dot"></div>
-        <span id="app-eyebrow" class="eyebrow">Initializing System...</span>
+        <span id="app-eyebrow" class="eyebrow">AR Spec System</span>
       </div>
-      <h1 id="app-title" class="brand-title">Loading <span class="accent">Specs</span></h1>
+      <h1 id="app-title" class="brand-title">Pulsar <span class="accent">NS200</span></h1>
     </div>
     <div class="stat-strip" id="json-stats-container"></div>
     <button class="scan-btn" onclick="startScanner()">
@@ -140,41 +137,49 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
 <div id="scan-hint">Aim Camera at Pulsar Target Image</div>
 
-<!-- AR World scene -->
-<a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 0.005; uiScanning: no;" 
+<a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 0.001; uiScanning: no;" 
          color-space="sRGB" 
          renderer="colorManagement: true, physicallyCorrectLights" 
          vr-mode-ui="enabled: false" 
          device-orientation-permission-ui="enabled: false">
   
-  <!-- Main Active Camera Node -->
-  <a-camera id="main-camera" position="0 0 0" look-controls="enabled: false"></a-camera>
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <!-- Target Anchor Entry -->
-  <a-entity mindar-image-target="targetIndex: 0">
+  <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
     
-    <!-- FUTURISTIC TARGET HUD GLOW RING (Helps verify tracking instantly) -->
-    <a-ring color="#00e0ff" radius-inner="0.45" radius-outer="0.5" position="0 0 0" opacity="0.8"
-            animation="property: scale; to: 1.05 1.05 1.05; dir: alternate; dur: 800; loop: true">
-    </a-ring>
-    <a-ring color="#ff4b12" radius-inner="0.49" radius-outer="0.51" position="0 0 0" opacity="0.5" rotation="0 0 45"></a-ring>
+    <a-ring color="#00e0ff" radius-inner="0.55" radius-outer="0.57" position="0 0 0.02" opacity="0.7"></a-ring>
 
-    <!-- FIXED IMMERSIVE TEXT LAYOUT (Look-At target added & Position adjusted forward) -->
-    <a-text id="ar-telemetry-text"
-            value="FETCHING DATA..." 
-            color="#ffffff" 
-            position="0 0 0.1" 
-            align="center" 
-            wrap-count="20" 
-            width="1.2"
-            look-at="#main-camera"
-            font="roboto">
-    </a-text>
+    <a-entity id="specs-container" position="0 0 0.15" visible="true">
+      
+      <a-entity position="0 0 0" rotation="0 0 0">
+        <a-text id="spec-text-front"
+                value="FETCHING TELEMETRY..." 
+                color="#ff4b12" 
+                align="center" 
+                wrap-count="20" 
+                width="1.2"
+                font="roboto">
+        </a-text>
+      </a-entity>
+
+      <a-entity position="0 0 -0.05" rotation="0 180 0">
+        <a-text id="spec-text-back"
+                value="FETCHING TELEMETRY..." 
+                color="#00e0ff" 
+                align="center" 
+                wrap-count="20" 
+                width="1.2"
+                font="roboto">
+        </a-text>
+      </a-entity>
+
+    </a-entity>
 
   </a-entity>
 </a-scene>
 
 <script>
+  // Central JSON Configuration
   const backendJsonData = {
     "brandName": "Pulsar",
     "modelName": "NS200",
@@ -184,17 +189,22 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       { "value": "18.7 Nm", "label": "Max Torque" },
       { "value": "199.5 cc", "label": "Liquid Cooled" }
     ],
-    // Made text spacing cleaner for immediate recognition inside target container
-    "arDisplayString": "PULSAR NS200\n\nPOWER: 24.5 PS\nTORQUE: 18.7 NM\nABS: DUAL CHANNEL\nCOOLING: LIQUID"
+    "arFrontText": "PULSAR NS200\n\nPOWER: 24.5 PS\nTORQUE: 18.7 NM\nCOOLING: LIQUID",
+    "arBackText": "PERFORMANCE HUD\n\nABS: DUAL CHANNEL\nFUEL: INJECTION\nGEARS: 6-SPEED"
   };
 
+  let targetTracked = false;
+  let isDragging = false;
+  let previousMousePosition = { x: 0 };
+  const specsContainer = document.getElementById('specs-container');
+
   document.addEventListener("DOMContentLoaded", () => {
+    // Inject UI Content
     document.getElementById("app-eyebrow").innerText = backendJsonData.systemTag;
     document.getElementById("app-title").innerHTML = `${backendJsonData.brandName} <span class="accent">${backendJsonData.modelName}</span>`;
     
     const gridContainer = document.getElementById("json-stats-container");
     gridContainer.innerHTML = "";
-    
     backendJsonData.dashboardSpecs.forEach(spec => {
       const statBlock = document.createElement("div");
       statBlock.className = "stat";
@@ -202,9 +212,51 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       gridContainer.appendChild(statBlock);
     });
 
-    const arTextEntity = document.getElementById("ar-telemetry-text");
-    arTextEntity.setAttribute("value", backendJsonData.arDisplayString);
+    // Inject AR Text Nodes
+    document.getElementById("spec-text-front").setAttribute("value", backendJsonData.arFrontText);
+    document.getElementById("spec-text-back").setAttribute("value", backendJsonData.arBackText);
+
+    // MindAR Trackers
+    const targetAnchor = document.getElementById('target-anchor');
+    targetAnchor.addEventListener("targetFound", () => { 
+      targetTracked = true; 
+      document.getElementById("scan-hint").style.display = "none";
+    });
+    targetAnchor.addEventListener("targetLost", () => { 
+      targetTracked = false; 
+      document.getElementById("scan-hint").style.display = "block";
+    });
+
+    // Start 360 Spin Loop
+    autoSpin();
   });
+
+  // Smooth Dragging Mechanics (PC & Mobile)
+  const startDrag = (clientX) => { isDragging = true; previousMousePosition.x = clientX; };
+  const updateDrag = (clientX) => {
+    if (!isDragging || !targetTracked) return;
+    const deltaX = clientX - previousMousePosition.x;
+    const currentRotation = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
+    specsContainer.setAttribute('rotation', { x: currentRotation.x, y: currentRotation.y + deltaX * 0.4, z: currentRotation.z });
+    previousMousePosition.x = clientX;
+  };
+  const endDrag = () => { isDragging = false; };
+
+  window.addEventListener('mousedown', (e) => startDrag(e.clientX));
+  window.addEventListener('mousemove', (e) => updateDrag(e.clientX));
+  window.addEventListener('mouseup', endDrag);
+  window.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientX); });
+  window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientX); });
+  window.addEventListener('touchend', endDrag);
+
+  // Elegant Continuous Rotation Function
+  function autoSpin() {
+    requestAnimationFrame(autoSpin);
+    if (!isDragging && targetTracked) {
+      const currentRot = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
+      specsContainer.setAttribute('rotation', { x: currentRot.x, y: currentRot.y + 0.3, z: currentRot.z });
+    }
+  }
 
   function startScanner() {
     const overlay = document.getElementById('start-overlay');
@@ -213,6 +265,5 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     setTimeout(() => { overlay.style.display = 'none'; }, 800);
   }
 </script>
-
 </body>
 </html>
