@@ -4,8 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Bajaj Pulsar NS200 — AR Spec Scanner</title>
+<!-- A-Frame Core and MindAR Component -->
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+<!-- A-Frame Look-At Component to keep text facing user always -->
+<script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -24,7 +28,6 @@
 html,body{margin:0;overflow:hidden;width:100%;height:100%;background-color:transparent;font-family:'Rajdhani',sans-serif;}
 a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
-/* Hide Default MindAR UI elements */
 #mindar-ui-scanning, .mindar-ui-overlay { display: none !important; }
 
 /* ============ ULTRA-MODERN ONBOARDING DASHBOARD ============ */
@@ -45,9 +48,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   filter:saturate(1.1) contrast(1.1);
   transition: transform 6s ease;
 }
-#start-overlay:hover .hero-photo-wrap img {
-  transform: scale(1.06);
-}
+#start-overlay:hover .hero-photo-wrap img { transform: scale(1.06); }
 .hero-photo-wrap::after{
   content:"";position:absolute;inset:0;
   background:linear-gradient(180deg, rgba(5,5,6,0) 30%, rgba(5,5,6,0.98) 98%),
@@ -59,9 +60,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   padding:20px max(26px, 5%) max(26px, env(safe-area-inset-bottom)) max(26px, 5%);
   text-align:center;
 }
-.eyebrow-row{
-  display:flex;align-items:center;gap:10px;margin-bottom:12px;
-}
+.eyebrow-row{ display:flex;align-items:center;gap:10px;margin-bottom:12px; }
 .led-dot{width:9px;height:9px;border-radius:50%;background:var(--pulsar-orange);
   box-shadow:0 0 12px var(--pulsar-orange);animation:pulse 1.4s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(0.85);}}
@@ -75,47 +74,33 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   text-transform:uppercase;margin:0;
   text-shadow: 0 4px 20px rgba(0,0,0,0.6);
 }
-.brand-title .accent{
-  color:var(--pulsar-orange);
-}
+.brand-title .accent{ color:var(--pulsar-orange); }
 
-/* Dynamic Grid Layout for JSON Specs */
 .stat-strip{
   display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;
   width:100%;max-width:640px;margin:28px 0;
   background:rgba(255,255,255,0.03);border-radius:14px;
   border:1px solid rgba(255,255,255,0.08);padding:16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
-.stat{
-  text-align:center;border-right:1px solid rgba(255,255,255,0.08);
-  transition: all 0.3s ease;
-}
+.stat{ text-align:center;border-right:1px solid rgba(255,255,255,0.08); }
 .stat:last-child{border-right:none;}
 .stat-value{
   font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(16px, 4.5vw, 24px);color:var(--ink);
-  display:block;text-shadow:0 0 10px rgba(255,255,255,0.1);
+  display:block;
 }
 .stat-label{
   font-family:'JetBrains Mono',monospace;font-size:clamp(9px, 2.3vw, 11px);letter-spacing:1.5px;
   color:var(--ink-dim);text-transform:uppercase;display:block;margin-top:6px;
 }
 
-/* Interactive Glowing Launch Button */
 .scan-btn{
   position:relative;overflow:hidden;
   background:linear-gradient(135deg,var(--pulsar-orange),var(--pulsar-amber));
   border:none;color:#0a0a0a;padding:18px 45px;font-size:clamp(13px, 3.5vw, 16px);font-weight:900;
-  font-family:'Orbitron',sans-serif;
-  border-radius:50px;cursor:pointer;letter-spacing:3px;text-transform:uppercase;
-  box-shadow:0 8px 32px rgba(255,75,18,0.45);
-  width:100%;max-width:340px;transition:all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  font-family:'Orbitron',sans-serif;border-radius:50px;cursor:pointer;letter-spacing:3px;text-transform:uppercase;
+  box-shadow:0 8px 32px rgba(255,75,18,0.45);width:100%;max-width:340px;transition:all 0.3s ease;
 }
-.scan-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(255,75,18,0.6);
-}
-.scan-btn:active{transform:translateY(1px);box-shadow:0 4px 15px rgba(255,75,18,0.45);}
+.scan-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,75,18,0.6); }
 .scan-btn::after{
   content:"";position:absolute;top:0;left:-100%;width:50%;height:100%;
   background:linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
@@ -123,20 +108,12 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 }
 @keyframes sweep{ 0%{left:-100%;} 50%{left:200%;} 100%{left:200%;} }
 
-/* HUD Notification hints */
 #scan-hint{
   position:fixed;bottom:max(36px, env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
   color:var(--ink);background:rgba(10,10,12,0.92);padding:14px 24px;border-radius:12px;
   font-family:'JetBrains Mono',monospace;font-size:clamp(10px,3vw,12px);font-weight:600;z-index:99;
   border:1px solid var(--pulsar-orange);pointer-events:none;text-align:center;letter-spacing:1.5px;
-  box-shadow:0 10px 30px rgba(255,75,18,0.3);text-transform:uppercase;
-  max-width:90vw;width:max-content;backdrop-filter: blur(8px);
-}
-
-/* PC/Tablet Optimization Overlay Layout */
-@media (min-width: 768px) {
-  .hero-photo-wrap { height: 52%; clip-path: polygon(0 0, 100% 0, 100% 78%, 0 100%); }
-  .content-wrap { padding-top: 0; }
+  backdrop-filter: blur(8px); max-width:90vw; width:max-content;
 }
 </style>
 </head>
@@ -146,46 +123,58 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   <div class="hero-photo-wrap">
     <img id="bike-hero-img" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz..." alt="Bajaj Pulsar NS200">
   </div>
-
   <div class="content-wrap">
     <div>
       <div class="eyebrow-row">
         <div class="led-dot"></div>
-        <span id="app-eyebrow" class="eyebrow">Initializing...</span>
+        <span id="app-eyebrow" class="eyebrow">Initializing System...</span>
       </div>
       <h1 id="app-title" class="brand-title">Loading <span class="accent">Specs</span></h1>
     </div>
-
-    <div class="stat-strip" id="json-stats-container">
-      </div>
-
+    <div class="stat-strip" id="json-stats-container"></div>
     <button class="scan-btn" onclick="startScanner()">
       <span>Launch AR Telemetry</span>
     </button>
   </div>
 </div>
 
-<div id="scan-hint">Aim Camera at Pulsar Logo or Target Image</div>
+<div id="scan-hint">Aim Camera at Pulsar Target Image</div>
 
-<a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 0.001; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+<!-- AR World scene -->
+<a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 0.005; uiScanning: no;" 
+         color-space="sRGB" 
+         renderer="colorManagement: true, physicallyCorrectLights" 
+         vr-mode-ui="enabled: false" 
+         device-orientation-permission-ui="enabled: false">
   
-  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  <!-- Main Active Camera Node -->
+  <a-camera id="main-camera" position="0 0 0" look-controls="enabled: false"></a-camera>
 
+  <!-- Target Anchor Entry -->
   <a-entity mindar-image-target="targetIndex: 0">
+    
+    <!-- FUTURISTIC TARGET HUD GLOW RING (Helps verify tracking instantly) -->
+    <a-ring color="#00e0ff" radius-inner="0.45" radius-outer="0.5" position="0 0 0" opacity="0.8"
+            animation="property: scale; to: 1.05 1.05 1.05; dir: alternate; dur: 800; loop: true">
+    </a-ring>
+    <a-ring color="#ff4b12" radius-inner="0.49" radius-outer="0.51" position="0 0 0" opacity="0.5" rotation="0 0 45"></a-ring>
+
+    <!-- FIXED IMMERSIVE TEXT LAYOUT (Look-At target added & Position adjusted forward) -->
     <a-text id="ar-telemetry-text"
-            value="Connecting API..." 
-            color="#ff4b12" 
-            position="0 0.2 0" 
+            value="FETCHING DATA..." 
+            color="#ffffff" 
+            position="0 0 0.1" 
             align="center" 
-            wrap-count="24" 
-            width="1.6"
-            font="https://cdn.aframe.io/fonts/Orbitron-Regular.fnt">
+            wrap-count="20" 
+            width="1.2"
+            look-at="#main-camera"
+            font="roboto">
     </a-text>
+
   </a-entity>
 </a-scene>
 
 <script>
-  // Mock Backend Centralized JSON Configuration Database
   const backendJsonData = {
     "brandName": "Pulsar",
     "modelName": "NS200",
@@ -195,42 +184,33 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       { "value": "18.7 Nm", "label": "Max Torque" },
       { "value": "199.5 cc", "label": "Liquid Cooled" }
     ],
-    "arDisplayString": "PULSAR NS200 SPECS\n\nPower: 24.5 PS\nTorque: 18.7 Nm\nLiquid Cooled Triple Spark Engine\nDual Channel ABS Control System"
+    // Made text spacing cleaner for immediate recognition inside target container
+    "arDisplayString": "PULSAR NS200\n\nPOWER: 24.5 PS\nTORQUE: 18.7 NM\nABS: DUAL CHANNEL\nCOOLING: LIQUID"
   };
 
-  // Dynamic Data Injection Layer Engine
   document.addEventListener("DOMContentLoaded", () => {
-    // Populate Title Content
     document.getElementById("app-eyebrow").innerText = backendJsonData.systemTag;
     document.getElementById("app-title").innerHTML = `${backendJsonData.brandName} <span class="accent">${backendJsonData.modelName}</span>`;
     
-    // Inject Grid Data Layout elements dynamically from JSON
     const gridContainer = document.getElementById("json-stats-container");
-    gridContainer.innerHTML = ""; // Clear loader container state
+    gridContainer.innerHTML = "";
     
     backendJsonData.dashboardSpecs.forEach(spec => {
       const statBlock = document.createElement("div");
       statBlock.className = "stat";
-      statBlock.innerHTML = `
-        <span class="stat-value">${spec.value}</span>
-        <span class="stat-label">${spec.label}</span>
-      `;
+      statBlock.innerHTML = `<span class="stat-value">${spec.value}</span><span class="stat-label">${spec.label}</span>`;
       gridContainer.appendChild(statBlock);
     });
 
-    // Populate AR 3D Matrix Layer values
     const arTextEntity = document.getElementById("ar-telemetry-text");
     arTextEntity.setAttribute("value", backendJsonData.arDisplayString);
   });
 
-  // Smooth Dashboard Departure Transition Function
   function startScanner() {
     const overlay = document.getElementById('start-overlay');
     overlay.style.opacity = '0';
     overlay.style.transform = 'scale(1.05)';
-    setTimeout(() => {
-      overlay.style.display = 'none';
-    }, 800);
+    setTimeout(() => { overlay.style.display = 'none'; }, 800);
   }
 </script>
 
