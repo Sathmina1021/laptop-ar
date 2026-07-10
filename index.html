@@ -91,11 +91,22 @@
         device-orientation-permission-ui="enabled: false"
     >
         <a-assets>
-            </a-assets>
+            <!-- glTF Model එක මෙතනින් රිෆරන්ස් කර ඇත -->
+            <a-asset-item id="pulsar-gltf" src="pulsar.gltf"></a-asset-item>
+        </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity id="bike-anchor" mindar-image-target="targetIndex: 0">
+            
+            <!-- 360° කැරකෙන සහ ස්කෑන් කළ විට මතුවන Bajaj Pulsar Model එක -->
+            <a-gltf-model id="bike-model" src="#pulsar-gltf" 
+                          position="0 -0.2 0" 
+                          scale="0.001 0.001 0.001"
+                          animation__scale="property: scale; to: 0.4 0.4 0.4; dur: 1200; easing: easeOutElastic; startEvents: animateFound"
+                          animation__out="property: scale; to: 0.001 0.001 0.001; dur: 300; easing: linear; startEvents: animateLost"
+                          animation__rotate="property: rotation; to: 0 360 0; loop: true; dur: 18000; easing: linear; startEvents: animateFound">
+            </a-gltf-model>
             
             <a-entity id="spatial-cards" scale="0.001 0.001 0.001"
                       animation__scale="property: scale; to: 0.55 0.55 0.55; dur: 1000; easing: easeOutElastic; startEvents: animateFound"
@@ -175,6 +186,7 @@
         const statusSub = document.querySelector('#status-sub');
         const anchorEl = document.querySelector('#bike-anchor');
         const cardsContainer = document.querySelector('#spatial-cards');
+        const bikeModel = document.querySelector('#bike-model');
         const scanHint = document.querySelector('#scan-hint');
         const bootProgress = document.querySelector('#boot-progress');
         const bootFill = document.querySelector('#boot-progress-fill');
@@ -235,18 +247,18 @@
         // බයික් එක Scan වුණ සැනින් ක්‍රියාත්මක වන කොටස (Target Found)
         anchorEl.addEventListener('targetFound', () => {
             cardsContainer.emit('animateFound');
+            if (bikeModel) bikeModel.emit('animateFound');
             scanHint.style.opacity = "0";
 
             // එකින් එක (Staggered) කාඩ්පත් මතු වන ඇනිමේෂන් ස්ක්‍රිප්ට් එක
             const cards = document.querySelectorAll('.card-base');
             cards.forEach((card, index) => {
-                // මුලින්ම Scale එක බිංදු කරලා තියාගන්නවා
                 card.setAttribute('animation', {
                     property: 'scale',
                     from: '1 0.001 1',
                     to: '1 1 1',
                     dur: 800,
-                    delay: index * 350, // තත්පර 0.35 ක Gap එකකින් එකින් එක මතු වේ (360效果)
+                    delay: index * 350,
                     easing: 'easeOutElastic'
                 });
             });
@@ -255,12 +267,13 @@
         // කැමරාවෙන් බයික් එක මඟහැරුණු විට (Target Lost)
         anchorEl.addEventListener('targetLost', () => {
             cardsContainer.emit('animateLost');
+            if (bikeModel) bikeModel.emit('animateLost');
             scanHint.style.opacity = "1";
 
             const cards = document.querySelectorAll('.card-base');
             cards.forEach((card) => {
                 card.removeAttribute('animation');
-                card.setAttribute('scale', '1 0.001 1'); // නැවත නොපෙනෙන තත්ත්වයට පත් කිරීම
+                card.setAttribute('scale', '1 0.001 1');
             });
         });
     </script>
