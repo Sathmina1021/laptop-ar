@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>Bajaj Pulsar NS400 AR Scanner</title>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    <title>Bajaj Pulsar NS200 AR Scanner</title>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <style>
         :root{
             --brand-amber:#ffb100;
@@ -15,7 +14,6 @@
         html, body { margin: 0; overflow: hidden; width: 100%; height: 100%; background-color: transparent;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
         a-scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        .mindar-ui-overlay { display: none !important; }
 
         /* START SCREEN OVERLAY */
         #start-overlay {
@@ -48,6 +46,7 @@
         #boot-progress-fill{ width: 0%; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #ff6a00, #ffb100); transition: width 0.25s ease; }
 
         /* SCAN HINT */
+        #dom-overlay{ position: fixed; inset: 0; pointer-events: none; z-index: 50; }
         #scan-hint { position: fixed; bottom: max(24px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); color: #ffb100; background: rgba(21, 8, 0, 0.85); padding: clamp(9px,1.6vh,13px) clamp(16px,4vw,26px); border-radius: 20px; font-size: clamp(11px,1.8vw,13px); z-index: 99; border: 1px solid #ffb100; pointer-events: none; opacity: 0; transition: opacity 0.4s; text-align: center; width: 75%; max-width: 300px; animation: hintFloat 2.4s ease-in-out infinite; display:flex; align-items:center; justify-content:center; gap:8px; }
         @keyframes hintFloat { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-6px); } }
         .hint-dot{ width:7px; height:7px; border-radius:50%; background:#ff6a00; box-shadow:0 0 8px 2px rgba(255,106,0,0.8); animation: dotPulse 1.2s ease-in-out infinite; }
@@ -87,18 +86,22 @@
             </svg>
             <div class="scan-bike-emoji">🏍️</div>
         </div>
-        <button class="scan-btn" id="activate-btn">START BIKE SCANNER</button>
-        <div id="status-txt">TAP TO ACTIVATE BIKE AR SCANNER</div>
-        <div id="status-sub">Point your camera at the bike once the scanner is live</div>
+        <button class="scan-btn" id="activate-btn">START AR EXPERIENCE</button>
+        <div id="status-txt">TAP TO LAUNCH MARKERLESS AR</div>
+        <div id="status-sub">Move your phone slowly to scan the floor, then tap to place the Pulsar hologram anywhere near the bike</div>
         <div id="boot-progress"><div id="boot-progress-fill"></div></div>
     </div>
 
-    <div id="scan-hint"><span class="hint-dot"></span>POINT CAMERA AT THE BIKE TO SCAN</div>
+    <!-- WebXR DOM Overlay: renders on top of the live AR camera feed -->
+    <div id="dom-overlay">
+        <div id="scan-hint"><span class="hint-dot"></span>MOVE PHONE TO FIND A SURFACE</div>
+    </div>
 
     <a-scene
         id="main-scene"
         embedded
-        mindar-image="imageTargetSrc: targets.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0003; filterBeta: 0.06;"
+        webxr="optionalFeatures: hit-test, dom-overlay, local-floor; overlayElement: #dom-overlay;"
+        ar-hit-test="target:#bike-anchor; type: footprint; footprintDepth: 0.2;"
         color-space="sRGB"
         renderer="colorManagement: true; antialias: true; alpha: true; precision: mediump;"
         vr-mode-ui="enabled: false"
@@ -111,9 +114,9 @@
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity id="bike-anchor" mindar-image-target="targetIndex: 0">
+        <a-entity id="bike-anchor" hide-on-enter-ar>
             
-            <!-- 360° කැරකෙන සහ ස්කෑන් කළ විට මතුවන Bajaj Pulsar Model එක -->
+            <!-- 360° කැරකෙන සහ tap කළ තැන මතුවන Bajaj Pulsar Model එක -->
             <a-gltf-model id="bike-model" src="#pulsar-gltf" 
                           position="0 -0.2 0" 
                           scale="0.001 0.001 0.001"
@@ -145,7 +148,7 @@
                               animation="property: opacity; from: 0.5; to: 1; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"></a-plane>
                     <a-plane width="2.4" height="0.02" color="#ff6a00" position="0 -0.25 0.01" shader="flat"
                               animation="property: opacity; from: 1; to: 0.5; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"></a-plane>
-                    <a-text value="BAJAJ PULSAR NS400" color="#ffb100" align="center" width="4.0" position="0 0.08 0.02" font="kelsonsans"></a-text>
+                    <a-text value="BAJAJ PULSAR NS200" color="#ffb100" align="center" width="4.0" position="0 0.08 0.02" font="kelsonsans"></a-text>
                     <a-text value="STREET NAKED . ADVENTURE SPORT" color="#ff6a00" align="center" width="2.0" position="0 -0.12 0.02"></a-text>
                 </a-entity>
 
@@ -159,7 +162,7 @@
                         <a-text value="EN" color="#150800" align="center" width="3.4" position="-0.6 0.23 0.03"></a-text>
                         <a-plane width="1.4" height="0.04" color="#ffb100" position="0 0.23 0.01" shader="flat"></a-plane>
                         <a-text value="ENGINE" color="#150800" bgcolor="#ffb100" align="center" width="1.8" position="0.12 0.23 0.02"></a-text>
-                        <a-text value="373.27cc Liquid-Cooled\n40 HP . 35 Nm\n6-Speed Gearbox" color="#ffb100" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
+                        <a-text value="199.5cc Liquid-Cooled\n24.5 PS . 18.74 Nm\n6-Speed Gearbox" color="#ffb100" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
                         <a-plane width="1.4" height="0.06" color="#ffffff" opacity="0" position="0 0.3 0.04" shader="flat"
                                   animation__sweep="property: position; from: 0 0.3 0.04; to: 0 -0.3 0.04; dur: 700; easing: linear; startEvents: animateFound; delay: 0"
                                   animation__in="property: material.opacity; from: 0; to: 0.6; dur: 120; startEvents: animateFound; delay: 0"
@@ -177,7 +180,7 @@
                         <a-text value="CH" color="#150800" align="center" width="3.4" position="-0.6 0.23 0.03"></a-text>
                         <a-plane width="1.4" height="0.04" color="#ff6a00" position="0 0.23 0.01" shader="flat"></a-plane>
                         <a-text value="CHASSIS" color="#150800" bgcolor="#ff6a00" align="center" width="1.8" position="0.12 0.23 0.02"></a-text>
-                        <a-text value="Dual Channel ABS + TC\n320mm F . 230mm R Disc\n110/70-17 . 140/70-17" color="#ff6a00" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
+                        <a-text value="Dual Channel ABS\n300mm F . 230mm R Disc\n100/80-17 . 130/70-17" color="#ff6a00" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
                         <a-plane width="1.4" height="0.06" color="#ffffff" opacity="0" position="0 0.3 0.04" shader="flat"
                                   animation__sweep="property: position; from: 0 0.3 0.04; to: 0 -0.3 0.04; dur: 700; easing: linear; startEvents: animateFound; delay: 350"
                                   animation__in="property: material.opacity; from: 0; to: 0.6; dur: 120; startEvents: animateFound; delay: 350"
@@ -195,7 +198,7 @@
                         <a-text value="DM" color="#150800" align="center" width="3.4" position="-0.6 0.23 0.03"></a-text>
                         <a-plane width="1.4" height="0.04" color="#ffb100" position="0 0.23 0.01" shader="flat"></a-plane>
                         <a-text value="DIMENSIONS" color="#150800" bgcolor="#ffb100" align="center" width="1.8" position="0.12 0.23 0.02"></a-text>
-                        <a-text value="Wheelbase 1344mm\nGround Clear. 168mm\nSeat Height 807mm" color="#ffb100" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
+                        <a-text value="Wheelbase 1363mm\nGround Clear. 168mm\nSeat Height 805mm" color="#ffb100" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
                         <a-plane width="1.4" height="0.06" color="#ffffff" opacity="0" position="0 0.3 0.04" shader="flat"
                                   animation__sweep="property: position; from: 0 0.3 0.04; to: 0 -0.3 0.04; dur: 700; easing: linear; startEvents: animateFound; delay: 700"
                                   animation__in="property: material.opacity; from: 0; to: 0.6; dur: 120; startEvents: animateFound; delay: 700"
@@ -213,7 +216,7 @@
                         <a-text value="PF" color="#150800" align="center" width="3.4" position="-0.6 0.23 0.03"></a-text>
                         <a-plane width="1.4" height="0.04" color="#ff6a00" position="0 0.23 0.01" shader="flat"></a-plane>
                         <a-text value="PERFORMANCE" color="#150800" bgcolor="#ff6a00" align="center" width="1.8" position="0.12 0.23 0.02"></a-text>
-                        <a-text value="12L Fuel Tank\nTop Speed 170 km/h" color="#ff6a00" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
+                        <a-text value="12L Fuel Tank\nTop Speed ~130 km/h" color="#ff6a00" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
                         <a-plane width="1.4" height="0.06" color="#ffffff" opacity="0" position="0 0.3 0.04" shader="flat"
                                   animation__sweep="property: position; from: 0 0.3 0.04; to: 0 -0.3 0.04; dur: 700; easing: linear; startEvents: animateFound; delay: 1050"
                                   animation__in="property: material.opacity; from: 0; to: 0.6; dur: 120; startEvents: animateFound; delay: 1050"
@@ -249,7 +252,7 @@
                         <a-text value="WT" color="#150800" align="center" width="3.4" position="-0.6 0.23 0.03"></a-text>
                         <a-plane width="1.4" height="0.04" color="#ff6a00" position="0 0.23 0.01" shader="flat"></a-plane>
                         <a-text value="WEIGHT" color="#150800" bgcolor="#ff6a00" align="center" width="1.8" position="0.12 0.23 0.02"></a-text>
-                        <a-text value="Kerb Weight 174 kg" color="#ff6a00" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
+                        <a-text value="Kerb Weight 158 kg" color="#ff6a00" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
                         <a-plane width="1.4" height="0.06" color="#ffffff" opacity="0" position="0 0.3 0.04" shader="flat"
                                   animation__sweep="property: position; from: 0 0.3 0.04; to: 0 -0.3 0.04; dur: 700; easing: linear; startEvents: animateFound; delay: 1750"
                                   animation__in="property: material.opacity; from: 0; to: 0.6; dur: 120; startEvents: animateFound; delay: 1750"
@@ -299,11 +302,11 @@
         })();
 
         const bootMessages = [
-            "INITIALIZING BIKE SCAN CORE...",
+            "INITIALIZING AR CORE...",
             "CALIBRATING OPTICS...",
             "WARMING UP AR ENGINE...",
             "SYNCING HOLOGRAM DATA...",
-            "LOCKING FRAME REFERENCE..."
+            "REQUESTING AR SESSION..."
         ];
 
         activateBtn.addEventListener('click', async () => {
@@ -325,12 +328,10 @@
             }, 220);
 
             try {
-                if (sceneEl.hasLoaded) {
-                    await sceneEl.systems["mindar-image-system"].start();
-                } else {
+                if (!sceneEl.hasLoaded) {
                     await new Promise(resolve => sceneEl.addEventListener('loaded', resolve, { once: true }));
-                    await sceneEl.systems["mindar-image-system"].start();
                 }
+                await sceneEl.enterAR();
                 clearInterval(msgInterval);
                 clearInterval(fillInterval);
                 bootFill.style.width = '100%';
@@ -343,22 +344,20 @@
                 console.error(err);
                 clearInterval(msgInterval);
                 clearInterval(fillInterval);
-                statusTxt.innerText = "ERROR: CAMERA ACCESS DENIED.";
+                statusTxt.innerText = "ERROR: AR NOT AVAILABLE";
                 bootProgress.style.display = 'none';
                 activateBtn.style.display = 'inline-block';
-                activateBtn.innerText = "RETRY SCANNER";
+                activateBtn.innerText = "RETRY AR";
                 statusSub.style.display = 'block';
-                statusSub.innerText = "Please allow camera permission and try again";
+                statusSub.innerText = "Needs Chrome on an ARCore Android phone over HTTPS. Please allow camera permission and try again.";
             }
         });
 
-        // බයික් එක Scan වුණ සැනින් ක්‍රියාත්මක වන කොටස (Target Found)
-        anchorEl.addEventListener('targetFound', () => {
+        // Reveal the hologram + spec cards with the staggered pop-in choreography
+        function triggerReveal() {
             cardsContainer.emit('animateFound');
             if (bikeModel) bikeModel.emit('animateFound');
-            scanHint.style.opacity = "0";
 
-            // එකින් එක (Staggered) කාඩ්පත් මතු වන ඇනිමේෂන් ස්ක්‍රිප්ට් එක
             const cards = document.querySelectorAll('.card-base');
             cards.forEach((card, index) => {
                 card.setAttribute('animation', {
@@ -370,13 +369,33 @@
                     easing: 'easeOutElastic'
                 });
             });
+        }
+
+        // WebXR hit-test lifecycle: surface search -> surface found -> user taps to place
+        sceneEl.addEventListener('ar-hit-test-start', () => {
+            scanHint.style.opacity = "1";
+            scanHint.innerHTML = '<span class="hint-dot"></span>MOVE PHONE TO FIND A SURFACE';
+        });
+        sceneEl.addEventListener('ar-hit-test-achieved', () => {
+            scanHint.innerHTML = '<span class="hint-dot"></span>TAP THE GROUND TO PLACE THE BIKE';
+        });
+        sceneEl.addEventListener('ar-hit-test-select', () => {
+            scanHint.innerHTML = '<span class="hint-dot"></span>TAP AGAIN TO MOVE THE HOLOGRAM';
+            triggerReveal();
         });
 
-        // කැමරාවෙන් බයික් එක මඟහැරුණු විට (Target Lost)
-        anchorEl.addEventListener('targetLost', () => {
-            cardsContainer.emit('animateLost');
-            if (bikeModel) bikeModel.emit('animateLost');
-            scanHint.style.opacity = "1";
+        // If the person exits the AR session, reset back to the start screen
+        sceneEl.addEventListener('exit-vr', () => {
+            overlay.style.display = 'flex';
+            requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+            scanHint.style.opacity = "0";
+            activateBtn.style.display = 'inline-block';
+            activateBtn.innerText = "START AR EXPERIENCE";
+            statusTxt.innerText = "TAP TO LAUNCH MARKERLESS AR";
+            statusSub.style.display = 'block';
+            statusSub.innerText = "Move your phone slowly to scan the floor, then tap to place the Pulsar hologram anywhere near the bike";
+            bootProgress.style.display = 'none';
+            bootFill.style.width = '0%';
 
             const cards = document.querySelectorAll('.card-base');
             cards.forEach((card) => {
