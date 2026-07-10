@@ -165,19 +165,16 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiScanning: no; uiLoading: no;"
     color-space="sRGB"
     renderer="colorManagement: true; antialias: true; alpha: true;"
+    background="transparent: true"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
 >
-    <a-assets>
-      <a-asset-item id="font-main" src="https://cdn.jsdelivr.net/npm/aframe-fonts@1.0.0/fonts/exo2bold.fnt"></a-asset-item>
-    </a-assets>
-
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <a-entity id="bike-anchor" mindar-image-target="targetIndex: 0">
 
         <!-- MAIN ANIMATED TOP TITLE + REV-COUNTER SIGNATURE RING -->
-        <a-entity position="0 0.78 -0.3" id="main-title-group" scale="0 0 0">
+        <a-entity position="0 1.05 -0.3" id="main-title-group" scale="0 0 0">
             <a-ring radius-inner="0.52" radius-outer="0.532" color="#ffb400" opacity="0.45" shader="flat" position="0 0 -0.015"
                     animation="property: rotation; to: 0 0 360; dur: 11000; loop: true; easing: linear"></a-ring>
 
@@ -303,40 +300,32 @@ function generate360Specs() {
 
     const channels = [
         {
-            code: "CH.01", tag: "POWERTRAIN", title: "ENGINE", accent: "#ff4b12",
+            code: "CH.01", tag: "POWERTRAIN", title: "ENGINE", accent: "#ff4b12", lift: 0.22,
             lines: [
-                `${S.engine.displacement} · ${S.engine.type.split(',')[0]}`,
-                `PWR  ${S.engine.max_power.split('@')[0].trim()}`,
-                `TRQ  ${S.engine.max_torque.split('@')[0].trim()}`
+                `${S.engine.displacement}  ·  ${S.engine.max_power.split('@')[0].trim()}`
             ]
         },
         {
-            code: "CH.02", tag: "CHASSIS", title: "BRAKES · SUSPENSION", accent: "#ffb400",
+            code: "CH.02", tag: "CHASSIS", title: "BRAKES · SUSPENSION", accent: "#ffb400", lift: -0.28,
             lines: [
-                `BRAKES  ${S.brakes.front.match(/\d+ mm/)[0]} F / ${S.brakes.rear.match(/\d+ mm/)[0]} R`,
-                `SUSP  ${S.suspension.front} / ${S.suspension.rear}`,
-                `TYRES  ${S.tyres.front.split(' ')[0]} / ${S.tyres.rear.split(' ')[0]}`
+                `${S.brakes.front.match(/\d+ mm/)[0]} F  ·  ${S.brakes.rear.match(/\d+ mm/)[0]} R Disc`
             ]
         },
         {
-            code: "CH.03", tag: "AVIONICS", title: "ELECTRICALS", accent: "#00e0ff",
+            code: "CH.03", tag: "AVIONICS", title: "ELECTRICALS", accent: "#00e0ff", lift: 0.3,
             lines: [
-                `${S.electricals.headlamp.split(',')[0]}`,
-                `${S.electricals.mobile_charger}`,
-                `${S.electricals.console_features.slice(0,2).join(' · ')}`
+                `${S.electricals.headlamp.split(',')[0]}  ·  ${S.electricals.mobile_charger}`
             ]
         },
         {
-            code: "CH.04", tag: "GEOMETRY", title: "DIMENSIONS", accent: "#d9dde1",
+            code: "CH.04", tag: "GEOMETRY", title: "DIMENSIONS", accent: "#d9dde1", lift: -0.22,
             lines: [
-                `L${S.dimensions.length.replace(' mm','')} · W${S.dimensions.width.replace(' mm','')} · H${S.dimensions.height.replace(' mm','')}`,
-                `WHEELBASE ${S.dimensions.wheelbase}  ·  GC ${S.dimensions.ground_clearance}`,
-                `WEIGHT ${S.dimensions.kerb_weight}  ·  TANK ${S.dimensions.fuel_tank_capacity}`
+                `${S.dimensions.kerb_weight}  ·  GC ${S.dimensions.ground_clearance}  ·  ${S.dimensions.fuel_tank_capacity} Tank`
             ]
         }
     ];
 
-    const radius = 1.05;
+    const radius = 1.4;
     const totalCards = channels.length;
 
     channels.forEach((ch, index) => {
@@ -344,43 +333,44 @@ function generate360Specs() {
         const x = Math.sin(angle) * radius;
         const z = Math.cos(angle) * radius;
         const rotY = (angle * 180) / Math.PI;
+        const y = ch.lift;
 
         const cardEntity = document.createElement('a-entity');
         cardEntity.setAttribute('class', 'spec-card');
-        cardEntity.setAttribute('position', `${x} 0 ${z}`);
+        cardEntity.setAttribute('position', `${x} ${y} ${z}`);
         cardEntity.setAttribute('rotation', `0 ${rotY} 0`);
         cardEntity.setAttribute('scale', '0 0 0');
 
-        // Telemetry link line back to the bike center
+        // Telemetry link line back to the bike's true center point
         const line = document.createElement('a-line');
         line.setAttribute('start', '0 0 0');
-        line.setAttribute('end', `${-x} 0 ${-z}`);
+        line.setAttribute('end', `${-x} ${-y} ${-z}`);
         line.setAttribute('color', ch.accent);
-        line.setAttribute('opacity', '0.45');
+        line.setAttribute('opacity', '0.5');
         cardEntity.appendChild(line);
 
         // Small node marker where the line meets the bike
         const node = document.createElement('a-circle');
-        node.setAttribute('radius', '0.012');
+        node.setAttribute('radius', '0.013');
         node.setAttribute('color', ch.accent);
         node.setAttribute('shader', 'flat');
-        node.setAttribute('position', `${-x} 0 ${-z + 0.001}`);
+        node.setAttribute('position', `${-x} ${-y} ${-z + 0.001}`);
         cardEntity.appendChild(node);
 
-        // Glow plate behind the card (soft accent halo)
+        // Soft accent halo behind the card
         const glow = document.createElement('a-plane');
-        glow.setAttribute('width', '0.78');
-        glow.setAttribute('height', '0.42');
+        glow.setAttribute('width', '0.68');
+        glow.setAttribute('height', '0.26');
         glow.setAttribute('color', ch.accent);
-        glow.setAttribute('opacity', '0.15');
+        glow.setAttribute('opacity', '0.14');
         glow.setAttribute('shader', 'flat');
         glow.setAttribute('position', '0 0 -0.006');
         cardEntity.appendChild(glow);
 
-        // Main dark plate
+        // Main dark plate — compact single-readout tag
         const basePlane = document.createElement('a-plane');
-        basePlane.setAttribute('width', '0.72');
-        basePlane.setAttribute('height', '0.36');
+        basePlane.setAttribute('width', '0.6');
+        basePlane.setAttribute('height', '0.2');
         basePlane.setAttribute('color', '#0d0d0f');
         basePlane.setAttribute('opacity', '0.95');
         basePlane.setAttribute('shader', 'flat');
@@ -388,40 +378,21 @@ function generate360Specs() {
 
         // Top accent bar
         const topBar = document.createElement('a-plane');
-        topBar.setAttribute('width', '0.72');
-        topBar.setAttribute('height', '0.018');
+        topBar.setAttribute('width', '0.6');
+        topBar.setAttribute('height', '0.014');
         topBar.setAttribute('color', ch.accent);
         topBar.setAttribute('shader', 'flat');
-        topBar.setAttribute('position', '0 0.171 0.001');
+        topBar.setAttribute('position', '0 0.093 0.001');
         cardEntity.appendChild(topBar);
-
-        // Diagonal corner flourish (livery-stripe echo)
-        const corner = document.createElement('a-plane');
-        corner.setAttribute('width', '0.022');
-        corner.setAttribute('height', '0.19');
-        corner.setAttribute('color', ch.accent);
-        corner.setAttribute('opacity', '0.5');
-        corner.setAttribute('shader', 'flat');
-        corner.setAttribute('rotation', '0 0 28');
-        corner.setAttribute('position', '0.325 0.06 0.001');
-        cardEntity.appendChild(corner);
-
-        // LED status dot
-        const led = document.createElement('a-circle');
-        led.setAttribute('radius', '0.01');
-        led.setAttribute('color', ch.accent);
-        led.setAttribute('shader', 'flat');
-        led.setAttribute('position', '-0.31 0.15 0.002');
-        cardEntity.appendChild(led);
 
         // Channel code (small monospace-style eyebrow)
         const codeText = document.createElement('a-text');
         codeText.setAttribute('value', `${ch.code}  ${ch.tag}`);
         codeText.setAttribute('color', ch.accent);
         codeText.setAttribute('align', 'left');
-        codeText.setAttribute('width', '1.3');
-        codeText.setAttribute('wrap-count', '26');
-        codeText.setAttribute('position', '-0.335 0.14 0.002');
+        codeText.setAttribute('width', '1.55');
+        codeText.setAttribute('wrap-count', '30');
+        codeText.setAttribute('position', '-0.28 0.058 0.002');
         codeText.setAttribute('font', 'exo2bold');
         cardEntity.appendChild(codeText);
 
@@ -430,31 +401,30 @@ function generate360Specs() {
         titleText.setAttribute('value', ch.title);
         titleText.setAttribute('color', '#f3efe6');
         titleText.setAttribute('align', 'left');
-        titleText.setAttribute('width', '1.55');
+        titleText.setAttribute('width', '1.75');
         titleText.setAttribute('wrap-count', '20');
-        titleText.setAttribute('position', '-0.335 0.088 0.002');
+        titleText.setAttribute('position', '-0.28 0.015 0.002');
         titleText.setAttribute('font', 'exo2bold');
         cardEntity.appendChild(titleText);
 
-        // Divider
+        // Thin divider
         const divider = document.createElement('a-plane');
-        divider.setAttribute('width', '0.66');
-        divider.setAttribute('height', '0.004');
+        divider.setAttribute('width', '0.54');
+        divider.setAttribute('height', '0.003');
         divider.setAttribute('color', ch.accent);
-        divider.setAttribute('opacity', '0.35');
+        divider.setAttribute('opacity', '0.3');
         divider.setAttribute('shader', 'flat');
-        divider.setAttribute('position', '0 0.048 0.001');
+        divider.setAttribute('position', '0 -0.018 0.001');
         cardEntity.appendChild(divider);
 
-        // Body readout lines
+        // Single readout line
         const bodyText = document.createElement('a-text');
-        bodyText.setAttribute('value', ch.lines.join('\n'));
+        bodyText.setAttribute('value', ch.lines[0]);
         bodyText.setAttribute('color', '#d6d6d9');
         bodyText.setAttribute('align', 'left');
-        bodyText.setAttribute('width', '1.4');
-        bodyText.setAttribute('wrap-count', '30');
-        bodyText.setAttribute('line-height', '52');
-        bodyText.setAttribute('position', '-0.335 -0.005 0.002');
+        bodyText.setAttribute('width', '1.55');
+        bodyText.setAttribute('wrap-count', '34');
+        bodyText.setAttribute('position', '-0.28 -0.055 0.002');
         cardEntity.appendChild(bodyText);
 
         specsContainer.appendChild(cardEntity);
