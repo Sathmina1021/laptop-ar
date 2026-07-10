@@ -32,6 +32,8 @@
         .brand-title{ color: var(--brand-amber); font-size: clamp(15px, 3vw, 20px); letter-spacing: 3px; font-weight: 700; }
         .brand-title span{ color: var(--brand-orange); }
         .scan-ring-wrap{ position: relative; width: clamp(150px, 32vw, 230px); height: clamp(150px, 32vw, 230px); display:flex; align-items:center; justify-content:center; margin-bottom: clamp(20px, 4vh, 32px); }
+        .scan-ring-wrap::before{ content:''; position:absolute; inset:-18%; border-radius:50%; background: radial-gradient(circle, rgba(255,106,0,0.28) 0%, rgba(255,106,0,0) 70%); animation: haloPulse 2.6s ease-in-out infinite; }
+        @keyframes haloPulse{ 0%,100%{ transform: scale(0.92); opacity:0.6; } 50%{ transform: scale(1.08); opacity:1; } }
         .scan-ring-wrap svg{ position:absolute; inset:0; width:100%; height:100%; }
         .scan-ring-bg{ fill:none; stroke: rgba(255,177,0,0.12); stroke-width: 4; }
         .scan-ring-fg{ fill:none; stroke: url(#ringGrad); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 500; stroke-dashoffset: 500; animation: ringSweep 2.6s ease-in-out infinite; }
@@ -46,13 +48,25 @@
         #boot-progress-fill{ width: 0%; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #ff6a00, #ffb100); transition: width 0.25s ease; }
 
         /* SCAN HINT */
-        #scan-hint { position: fixed; bottom: max(24px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); color: #ffb100; background: rgba(21, 8, 0, 0.85); padding: clamp(9px,1.6vh,13px) clamp(16px,4vw,26px); border-radius: 20px; font-size: clamp(11px,1.8vw,13px); z-index: 99; border: 1px solid #ffb100; pointer-events: none; opacity: 0; transition: opacity 0.4s; text-align: center; width: 75%; max-width: 300px; animation: hintFloat 2.4s ease-in-out infinite; }
+        #scan-hint { position: fixed; bottom: max(24px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); color: #ffb100; background: rgba(21, 8, 0, 0.85); padding: clamp(9px,1.6vh,13px) clamp(16px,4vw,26px); border-radius: 20px; font-size: clamp(11px,1.8vw,13px); z-index: 99; border: 1px solid #ffb100; pointer-events: none; opacity: 0; transition: opacity 0.4s; text-align: center; width: 75%; max-width: 300px; animation: hintFloat 2.4s ease-in-out infinite; display:flex; align-items:center; justify-content:center; gap:8px; }
         @keyframes hintFloat { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-6px); } }
+        .hint-dot{ width:7px; height:7px; border-radius:50%; background:#ff6a00; box-shadow:0 0 8px 2px rgba(255,106,0,0.8); animation: dotPulse 1.2s ease-in-out infinite; }
+        @keyframes dotPulse{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:0.3; transform:scale(0.6);} }
+
+        /* AMBIENT PARTICLES ON START SCREEN */
+        #particle-field{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+        .spark{ position:absolute; bottom:-10px; width:3px; height:3px; border-radius:50%; background:#ffb100; box-shadow:0 0 6px 2px rgba(255,177,0,0.7); opacity:0; animation-name: sparkRise; animation-timing-function: ease-in; animation-iteration-count: infinite; }
+        @keyframes sparkRise{ 0%{ transform: translateY(0) translateX(0); opacity:0; } 10%{ opacity:1; } 90%{ opacity:0.6; } 100%{ transform: translateY(-100vh) translateX(var(--drift,20px)); opacity:0; } }
+
+        /* Glowing brand title */
+        .brand-title{ animation: titleGlow 2.4s ease-in-out infinite; }
+        @keyframes titleGlow{ 0%,100%{ text-shadow: 0 0 8px rgba(255,177,0,0.35), 0 0 2px rgba(255,177,0,0.5); } 50%{ text-shadow: 0 0 18px rgba(255,177,0,0.8), 0 0 6px rgba(255,106,0,0.7); } }
     </style>
 </head>
 <body>
 
     <div id="start-overlay">
+        <div id="particle-field"></div>
         <div class="brand-mark">
             <svg class="gear-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 8a4 4 0 100 8 4 4 0 000-8z" stroke="#ffb100" stroke-width="1.6"/>
@@ -79,7 +93,7 @@
         <div id="boot-progress"><div id="boot-progress-fill"></div></div>
     </div>
 
-    <div id="scan-hint">POINT CAMERA AT THE BIKE TO SCAN</div>
+    <div id="scan-hint"><span class="hint-dot"></span>POINT CAMERA AT THE BIKE TO SCAN</div>
 
     <a-scene
         id="main-scene"
@@ -118,59 +132,128 @@
                 <a-ring color="#ffb100" radius-inner="1.52" radius-outer="1.55" rotation="-90 0 0" position="0 -0.5 0" opacity="0.4" shader="flat"
                         animation="property: rotation; to: -90 0 -360; loop: true; dur: 12000; easing: linear"></a-ring>
 
+                <!-- SONAR LOCK-ON PING : fires once every time the bike is (re)found -->
+                <a-ring color="#ffb100" radius-inner="0.9" radius-outer="0.98" rotation="-90 0 0" position="0 -0.5 0" opacity="0" shader="flat" scale="0.3 0.3 0.3"
+                        animation__pingscale="property: scale; from: 0.3 0.3 0.3; to: 2.4 2.4 2.4; dur: 1300; easing: easeOutQuad; startEvents: animateFound"
+                        animation__pingfade="property: material.opacity; from: 0.9; to: 0; dur: 1300; easing: easeOutQuad; startEvents: animateFound"></a-ring>
+
                 <a-entity id="title-float" position="0 1.6 0" rotation="0 0 0">
-                    <a-plane width="2.4" height="0.5" color="#150800" opacity="0.9" shader="flat"></a-plane>
-                    <a-plane width="2.4" height="0.02" color="#ffb100" position="0 0.25 0.01" shader="flat"></a-plane>
-                    <a-plane width="2.4" height="0.02" color="#ff6a00" position="0 -0.25 0.01" shader="flat"></a-plane>
+                    <a-plane width="2.55" height="0.62" color="#ff6a00" opacity="0.18" shader="flat" position="0 0 -0.01"
+                              animation="property: opacity; from: 0.1; to: 0.32; dir: alternate; loop: true; dur: 1500; easing: easeInOutSine"></a-plane>
+                    <a-plane width="2.4" height="0.5" color="#150800" opacity="0.92" shader="flat"></a-plane>
+                    <a-plane width="2.4" height="0.02" color="#ffb100" position="0 0.25 0.01" shader="flat"
+                              animation="property: opacity; from: 0.5; to: 1; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"></a-plane>
+                    <a-plane width="2.4" height="0.02" color="#ff6a00" position="0 -0.25 0.01" shader="flat"
+                              animation="property: opacity; from: 1; to: 0.5; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"></a-plane>
                     <a-text value="BAJAJ PULSAR NS400" color="#ffb100" align="center" width="4.0" position="0 0.08 0.02" font="kelsonsans"></a-text>
                     <a-text value="STREET NAKED . ADVENTURE SPORT" color="#ff6a00" align="center" width="2.0" position="0 -0.12 0.02"></a-text>
                 </a-entity>
 
-                <a-entity position="1.6 0.3 0" rotation="0 90 0" class="spec-card">
+                <a-entity position="1.6 0.3 0" rotation="0 90 0" class="spec-card"
+                           animation__float="property: position; from: 1.6 0.3 0; to: 1.6 0.38 0; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine; delay: 0">
                     <a-plane width="1.4" height="0.5" color="#1a0e05" opacity="0.95" shader="flat" class="card-base" scale="1 0.001 1">
+                        <a-plane width="1.52" height="0.62" color="#ffb100" opacity="0.2" shader="flat" position="0 0 -0.01"
+                                  animation="property: opacity; from: 0.12; to: 0.38; dir: alternate; loop: true; dur: 1400; easing: easeInOutSine"></a-plane>
+                        <a-plane width="1.44" height="0.5" color="#ffb100" opacity="0.5" shader="flat" position="0 0 -0.005"></a-plane>
+                        <a-circle radius="0.075" color="#ffb100" position="-0.6 0.23 0.02" shader="flat"></a-circle>
+                        <a-text value="EN" color="#150800" align="center" width="3.4" position="-0.6 0.23 0.03"></a-text>
                         <a-plane width="1.4" height="0.04" color="#ffb100" position="0 0.23 0.01" shader="flat"></a-plane>
-                        <a-text value="ENGINE" color="#150800" bgcolor="#ffb100" align="center" width="1.8" position="0 0.23 0.02"></a-text>
+                        <a-text value="ENGINE" color="#150800" bgcolor="#ffb100" align="center" width="1.8" position="0.12 0.23 0.02"></a-text>
                         <a-text value="373.27cc Liquid-Cooled\n40 HP . 35 Nm\n6-Speed Gearbox" color="#ffb100" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
+                        <a-plane width="1.4" height="0.06" color="#ffffff" opacity="0" position="0 0.3 0.04" shader="flat"
+                                  animation__sweep="property: position; from: 0 0.3 0.04; to: 0 -0.3 0.04; dur: 700; easing: linear; startEvents: animateFound; delay: 0"
+                                  animation__in="property: material.opacity; from: 0; to: 0.6; dur: 120; startEvents: animateFound; delay: 0"
+                                  animation__out="property: material.opacity; from: 0.6; to: 0; dur: 550; startEvents: animateFound; delay: 150"></a-plane>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="0.8 0.3 -1.4" rotation="0 30 0" class="spec-card">
+                <a-entity position="0.8 0.3 -1.4" rotation="0 30 0" class="spec-card"
+                           animation__float="property: position; from: 0.8 0.3 -1.4; to: 0.8 0.38 -1.4; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine; delay: 300">
                     <a-plane width="1.4" height="0.5" color="#1a0e05" opacity="0.95" shader="flat" class="card-base" scale="1 0.001 1">
+                        <a-plane width="1.52" height="0.62" color="#ff6a00" opacity="0.2" shader="flat" position="0 0 -0.01"
+                                  animation="property: opacity; from: 0.12; to: 0.38; dir: alternate; loop: true; dur: 1400; easing: easeInOutSine"></a-plane>
+                        <a-plane width="1.44" height="0.5" color="#ff6a00" opacity="0.5" shader="flat" position="0 0 -0.005"></a-plane>
+                        <a-circle radius="0.075" color="#ff6a00" position="-0.6 0.23 0.02" shader="flat"></a-circle>
+                        <a-text value="CH" color="#150800" align="center" width="3.4" position="-0.6 0.23 0.03"></a-text>
                         <a-plane width="1.4" height="0.04" color="#ff6a00" position="0 0.23 0.01" shader="flat"></a-plane>
-                        <a-text value="CHASSIS" color="#150800" bgcolor="#ff6a00" align="center" width="1.8" position="0 0.23 0.02"></a-text>
+                        <a-text value="CHASSIS" color="#150800" bgcolor="#ff6a00" align="center" width="1.8" position="0.12 0.23 0.02"></a-text>
                         <a-text value="Dual Channel ABS + TC\n320mm F . 230mm R Disc\n110/70-17 . 140/70-17" color="#ff6a00" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
+                        <a-plane width="1.4" height="0.06" color="#ffffff" opacity="0" position="0 0.3 0.04" shader="flat"
+                                  animation__sweep="property: position; from: 0 0.3 0.04; to: 0 -0.3 0.04; dur: 700; easing: linear; startEvents: animateFound; delay: 350"
+                                  animation__in="property: material.opacity; from: 0; to: 0.6; dur: 120; startEvents: animateFound; delay: 350"
+                                  animation__out="property: material.opacity; from: 0.6; to: 0; dur: 550; startEvents: animateFound; delay: 500"></a-plane>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="-0.8 0.3 -1.4" rotation="0 -30 0" class="spec-card">
+                <a-entity position="-0.8 0.3 -1.4" rotation="0 -30 0" class="spec-card"
+                           animation__float="property: position; from: -0.8 0.3 -1.4; to: -0.8 0.38 -1.4; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine; delay: 600">
                     <a-plane width="1.4" height="0.5" color="#1a0e05" opacity="0.95" shader="flat" class="card-base" scale="1 0.001 1">
+                        <a-plane width="1.52" height="0.62" color="#ffb100" opacity="0.2" shader="flat" position="0 0 -0.01"
+                                  animation="property: opacity; from: 0.12; to: 0.38; dir: alternate; loop: true; dur: 1400; easing: easeInOutSine"></a-plane>
+                        <a-plane width="1.44" height="0.5" color="#ffb100" opacity="0.5" shader="flat" position="0 0 -0.005"></a-plane>
+                        <a-circle radius="0.075" color="#ffb100" position="-0.6 0.23 0.02" shader="flat"></a-circle>
+                        <a-text value="DM" color="#150800" align="center" width="3.4" position="-0.6 0.23 0.03"></a-text>
                         <a-plane width="1.4" height="0.04" color="#ffb100" position="0 0.23 0.01" shader="flat"></a-plane>
-                        <a-text value="DIMENSIONS" color="#150800" bgcolor="#ffb100" align="center" width="1.8" position="0 0.23 0.02"></a-text>
+                        <a-text value="DIMENSIONS" color="#150800" bgcolor="#ffb100" align="center" width="1.8" position="0.12 0.23 0.02"></a-text>
                         <a-text value="Wheelbase 1344mm\nGround Clear. 168mm\nSeat Height 807mm" color="#ffb100" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
+                        <a-plane width="1.4" height="0.06" color="#ffffff" opacity="0" position="0 0.3 0.04" shader="flat"
+                                  animation__sweep="property: position; from: 0 0.3 0.04; to: 0 -0.3 0.04; dur: 700; easing: linear; startEvents: animateFound; delay: 700"
+                                  animation__in="property: material.opacity; from: 0; to: 0.6; dur: 120; startEvents: animateFound; delay: 700"
+                                  animation__out="property: material.opacity; from: 0.6; to: 0; dur: 550; startEvents: animateFound; delay: 850"></a-plane>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="-1.6 0.3 0" rotation="0 -90 0" class="spec-card">
+                <a-entity position="-1.6 0.3 0" rotation="0 -90 0" class="spec-card"
+                           animation__float="property: position; from: -1.6 0.3 0; to: -1.6 0.38 0; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine; delay: 900">
                     <a-plane width="1.4" height="0.5" color="#1a0e05" opacity="0.95" shader="flat" class="card-base" scale="1 0.001 1">
+                        <a-plane width="1.52" height="0.62" color="#ff6a00" opacity="0.2" shader="flat" position="0 0 -0.01"
+                                  animation="property: opacity; from: 0.12; to: 0.38; dir: alternate; loop: true; dur: 1400; easing: easeInOutSine"></a-plane>
+                        <a-plane width="1.44" height="0.5" color="#ff6a00" opacity="0.5" shader="flat" position="0 0 -0.005"></a-plane>
+                        <a-circle radius="0.075" color="#ff6a00" position="-0.6 0.23 0.02" shader="flat"></a-circle>
+                        <a-text value="PF" color="#150800" align="center" width="3.4" position="-0.6 0.23 0.03"></a-text>
                         <a-plane width="1.4" height="0.04" color="#ff6a00" position="0 0.23 0.01" shader="flat"></a-plane>
-                        <a-text value="PERFORMANCE" color="#150800" bgcolor="#ff6a00" align="center" width="1.8" position="0 0.23 0.02"></a-text>
+                        <a-text value="PERFORMANCE" color="#150800" bgcolor="#ff6a00" align="center" width="1.8" position="0.12 0.23 0.02"></a-text>
                         <a-text value="12L Fuel Tank\nTop Speed 170 km/h" color="#ff6a00" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
+                        <a-plane width="1.4" height="0.06" color="#ffffff" opacity="0" position="0 0.3 0.04" shader="flat"
+                                  animation__sweep="property: position; from: 0 0.3 0.04; to: 0 -0.3 0.04; dur: 700; easing: linear; startEvents: animateFound; delay: 1050"
+                                  animation__in="property: material.opacity; from: 0; to: 0.6; dur: 120; startEvents: animateFound; delay: 1050"
+                                  animation__out="property: material.opacity; from: 0.6; to: 0; dur: 550; startEvents: animateFound; delay: 1200"></a-plane>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="-0.8 0.3 1.4" rotation="0 -150 0" class="spec-card">
+                <a-entity position="-0.8 0.3 1.4" rotation="0 -150 0" class="spec-card"
+                           animation__float="property: position; from: -0.8 0.3 1.4; to: -0.8 0.38 1.4; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine; delay: 1200">
                     <a-plane width="1.4" height="0.5" color="#1a0e05" opacity="0.95" shader="flat" class="card-base" scale="1 0.001 1">
+                        <a-plane width="1.52" height="0.62" color="#ffb100" opacity="0.2" shader="flat" position="0 0 -0.01"
+                                  animation="property: opacity; from: 0.12; to: 0.38; dir: alternate; loop: true; dur: 1400; easing: easeInOutSine"></a-plane>
+                        <a-plane width="1.44" height="0.5" color="#ffb100" opacity="0.5" shader="flat" position="0 0 -0.005"></a-plane>
+                        <a-circle radius="0.075" color="#ffb100" position="-0.6 0.23 0.02" shader="flat"></a-circle>
+                        <a-text value="EL" color="#150800" align="center" width="3.4" position="-0.6 0.23 0.03"></a-text>
                         <a-plane width="1.4" height="0.04" color="#ffb100" position="0 0.23 0.01" shader="flat"></a-plane>
-                        <a-text value="ELECTRONICS" color="#150800" bgcolor="#ffb100" align="center" width="1.8" position="0 0.23 0.02"></a-text>
+                        <a-text value="ELECTRONICS" color="#150800" bgcolor="#ffb100" align="center" width="1.8" position="0.12 0.23 0.02"></a-text>
                         <a-text value="Full LCD Console\nFull-LED Lighting" color="#ffb100" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
+                        <a-plane width="1.4" height="0.06" color="#ffffff" opacity="0" position="0 0.3 0.04" shader="flat"
+                                  animation__sweep="property: position; from: 0 0.3 0.04; to: 0 -0.3 0.04; dur: 700; easing: linear; startEvents: animateFound; delay: 1400"
+                                  animation__in="property: material.opacity; from: 0; to: 0.6; dur: 120; startEvents: animateFound; delay: 1400"
+                                  animation__out="property: material.opacity; from: 0.6; to: 0; dur: 550; startEvents: animateFound; delay: 1550"></a-plane>
                     </a-plane>
                 </a-entity>
 
-                <a-entity position="0.8 0.3 1.4" rotation="0 150 0" class="spec-card">
+                <a-entity position="0.8 0.3 1.4" rotation="0 150 0" class="spec-card"
+                           animation__float="property: position; from: 0.8 0.3 1.4; to: 0.8 0.38 1.4; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine; delay: 1500">
                     <a-plane width="1.4" height="0.5" color="#1a0e05" opacity="0.95" shader="flat" class="card-base" scale="1 0.001 1">
+                        <a-plane width="1.52" height="0.62" color="#ff6a00" opacity="0.2" shader="flat" position="0 0 -0.01"
+                                  animation="property: opacity; from: 0.12; to: 0.38; dir: alternate; loop: true; dur: 1400; easing: easeInOutSine"></a-plane>
+                        <a-plane width="1.44" height="0.5" color="#ff6a00" opacity="0.5" shader="flat" position="0 0 -0.005"></a-plane>
+                        <a-circle radius="0.075" color="#ff6a00" position="-0.6 0.23 0.02" shader="flat"></a-circle>
+                        <a-text value="WT" color="#150800" align="center" width="3.4" position="-0.6 0.23 0.03"></a-text>
                         <a-plane width="1.4" height="0.04" color="#ff6a00" position="0 0.23 0.01" shader="flat"></a-plane>
-                        <a-text value="WEIGHT" color="#150800" bgcolor="#ff6a00" align="center" width="1.8" position="0 0.23 0.02"></a-text>
+                        <a-text value="WEIGHT" color="#150800" bgcolor="#ff6a00" align="center" width="1.8" position="0.12 0.23 0.02"></a-text>
                         <a-text value="Kerb Weight 174 kg" color="#ff6a00" align="center" width="1.8" position="0 -0.05 0.02"></a-text>
+                        <a-plane width="1.4" height="0.06" color="#ffffff" opacity="0" position="0 0.3 0.04" shader="flat"
+                                  animation__sweep="property: position; from: 0 0.3 0.04; to: 0 -0.3 0.04; dur: 700; easing: linear; startEvents: animateFound; delay: 1750"
+                                  animation__in="property: material.opacity; from: 0; to: 0.6; dur: 120; startEvents: animateFound; delay: 1750"
+                                  animation__out="property: material.opacity; from: 0.6; to: 0; dur: 550; startEvents: animateFound; delay: 1900"></a-plane>
                     </a-plane>
                 </a-entity>
 
@@ -191,10 +274,35 @@
         const bootProgress = document.querySelector('#boot-progress');
         const bootFill = document.querySelector('#boot-progress-fill');
 
+        // Spawn ambient ember/spark particles on the start screen for a premium feel
+        (function spawnParticles(){
+            const field = document.querySelector('#particle-field');
+            if (!field) return;
+            const COUNT = 22;
+            for (let i = 0; i < COUNT; i++) {
+                const p = document.createElement('div');
+                p.className = 'spark';
+                const left = Math.random() * 100;
+                const size = 2 + Math.random() * 3;
+                const dur = 4 + Math.random() * 5;
+                const delay = Math.random() * 6;
+                const drift = (Math.random() * 60 - 30) + 'px';
+                p.style.left = left + '%';
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.setProperty('--drift', drift);
+                p.style.animationDuration = dur + 's';
+                p.style.animationDelay = delay + 's';
+                if (Math.random() > 0.5) p.style.background = '#ff6a00';
+                field.appendChild(p);
+            }
+        })();
+
         const bootMessages = [
             "INITIALIZING BIKE SCAN CORE...",
             "CALIBRATING OPTICS...",
             "WARMING UP AR ENGINE...",
+            "SYNCING HOLOGRAM DATA...",
             "LOCKING FRAME REFERENCE..."
         ];
 
