@@ -24,7 +24,6 @@
 html,body{margin:0;overflow:hidden;width:100%;height:100%;background-color:transparent;font-family:'Rajdhani',sans-serif;}
 a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
-/* Hide Default MindAR UI elements */
 #mindar-ui-scanning, .mindar-ui-overlay { display: none !important; }
 
 /* ============ MODERN LOADING SCREEN ============ */
@@ -147,39 +146,16 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
   <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
     
-    <a-ring color="#00e0ff" radius-inner="0.55" radius-outer="0.57" position="0 0 0.02" opacity="0.7"></a-ring>
+    <a-ring color="#00e0ff" radius-inner="0.6" radius-outer="0.61" position="0 0 0.01" opacity="0.4"></a-ring>
 
-    <a-entity id="specs-container" position="0 0 0.15" visible="true">
-      
-      <a-entity position="0 0 0" rotation="0 0 0">
-        <a-text id="spec-text-front"
-                value="FETCHING TELEMETRY..." 
-                color="#ff4b12" 
-                align="center" 
-                wrap-count="20" 
-                width="1.2"
-                font="roboto">
-        </a-text>
-      </a-entity>
-
-      <a-entity position="0 0 -0.05" rotation="0 180 0">
-        <a-text id="spec-text-back"
-                value="FETCHING TELEMETRY..." 
-                color="#00e0ff" 
-                align="center" 
-                wrap-count="20" 
-                width="1.2"
-                font="roboto">
-        </a-text>
-      </a-entity>
-
-    </a-entity>
+    <a-entity id="specs-container" position="0 0 0" visible="true">
+       </a-entity>
 
   </a-entity>
 </a-scene>
 
 <script>
-  // Central JSON Configuration
+  // Central JSON Database - Each item will generate a separate creative 3D card layout!
   const backendJsonData = {
     "brandName": "Pulsar",
     "modelName": "NS200",
@@ -189,8 +165,14 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       { "value": "18.7 Nm", "label": "Max Torque" },
       { "value": "199.5 cc", "label": "Liquid Cooled" }
     ],
-    "arFrontText": "PULSAR NS200\n\nPOWER: 24.5 PS\nTORQUE: 18.7 NM\nCOOLING: LIQUID",
-    "arBackText": "PERFORMANCE HUD\n\nABS: DUAL CHANNEL\nFUEL: INJECTION\nGEARS: 6-SPEED"
+    // These items will instantly layout into separate cards floating around the target
+    "arSeparateCards": [
+      { "title": "ENGINE", "desc": "199.5 CC LIQUID COOLED" },
+      { "title": "POWER", "desc": "24.5 PS @ 9750 RPM" },
+      { "title": "TORQUE", "desc": "18.7 NM @ 8000 RPM" },
+      { "title": "BRAKES", "desc": "DUAL CHANNEL ABS" },
+      { "title": "GEARBOX", "desc": "6-SPEED TRANSMISSION" }
+    ]
   };
 
   let targetTracked = false;
@@ -199,7 +181,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   const specsContainer = document.getElementById('specs-container');
 
   document.addEventListener("DOMContentLoaded", () => {
-    // Inject UI Content
+    // Inject UI Loading Screen Content
     document.getElementById("app-eyebrow").innerText = backendJsonData.systemTag;
     document.getElementById("app-title").innerHTML = `${backendJsonData.brandName} <span class="accent">${backendJsonData.modelName}</span>`;
     
@@ -212,9 +194,64 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       gridContainer.appendChild(statBlock);
     });
 
-    // Inject AR Text Nodes
-    document.getElementById("spec-text-front").setAttribute("value", backendJsonData.arFrontText);
-    document.getElementById("spec-text-back").setAttribute("value", backendJsonData.arBackText);
+    // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA
+    const cardsData = backendJsonData.arSeparateCards;
+    const totalCards = cardsData.length;
+    const radius = 0.65; // Distance from center object
+
+    cardsData.forEach((card, index) => {
+      // Calculate angular distribution symmetrically (360 degrees division)
+      const angle = (index / totalCards) * Math.PI * 2;
+      const posX = Math.cos(angle) * radius;
+      const posY = Math.sin(angle) * radius;
+
+      // Outer Card Component Group
+      const cardEntity = document.createElement('a-entity');
+      cardEntity.setAttribute('position', `${posX} ${posY} 0.15`);
+      
+      // Make each individual card face forward towards its angle position naturally
+      const angleDegrees = (angle * 180) / Math.PI;
+      cardEntity.setAttribute('rotation', `0 0 ${angleDegrees - 90}`);
+
+      // Futuristic Background Plane for readability
+      const bgPlane = document.createElement('a-plane');
+      bgPlane.setAttribute('width', '0.45');
+      bgPlane.setAttribute('height', '0.18');
+      bgPlane.setAttribute('color', '#0a0a0c');
+      bgPlane.setAttribute('opacity', '0.85');
+      bgPlane.setAttribute('material', 'transparent: true; side: double');
+      
+      // Card Frame Border
+      const frame = document.createElement('a-rect');
+      bgPlane.innerHTML = `
+        <a-entity line="start: -0.225 -0.09 0; end: 0.225 -0.09 0; color: #ff4b12"></a-entity>
+        <a-entity line="start: -0.225 0.09 0; end: 0.225 0.09 0; color: #00e0ff"></a-entity>
+      `;
+
+      // Header Text inside Card
+      const titleText = document.createElement('a-text');
+      titleText.setAttribute('value', card.title);
+      titleText.setAttribute('color', '#00e0ff');
+      titleText.setAttribute('align', 'center');
+      titleText.setAttribute('position', '0 0.04 0.01');
+      titleText.setAttribute('width', '0.8');
+      titleText.setAttribute('font', 'roboto');
+
+      // Description Text inside Card
+      const descText = document.createElement('a-text');
+      descText.setAttribute('value', card.desc);
+      descText.setAttribute('color', '#ffffff');
+      descText.setAttribute('align', 'center');
+      descText.setAttribute('position', '0 -0.03 0.01');
+      descText.setAttribute('width', '0.65');
+      descText.setAttribute('font', 'roboto');
+
+      // Assemble Entities
+      cardEntity.appendChild(bgPlane);
+      cardEntity.appendChild(titleText);
+      cardEntity.appendChild(descText);
+      specsContainer.appendChild(cardEntity);
+    });
 
     // MindAR Trackers
     const targetAnchor = document.getElementById('target-anchor');
@@ -227,17 +264,17 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       document.getElementById("scan-hint").style.display = "block";
     });
 
-    // Start 360 Spin Loop
+    // Run continuous spin framework loop
     autoSpin();
   });
 
-  // Smooth Dragging Mechanics (PC & Mobile)
+  // Smooth Interactive Touch/Drag Orbit System
   const startDrag = (clientX) => { isDragging = true; previousMousePosition.x = clientX; };
   const updateDrag = (clientX) => {
     if (!isDragging || !targetTracked) return;
     const deltaX = clientX - previousMousePosition.x;
     const currentRotation = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
-    specsContainer.setAttribute('rotation', { x: currentRotation.x, y: currentRotation.y + deltaX * 0.4, z: currentRotation.z });
+    specsContainer.setAttribute('rotation', { x: currentRotation.x, y: currentRotation.y, z: currentRotation.z + deltaX * 0.4 });
     previousMousePosition.x = clientX;
   };
   const endDrag = () => { isDragging = false; };
@@ -249,12 +286,12 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientX); });
   window.addEventListener('touchend', endDrag);
 
-  // Elegant Continuous Rotation Function
+  // Auto Orbit Engine Control
   function autoSpin() {
     requestAnimationFrame(autoSpin);
     if (!isDragging && targetTracked) {
       const currentRot = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
-      specsContainer.setAttribute('rotation', { x: currentRot.x, y: currentRot.y + 0.3, z: currentRot.z });
+      specsContainer.setAttribute('rotation', { x: currentRot.x, y: currentRot.y, z: currentRot.z + 0.2 });
     }
   }
 
