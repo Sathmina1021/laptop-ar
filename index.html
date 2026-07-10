@@ -3,218 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>Bajaj Pulsar NS200 AR Scanner</title>
+    <title>Bajaj Pulsar NS200 AR Interactive Scanner</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
-        :root{
-            --brand-amber:#ffb100;
-            --brand-orange:#ff6a00;
-            --brand-dark:#150800;
+        :root {
+            --brand-amber: #ffb100;
+            --brand-orange: #ff4500;
+            --brand-dark: #0a0401;
+            --neon-blue: #00f3ff;
         }
-        html, body { margin: 0; overflow: hidden; width: 100%; height: 100%; background-color: transparent;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        html, body { margin: 0; overflow: hidden; width: 100%; height: 100%; background-color: transparent; font-family: 'Segoe UI', system-ui, sans-serif; }
         a-scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 
         /* START SCREEN OVERLAY */
         #start-overlay {
             position: fixed; inset: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 40%, #241205 0%, #0a0402 70%, #030201 100%);
+            background: radial-gradient(circle at 50% 50%, #1a0b02 0%, #050201 100%);
             z-index: 9999; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            padding: 24px; box-sizing: border-box;
-            transition: opacity 0.5s ease;
+            justify-content: center; align-items: center; padding: 24px; box-sizing: border-box;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .brand-mark{ display:flex; align-items:center; gap: clamp(8px,2vw,14px); margin-bottom: clamp(18px, 4vh, 34px); }
-        .gear-icon{ width: clamp(38px,7vw,56px); height: clamp(38px,7vw,56px); animation: spinGear 3.2s linear infinite; filter: drop-shadow(0 0 8px rgba(255,177,0,0.55)); }
-        @keyframes spinGear{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
-        .brand-title{ color: var(--brand-amber); font-size: clamp(15px, 3vw, 20px); letter-spacing: 3px; font-weight: 700; animation: titleGlow 2.4s ease-in-out infinite; }
-        .brand-title span{ color: var(--brand-orange); }
-        @keyframes titleGlow{ 0%,100%{ text-shadow: 0 0 8px rgba(255,177,0,0.35), 0 0 2px rgba(255,177,0,0.5); } 50%{ text-shadow: 0 0 18px rgba(255,177,0,0.8), 0 0 6px rgba(255,106,0,0.7); } }
-        .scan-ring-wrap{ position: relative; width: clamp(150px, 32vw, 230px); height: clamp(150px, 32vw, 230px); display:flex; align-items:center; justify-content:center; margin-bottom: clamp(20px, 4vh, 32px); }
-        .scan-ring-wrap::before{ content:''; position:absolute; inset:-18%; border-radius:50%; background: radial-gradient(circle, rgba(255,106,0,0.28) 0%, rgba(255,106,0,0) 70%); animation: haloPulse 2.6s ease-in-out infinite; }
-        @keyframes haloPulse{ 0%,100%{ transform: scale(0.92); opacity:0.6; } 50%{ transform: scale(1.08); opacity:1; } }
-        .scan-ring-wrap svg{ position:absolute; inset:0; width:100%; height:100%; }
-        .scan-ring-bg{ fill:none; stroke: rgba(255,177,0,0.12); stroke-width: 4; }
-        .scan-ring-fg{ fill:none; stroke: url(#ringGrad); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 500; stroke-dashoffset: 500; animation: ringSweep 2.6s ease-in-out infinite; }
-        @keyframes ringSweep{ 0%{ stroke-dashoffset: 500; } 50%{ stroke-dashoffset: 90; } 100%{ stroke-dashoffset: 500; } }
-        .scan-bike-emoji{ font-size: clamp(38px, 8vw, 60px); animation: floatBike 2.2s ease-in-out infinite; }
-        @keyframes floatBike{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-8px); } }
-        .scan-btn { background: linear-gradient(45deg, #ff3d1a, #ffb100); border: none; color: #150800; padding: clamp(13px,2.6vh,17px) clamp(32px,8vw,50px); font-size: clamp(14px, 2.4vw, 18px); font-weight: bold; border-radius: 40px; cursor: pointer; letter-spacing: 1.5px; box-shadow: 0 0 25px rgba(255, 61, 26, 0.45); transition: 0.2s; animation: pulseBtn 1.8s ease-in-out infinite; max-width: 90vw; }
-        @keyframes pulseBtn { 0%, 100% { box-shadow: 0 0 25px rgba(255, 61, 26, 0.45); transform: scale(1); } 50% { box-shadow: 0 0 40px rgba(255, 177, 0, 0.65); transform: scale(1.03); } }
-        #status-txt { color: #ffb100; margin-top: clamp(16px,3vh,22px); font-size: clamp(11px, 2vw, 13px); letter-spacing: 2px; text-align: center; min-height: 18px; }
-        #status-sub{ color: rgba(255,177,0,0.55); margin-top: 8px; font-size: clamp(10px, 1.6vw, 12px); letter-spacing: 1px; text-align:center; max-width: 320px; }
+        .brand-mark { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 4vh; }
+        .brand-title { color: #fff; font-size: clamp(24px, 5vw, 36px); letter-spacing: 5px; font-weight: 900; text-align: center; text-transform: uppercase; }
+        .brand-title span { color: var(--brand-orange); text-shadow: 0 0 15px var(--brand-orange); }
+        
+        .scan-ring-wrap { position: relative; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; margin-bottom: 4vh; }
+        .scan-ring-wrap svg { position: absolute; width: 100%; height: 100%; animation: rotateRing 8s linear infinite; }
+        @keyframes rotateRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .scan-bike-emoji { font-size: 50px; animation: float 2s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 
-        /* SCAN HINT */
-        #scan-hint { position: fixed; bottom: max(24px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); color: #ffb100; background: rgba(21, 8, 0, 0.85); padding: clamp(9px,1.6vh,13px) clamp(16px,4vw,26px); border-radius: 20px; font-size: clamp(11px,1.8vw,13px); z-index: 99; border: 1px solid #ffb100; pointer-events: none; opacity: 0; transition: opacity 0.4s; text-align: center; width: 75%; max-width: 320px; animation: hintFloat 2.4s ease-in-out infinite; display:flex; align-items:center; justify-content:center; gap:8px; }
-        @keyframes hintFloat { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-6px); } }
-        .hint-dot{ width:7px; height:7px; border-radius:50%; background:#ff6a00; box-shadow:0 0 8px 2px rgba(255,106,0,0.8); animation: dotPulse 1.2s ease-in-out infinite; }
-        @keyframes dotPulse{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:0.3; transform:scale(0.6);} }
+        .scan-btn { 
+            background: linear-gradient(135deg, var(--brand-orange), var(--brand-amber)); 
+            border: none; color: #000; padding: 16px 45px; font-size: 16px; font-weight: 800; 
+            border-radius: 50px; cursor: pointer; letter-spacing: 2px; transition: all 0.3s ease;
+            box-shadow: 0 0 30px rgba(255, 69, 0, 0.4); 
+        }
+        .scan-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 177, 0, 0.7); }
+        
+        #status-txt { color: var(--brand-amber); margin-top: 20px; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 8px rgba(255,177,0,0.4); }
 
-        /* TOP BAR (shown once scanning starts) */
-        #top-bar{ position: fixed; top: max(16px, env(safe-area-inset-top)); left: 0; right: 0; display:flex; justify-content:center; z-index: 98; opacity:0; transition: opacity 0.4s; pointer-events:none; }
-        #top-bar span{ background: rgba(21,8,0,0.8); border:1px solid var(--brand-amber); color: var(--brand-amber); padding: 6px 16px; border-radius: 16px; font-size: 11px; letter-spacing: 2px; }
+        /* CREATIVE FLOATING TOP TITLE BAR */
+        #top-bar { 
+            position: fixed; top: max(20px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); 
+            z-index: 98; opacity: 0; transition: all 0.5s ease; pointer-events: none; text-align: center; width: 90%;
+        }
+        #top-bar h1 { 
+            margin: 0; background: rgba(10, 4, 1, 0.85); border: 2px solid var(--brand-orange); 
+            color: #fff; padding: 10px 30px; border-radius: 50px; font-size: clamp(16px, 4vw, 22px); 
+            font-weight: 900; letter-spacing: 4px; display: inline-block;
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.6), inset 0 0 10px rgba(255, 69, 0, 0.3);
+            animation: neonGlow 2s ease-in-out infinite alternate;
+        }
+        @keyframes neonGlow {
+            0% { box-shadow: 0 0 15px rgba(255, 69, 0, 0.5); border-color: var(--brand-orange); }
+            100% { box-shadow: 0 0 30px rgba(255, 177, 0, 0.9); border-color: var(--brand-amber); }
+        }
 
-        /* DIAGNOSTIC BANNER - tells you exactly why tracking isn't working instead of failing silently */
-        #diag-banner{ position: fixed; top: max(56px, calc(env(safe-area-inset-top) + 56px)); left: 50%; transform: translateX(-50%); max-width: 90%; background: rgba(120,0,0,0.92); border: 1px solid #ff5c5c; color: #ffdede; padding: 10px 16px; border-radius: 12px; font-size: 11.5px; line-height: 1.5; z-index: 200; display: none; text-align: center; }
+        /* BOTTOM SCAN HINT */
+        #scan-hint { 
+            position: fixed; bottom: max(30px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); 
+            color: #fff; background: rgba(0, 0, 0, 0.85); padding: 12px 28px; border-radius: 30px; 
+            font-size: 13px; font-weight: 600; z-index: 99; border: 1px solid rgba(255,255,255,0.2); 
+            pointer-events: none; opacity: 0; transition: opacity 0.4s; text-align: center; letter-spacing: 1px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
 
-        /* AMBIENT PARTICLES ON START SCREEN */
-        #particle-field{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
-        .spark{ position:absolute; bottom:-10px; width:3px; height:3px; border-radius:50%; background:#ffb100; box-shadow:0 0 6px 2px rgba(255,177,0,0.7); opacity:0; animation-name: sparkRise; animation-timing-function: ease-in; animation-iteration-count: infinite; }
-        @keyframes sparkRise{ 0%{ transform: translateY(0) translateX(0); opacity:0; } 10%{ opacity:1; } 90%{ opacity:0.6; } 100%{ transform: translateY(-100vh) translateX(var(--drift,20px)); opacity:0; } }
+        /* AMBIENT PARTICLES */
+        #particle-field { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .spark { position: absolute; bottom: -10px; width: 4px; height: 4px; border-radius: 50%; background: var(--brand-orange); opacity: 0; animation: rise 5s linear infinite; }
+        @keyframes rise { 0% { transform: translateY(0) scale(0); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: translateY(-105vh) scale(1.2); opacity: 0; } }
     </style>
 </head>
 <body>
 
+    <!-- Onboarding Screen -->
     <div id="start-overlay">
         <div id="particle-field"></div>
         <div class="brand-mark">
-            <svg class="gear-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 8a4 4 0 100 8 4 4 0 000-8z" stroke="#ffb100" stroke-width="1.6"/>
-                <path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.4 5.6l-1.55 1.55M7.15 16.85L5.6 18.4M18.4 18.4l-1.55-1.55M7.15 7.15L5.6 5.6" stroke="#ff6a00" stroke-width="1.6" stroke-linecap="round"/>
-            </svg>
-            <div class="brand-title">BAJAJ <span>AR SCANNER</span></div>
+            <div class="brand-title">BAJAJ PULSAR<br><span>NS200 AR EXPERIENCE</span></div>
         </div>
         <div class="scan-ring-wrap">
             <svg viewBox="0 0 100 100">
-                <defs>
-                    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#ff3d1a"/>
-                        <stop offset="100%" stop-color="#ffb100"/>
-                    </linearGradient>
-                </defs>
-                <circle class="scan-ring-bg" cx="50" cy="50" r="44"/>
-                <circle class="scan-ring-fg" cx="50" cy="50" r="44" pathLength="500"/>
+                <circle cx="50" cy="50" r="46" fill="none" stroke="#ff4500" stroke-width="2" stroke-dasharray="15 10"/>
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#ffb100" stroke-width="1" stroke-dasharray="5 5"/>
             </svg>
             <div class="scan-bike-emoji">🏍️</div>
         </div>
-        <button class="scan-btn" id="activate-btn">START AR SCAN</button>
-        <div id="status-txt">TAP TO LAUNCH CAMERA</div>
-        <div id="status-sub">Point your camera at the Pulsar NS200 — the real bike, a poster, or a photo on a screen — and hold steady until it locks on</div>
+        <button class="scan-btn" id="activate-btn">ALLOW CAMERA & START</button>
+        <div id="status-txt">Ready to Scan Real World or Image</div>
     </div>
 
-    <div id="top-bar"><span>SCANNING FOR PULSAR NS200</span></div>
-    <div id="scan-hint"><span class="hint-dot"></span>POINT CAMERA AT THE BIKE PHOTO</div>
-    <div id="diag-banner"></div>
+    <!-- Live Animated Top Title -->
+    <div id="top-bar">
+        <h1>BAJAJ PULSAR NS200</h1>
+    </div>
 
-    <!--
-      HOW THIS WORKS
-      ---------------
-      This uses MindAR image-tracking (not WebXR hit-test). Instead of scanning the
-      floor, it recognizes a specific trained photo of the bike and locks 3D content
-      to it — which is why it can be tested by pointing the camera at a photo on a
-      screen or a printout, not just the physical bike.
+    <div id="scan-hint">ALIGN CAMERA WITH THE PULSAR IMAGE</div>
 
-      BEFORE THIS WORKS YOU MUST COMPILE A .mind TARGET FILE:
-      1. Go to https://hiukim.github.io/mind-ar-js-doc/tools/compile/
-      2. Drop in "pulsar-marker-image.png" (included alongside this file — it's the
-         clean 3/4 side-view shot of the bike, the best of your 4 photos for tracking)
-      3. Click Start, wait for it to compile, then click Download — you get "targets.mind"
-      4. Put targets.mind in the same folder as this HTML file (see imageTargetSrc below)
-      5. For best real-world results, also print that same photo and stick it on/near
-         the actual bike (paint, chrome and glossy plastic are hard to track directly;
-         a printed reference image tracks far more reliably than the bike's bodywork).
-    -->
-
+    <!-- AR Scene -->
     <a-scene
         id="main-scene"
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiScanning: no; uiLoading: no;"
         color-space="sRGB"
-        renderer="colorManagement: true; antialias: true; alpha: true; precision: mediump;"
+        renderer="colorManagement: true; antialias: true; alpha: true;"
         vr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false"
     >
-        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
+        <!-- AR Target Anchor -->
         <a-entity id="bike-anchor" mindar-image-target="targetIndex: 0">
+            
+            <!-- 360 DEGREE HUD BACKGROUND RING -->
+            <a-ring color="#ff4500" radius-inner="0.48" radius-outer="0.50" opacity="0.6" shader="flat" rotation="0 0 0"
+                    animation="property: rotation; to: 0 0 360; loop: true; dur: 10000; easing: linear">
+            </a-ring>
+            <a-ring color="#ffb100" radius-inner="0.52" radius-outer="0.525" opacity="0.3" shader="flat" rotation="0 0 0"
+                    animation="property: rotation; to: 0 0 -360; loop: true; dur: 15000; easing: linear">
+            </a-ring>
 
-            <!-- Locked to the exact spot on the photo it was compiled from. 0,0 = image
-                 center; x grows right, y grows up; the image width = 1 unit, height = 0.667 -->
+            <!-- =========================================================
+                 360° RADIAL (CIRCULAR) SPECIFICATION CARDS
+                 Cards are arranged in a perfect circle surrounding the bike
+                 ========================================================= -->
 
-            <!-- IDENTITY BADGE: "PULSAR NS200" spin-materializes above the bike the
-                 instant it's recognized, with two glowing halo rings turning behind it -->
-            <a-entity id="id-badge" position="0 0.27 0.02" scale="0.001 0.001 0.001" rotation="0 180 0">
-                <a-ring color="#ffb100" radius-inner="0.10" radius-outer="0.104" opacity="0.55" shader="flat"
-                        animation="property: rotation; to: 0 0 360; loop: true; dur: 6000; easing: linear"></a-ring>
-                <a-ring color="#ff6a00" radius-inner="0.115" radius-outer="0.118" opacity="0.4" shader="flat"
-                        animation="property: rotation; to: 0 0 -360; loop: true; dur: 9000; easing: linear"></a-ring>
-                <a-ring id="sonar-ping" color="#ffb100" radius-inner="0.05" radius-outer="0.056" opacity="0" shader="flat" scale="0.3 0.3 0.3"></a-ring>
-                <a-plane width="0.46" height="0.13" color="#ff6a00" opacity="0.16" shader="flat" position="0 0 -0.005"
-                          animation="property: opacity; from: 0.08; to: 0.28; dir: alternate; loop: true; dur: 1500; easing: easeInOutSine"></a-plane>
-                <a-plane width="0.42" height="0.105" color="#150800" opacity="0.94" shader="flat"></a-plane>
-                <a-text value="PULSAR NS200" color="#ffb100" align="center" width="1.5" position="0 0.018 0.003"></a-text>
-                <a-text value="BAJAJ . STREET NAKED" color="#ff8c3a" align="center" width="0.85" position="0 -0.026 0.003"></a-text>
-            </a-entity>
-
-            <!-- ENGINE -->
-            <a-entity class="hotspot" data-delay="0"    position="-0.08 -0.10 0.01">
-                <a-circle radius="0.012" color="#ffb100" shader="flat"></a-circle>
-                <a-entity line="start: 0 0 0; end: 0.16 0.14 0; color: #ffb100"></a-entity>
-                <a-entity position="0.16 0.14 0" class="card-root">
-                    <a-plane width="0.34" height="0.15" color="#150800" opacity="0.92" shader="flat"></a-plane>
-                    <a-plane width="0.34" height="0.022" color="#ffb100" position="0 0.064 0.001" shader="flat"></a-plane>
-                    <a-text value="ENGINE" color="#ffb100" align="center" width="1.0" position="0 0.048 0.002"></a-text>
-                    <a-text value="199.5cc Liquid-Cooled\n24.5 PS . 18.74 Nm\n6-Speed Gearbox" color="#ffe9c2" align="center" width="0.62" position="0 -0.018 0.002"></a-text>
+            <!-- 1. ENGINE (Top Right - 45°) -->
+            <a-entity class="hotspot" position="0.42 0.42 0.02" data-delay="100">
+                <a-line start="-0.15 -0.15 0" end="0 0 0" color="#ffb100" opacity="0.8"></a-line>
+                <a-circle radius="0.015" color="#ffb100" position="-0.15 -0.15 0"></a-circle>
+                <a-entity class="card-root" scale="0.001 0.001 0.001">
+                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat" class="clickable">
+                        <a-plane width="0.38" height="0.02" color="#ff4500" position="0 0.07 0.001"></a-plane>
+                        <a-text value="ENGINE" color="#ffb100" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
+                        <a-text value="199.5cc Liquid-Cooled\n24.5 PS @ 9750 RPM\n18.74 Nm Torque . 6-Speed" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
+                    </a-plane>
                 </a-entity>
             </a-entity>
 
-            <!-- CHASSIS / front wheel -->
-            <a-entity class="hotspot" data-delay="200" position="-0.35 -0.187 0.01">
-                <a-circle radius="0.012" color="#ff6a00" shader="flat"></a-circle>
-                <a-entity line="start: 0 0 0; end: -0.14 -0.16 0; color: #ff6a00"></a-entity>
-                <a-entity position="-0.14 -0.16 0" class="card-root">
-                    <a-plane width="0.34" height="0.15" color="#150800" opacity="0.92" shader="flat"></a-plane>
-                    <a-plane width="0.34" height="0.022" color="#ff6a00" position="0 0.064 0.001" shader="flat"></a-plane>
-                    <a-text value="CHASSIS" color="#ff6a00" align="center" width="1.0" position="0 0.048 0.002"></a-text>
-                    <a-text value="Dual Channel ABS\n300mm F . 230mm R Disc\n100/80-17 Front Tyre" color="#ffe9c2" align="center" width="0.62" position="0 -0.018 0.002"></a-text>
+            <!-- 2. CHASSIS & BRAKES (Mid Right - 90°) -->
+            <a-entity class="hotspot" position="0.58 0 0.02" data-delay="300">
+                <a-line start="-0.2 0 0" end="0 0 0" color="#ff4500" opacity="0.8"></a-line>
+                <a-circle radius="0.015" color="#ff4500" position="-0.2 0 0"></a-circle>
+                <a-entity class="card-root" scale="0.001 0.001 0.001">
+                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat">
+                        <a-plane width="0.38" height="0.02" color="#ffb100" position="0 0.07 0.001"></a-plane>
+                        <a-text value="CHASSIS & BRAKES" color="#ff4500" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
+                        <a-text value="Perimeter Frame\nDual Channel ABS\n300mm Front / 230mm Rear" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
+                    </a-plane>
                 </a-entity>
             </a-entity>
 
-            <!-- DIMENSIONS / rear wheel -->
-            <a-entity class="hotspot" data-delay="400" position="0.30 -0.187 0.01">
-                <a-circle radius="0.012" color="#ffb100" shader="flat"></a-circle>
-                <a-entity line="start: 0 0 0; end: 0.14 -0.16 0; color: #ffb100"></a-entity>
-                <a-entity position="0.14 -0.16 0" class="card-root">
-                    <a-plane width="0.34" height="0.15" color="#150800" opacity="0.92" shader="flat"></a-plane>
-                    <a-plane width="0.34" height="0.022" color="#ffb100" position="0 0.064 0.001" shader="flat"></a-plane>
-                    <a-text value="DIMENSIONS" color="#ffb100" align="center" width="1.0" position="0 0.048 0.002"></a-text>
-                    <a-text value="Wheelbase 1363mm\nGround Clear. 168mm\n130/70-17 Rear Tyre" color="#ffe9c2" align="center" width="0.62" position="0 -0.018 0.002"></a-text>
+            <!-- 3. DIMENSIONS (Bottom Right - 135°) -->
+            <a-entity class="hotspot" position="0.42 -0.42 0.02" data-delay="500">
+                <a-line start="-0.15 0.15 0" end="0 0 0" color="#ffb100" opacity="0.8"></a-line>
+                <a-circle radius="0.015" color="#ffb100" position="-0.15 0.15 0"></a-circle>
+                <a-entity class="card-root" scale="0.001 0.001 0.001">
+                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat">
+                        <a-plane width="0.38" height="0.02" color="#ff4500" position="0 0.07 0.001"></a-plane>
+                        <a-text value="DIMENSIONS" color="#ffb100" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
+                        <a-text value="Ground Clearance: 168mm\nWheelbase: 1363mm\nSeat Height: 805mm" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
+                    </a-plane>
                 </a-entity>
             </a-entity>
 
-            <!-- PERFORMANCE / fuel tank -->
-            <a-entity class="hotspot" data-delay="600" position="-0.12 0.10 0.01">
-                <a-circle radius="0.012" color="#ff6a00" shader="flat"></a-circle>
-                <a-entity line="start: 0 0 0; end: -0.20 0.13 0; color: #ff6a00"></a-entity>
-                <a-entity position="-0.20 0.13 0" class="card-root">
-                    <a-plane width="0.30" height="0.13" color="#150800" opacity="0.92" shader="flat"></a-plane>
-                    <a-plane width="0.30" height="0.022" color="#ff6a00" position="0 0.054 0.001" shader="flat"></a-plane>
-                    <a-text value="PERFORMANCE" color="#ff6a00" align="center" width="1.0" position="0 0.04 0.002"></a-text>
-                    <a-text value="12L Fuel Tank\nTop Speed ~130 km/h" color="#ffe9c2" align="center" width="0.62" position="0 -0.018 0.002"></a-text>
+            <!-- 4. SUSPENSION (Bottom Left - 225°) -->
+            <a-entity class="hotspot" position="-0.42 -0.42 0.02" data-delay="700">
+                <a-line start="0.15 0.15 0" end="0 0 0" color="#ff4500" opacity="0.8"></a-line>
+                <a-circle radius="0.015" color="#ff4500" position="0.15 0.15 0"></a-circle>
+                <a-entity class="card-root" scale="0.001 0.001 0.001">
+                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat">
+                        <a-plane width="0.38" height="0.02" color="#ffb100" position="0 0.07 0.001"></a-plane>
+                        <a-text value="SUSPENSION" color="#ff4500" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
+                        <a-text value="Front: Up Side Down Fork\nRear: Nitrox Monoshock\nwith Canister" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
+                    </a-plane>
                 </a-entity>
             </a-entity>
 
-            <!-- ELECTRONICS / headlight -->
-            <a-entity class="hotspot" data-delay="800" position="-0.40 0.067 0.01">
-                <a-circle radius="0.012" color="#ffb100" shader="flat"></a-circle>
-                <a-entity line="start: 0 0 0; end: -0.20 0.15 0; color: #ffb100"></a-entity>
-                <a-entity position="-0.20 0.15 0" class="card-root">
-                    <a-plane width="0.30" height="0.13" color="#150800" opacity="0.92" shader="flat"></a-plane>
-                    <a-plane width="0.30" height="0.022" color="#ffb100" position="0 0.054 0.001" shader="flat"></a-plane>
-                    <a-text value="ELECTRONICS" color="#ffb100" align="center" width="1.0" position="0 0.04 0.002"></a-text>
-                    <a-text value="Full LCD Console\nFull-LED Lighting" color="#ffe9c2" align="center" width="0.62" position="0 -0.018 0.002"></a-text>
+            <!-- 5. TYRES & FUEL (Mid Left - 270°) -->
+            <a-entity class="hotspot" position="-0.58 0 0.02" data-delay="900">
+                <a-line start="0.2 0 0" end="0 0 0" color="#ffb100" opacity="0.8"></a-line>
+                <a-circle radius="0.015" color="#ffb100" position="0.2 0 0"></a-circle>
+                <a-entity class="card-root" scale="0.001 0.001 0.001">
+                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat">
+                        <a-plane width="0.38" height="0.02" color="#ff4500" position="0 0.07 0.001"></a-plane>
+                        <a-text value="TYRES & FUEL" color="#ffb100" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
+                        <a-text value="100/80-17 Tubeless Front\n130/70-17 Tubeless Rear\n12 Liters Fuel Tank Capacity" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
+                    </a-plane>
                 </a-entity>
             </a-entity>
 
-            <!-- WEIGHT / seat & tail -->
-            <a-entity class="hotspot" data-delay="1000" position="0.30 0.067 0.01">
-                <a-circle radius="0.012" color="#ff6a00" shader="flat"></a-circle>
-                <a-entity line="start: 0 0 0; end: 0.20 0.15 0; color: #ff6a00"></a-entity>
-                <a-entity position="0.20 0.15 0" class="card-root">
-                    <a-plane width="0.28" height="0.11" color="#150800" opacity="0.92" shader="flat"></a-plane>
-                    <a-plane width="0.28" height="0.022" color="#ff6a00" position="0 0.044 0.001" shader="flat"></a-plane>
-                    <a-text value="WEIGHT" color="#ff6a00" align="center" width="1.0" position="0 0.03 0.002"></a-text>
-                    <a-text value="Kerb Weight 158 kg" color="#ffe9c2" align="center" width="0.62" position="0 -0.014 0.002"></a-text>
+            <!-- 6. CONSOLE (Top Left - 315°) -->
+            <a-entity class="hotspot" position="-0.42 0.42 0.02" data-delay="1100">
+                <a-line start="0.15 -0.15 0" end="0 0 0" color="#ff4500" opacity="0.8"></a-line>
+                <a-circle radius="0.015" color="#ff4500" position="0.15 -0.15 0"></a-circle>
+                <a-entity class="card-root" scale="0.001 0.001 0.001">
+                    <a-plane width="0.38" height="0.16" color="#0a0401" opacity="0.95" shader="flat">
+                        <a-plane width="0.38" height="0.02" color="#ffb100" position="0 0.07 0.001"></a-plane>
+                        <a-text value="CONSOLE & LIGHTS" color="#ff4500" align="center" width="1.1" position="0 0.05 0.002" font="exo2bold"></a-text>
+                        <a-text value="Full LCD Digital Console\nDistance-to-Empty Indicator\nAggressive LED Headlamp" color="#fff" align="center" width="0.75" position="0 -0.02 0.002"></a-text>
+                    </a-plane>
                 </a-entity>
             </a-entity>
 
@@ -226,133 +215,76 @@
         const activateBtn = document.querySelector('#activate-btn');
         const overlay = document.querySelector('#start-overlay');
         const statusTxt = document.querySelector('#status-txt');
-        const statusSub = document.querySelector('#status-sub');
         const scanHint = document.querySelector('#scan-hint');
         const topBar = document.querySelector('#top-bar');
         const anchor = document.querySelector('#bike-anchor');
         const hotspots = document.querySelectorAll('.hotspot');
-        const idBadge = document.querySelector('#id-badge');
-        const sonarPing = document.querySelector('#sonar-ping');
-        const diagBanner = document.querySelector('#diag-banner');
 
-        function showDiag(msg) {
-            diagBanner.innerText = msg;
-            diagBanner.style.display = 'block';
-        }
-        function hideDiag() { diagBanner.style.display = 'none'; }
-
-        // Catch the #1 cause of "nothing happens": targets.mind missing or wrong path.
-        // MindAR fails silently otherwise, so check for it up front.
-        fetch('./targets.mind', { method: 'HEAD' }).then(res => {
-            if (!res.ok) throw new Error('not ok');
-        }).catch(() => {
-            showDiag('⚠ targets.mind not found next to this HTML file. Compile it at hiukim.github.io/mind-ar-js-doc/tools/compile using pulsar-marker-image.png, then place targets.mind in this same folder.');
-        });
-
-        // ambient ember particles on the start screen
-        (function spawnParticles(){
+        // Spawn ambient embers
+        (function initSparks(){
             const field = document.querySelector('#particle-field');
-            if (!field) return;
-            for (let i = 0; i < 22; i++) {
-                const p = document.createElement('div');
-                p.className = 'spark';
-                p.style.left = (Math.random() * 100) + '%';
-                const size = 2 + Math.random() * 3;
-                p.style.width = size + 'px';
-                p.style.height = size + 'px';
-                p.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
-                p.style.animationDuration = (4 + Math.random() * 5) + 's';
-                p.style.animationDelay = (Math.random() * 6) + 's';
-                if (Math.random() > 0.5) p.style.background = '#ff6a00';
-                field.appendChild(p);
+            for (let i = 0; i < 30; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'spark';
+                spark.style.left = (Math.random() * 100) + '%';
+                spark.style.animationDuration = (2 + Math.random() * 4) + 's';
+                spark.style.animationDelay = (Math.random() * 3) + 's';
+                if(Math.random() > 0.5) spark.style.background = '#ffb100';
+                field.appendChild(spark);
             }
         })();
 
-        // hide all cards + badge until the target is found
-        function resetHotspots() {
+        // Staggered Elastic Pop-in Animation
+        function animateCardsIn() {
             hotspots.forEach(h => {
                 const card = h.querySelector('.card-root');
-                if (card) card.setAttribute('scale', '0.001 0.001 0.001');
-            });
-            if (idBadge) {
-                idBadge.removeAttribute('animation__spinin');
-                idBadge.setAttribute('scale', '0.001 0.001 0.001');
-                idBadge.setAttribute('rotation', '0 180 0');
-            }
-        }
-        function revealHotspots() {
-            // Badge spin-materializes first: rotates a full turn while popping up to size
-            if (idBadge) {
-                idBadge.setAttribute('animation__spinin', {
-                    property: 'scale', from: '0.001 0.001 0.001', to: '1 1 1',
-                    dur: 700, easing: 'easeOutElastic'
-                });
-                idBadge.setAttribute('animation__spinrot', {
-                    property: 'rotation', from: '0 180 0', to: '0 0 0',
-                    dur: 700, easing: 'easeOutCubic'
-                });
-            }
-            if (sonarPing) {
-                sonarPing.setAttribute('animation__pscale', {
-                    property: 'scale', from: '0.3 0.3 0.3', to: '2.6 2.6 2.6',
-                    dur: 1200, easing: 'easeOutQuad'
-                });
-                sonarPing.setAttribute('animation__pfade', {
-                    property: 'material.opacity', from: '0.9', to: '0',
-                    dur: 1200, easing: 'easeOutQuad'
-                });
-            }
-            // spec cards pop in staggered, after the badge
-            hotspots.forEach(h => {
-                const card = h.querySelector('.card-root');
-                const delay = 700 + parseInt(h.getAttribute('data-delay') || '0', 10);
+                const delay = parseInt(h.getAttribute('data-delay'));
                 if (card) {
                     card.setAttribute('animation', {
                         property: 'scale', from: '0.001 0.001 0.001', to: '1 1 1',
-                        dur: 500, delay, easing: 'easeOutElastic'
+                        dur: 800, delay: delay, easing: 'easeOutElastic'
                     });
                 }
             });
         }
-        resetHotspots();
 
+        function hideCards() {
+            hotspots.forEach(h => {
+                const card = h.querySelector('.card-root');
+                if (card) card.setAttribute('scale', '0.001 0.001 0.001');
+            });
+        }
+
+        // Camera Activation and Start AR
         activateBtn.addEventListener('click', async () => {
             activateBtn.disabled = true;
-            statusTxt.innerText = "REQUESTING CAMERA...";
+            statusTxt.innerText = "ACCESSING SMARTPHONE CAMERA...";
             try {
                 if (!sceneEl.hasLoaded) {
                     await new Promise(resolve => sceneEl.addEventListener('loaded', resolve, { once: true }));
                 }
                 await sceneEl.systems['mindar-image-system'].start();
                 overlay.style.opacity = '0';
-                setTimeout(() => { overlay.style.display = 'none'; }, 500);
+                setTimeout(() => { overlay.style.display = 'none'; }, 600);
                 scanHint.style.opacity = '1';
-                topBar.style.opacity = '1';
             } catch (err) {
                 console.error(err);
-                statusTxt.innerText = "ERROR: CAMERA NOT AVAILABLE";
+                statusTxt.innerText = "CAMERA ERROR: PLEASE ALLOW ACCESS";
                 activateBtn.disabled = false;
-                statusSub.innerText = "Needs camera permission over HTTPS (or localhost). Please allow camera access and try again.";
-                showDiag('⚠ ' + (err && err.message ? err.message : 'Could not start the AR camera session.'));
             }
         });
 
-        // Any deeper MindAR failure (e.g. a corrupt/incompatible targets.mind) surfaces here
-        // instead of just leaving you staring at an unresponsive camera feed.
-        sceneEl.addEventListener('arError', (e) => {
-            console.error('MindAR error:', e.detail);
-            showDiag('⚠ AR engine error: ' + (e.detail && e.detail.error ? e.detail.error : 'failed to load targets.mind — recompile it and make sure the filename/path matches exactly.'));
+        // Target Recognition Events
+        anchor.addEventListener('targetFound', () => {
+            scanHint.style.opacity = '0';
+            topBar.style.opacity = '1'; // Show animated Bajaj Pulsar Title
+            animateCardsIn();
         });
 
-        // MindAR fires these on the anchor entity
-        anchor.addEventListener('targetFound', () => {
-            hideDiag();
-            scanHint.innerHTML = '<span class="hint-dot"></span>LOCKED — SHOWING LIVE SPECS';
-            revealHotspots();
-        });
         anchor.addEventListener('targetLost', () => {
-            scanHint.innerHTML = '<span class="hint-dot"></span>POINT CAMERA AT THE BIKE PHOTO';
-            resetHotspots();
+            scanHint.style.opacity = '1';
+            topBar.style.opacity = '0'; // Hide title
+            hideCards();
         });
     </script>
 </body>
