@@ -225,29 +225,53 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     brandTitleEntity.appendChild(brandAccentBottom);
     brandTitleEntity.appendChild(brandText);
 
-    // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA
+    // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA — TRUE 360° SPHERE LAYOUT
     const cardsData = backendJsonData.arSeparateCards;
     const totalCards = cardsData.length;
-    const radius = 0.72; // Distance from center object
+    const radius = 0.85; // Distance from center object (sphere radius)
 
     // Distinct accent colors per card, cycling through the brand + telemetry palette
     const accentPalette = ['#ff4b12', '#00e0ff', '#ffb400', '#ff4b12', '#00e0ff', '#ffb400'];
 
+    // Fibonacci-sphere distribution so text spreads evenly in ALL directions
+    // around the object (up, down, sides, diagonals) — matching a true 3D 360° burst.
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+
     cardsData.forEach((card, index) => {
-      // Calculate angular distribution symmetrically (360 degrees division)
-      const angle = (index / totalCards) * Math.PI * 2;
-      const posX = Math.cos(angle) * radius;
-      const posY = Math.sin(angle) * radius;
+      const t = totalCards > 1 ? index / (totalCards - 1) : 0;
+      const yUnit = 1 - t * 2;                       // top(+1) -> bottom(-1)
+      const ringRadius = Math.sqrt(Math.max(0, 1 - yUnit * yUnit));
+      const theta = goldenAngle * index;
+
+      const dirX = Math.cos(theta) * ringRadius;
+      const dirY = yUnit;
+      const dirZ = Math.sin(theta) * ringRadius;
+
+      const posX = dirX * radius;
+      const posY = dirY * radius;
+      const posZ = dirZ * radius;
       const accent = accentPalette[index % accentPalette.length];
+
+      // Leader line from the object center out to this card (like the arrows in the sketch)
+      const leaderLine = document.createElement('a-entity');
+      leaderLine.setAttribute('line', `start: 0 0 0; end: ${posX} ${posY} ${posZ}; color: ${accent}; opacity: 0.55`);
+      specsContainer.appendChild(leaderLine);
+
+      // Small node dot where the line meets the object surface
+      const nodeDot = document.createElement('a-circle');
+      nodeDot.setAttribute('radius', '0.012');
+      nodeDot.setAttribute('color', accent);
+      nodeDot.setAttribute('position', `${dirX * radius * 0.62} ${dirY * radius * 0.62} ${dirZ * radius * 0.62}`);
+      nodeDot.setAttribute('material', 'shader: flat');
+      specsContainer.appendChild(nodeDot);
 
       // Outer Card Component Group
       const cardEntity = document.createElement('a-entity');
       cardEntity.setAttribute('class', 'spec-card');
-      cardEntity.setAttribute('position', `${posX} ${posY} 0.15`);
+      cardEntity.setAttribute('position', `${posX} ${posY} ${posZ}`);
 
-      // Make each individual card face forward towards its angle position naturally
-      const angleDegrees = (angle * 180) / Math.PI;
-      cardEntity.setAttribute('rotation', `0 0 ${angleDegrees - 90}`);
+      // Card always faces outward, away from the object (front side toward the viewer)
+      cardEntity.setAttribute('look-at', '0 0 0');
 
       // Soft glow backdrop (slightly larger, low opacity, accent tinted)
       const glowPlane = document.createElement('a-plane');
@@ -329,30 +353,43 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     autoSpin();
   });
 
-  // Smooth Interactive Touch/Drag Orbit System
-  const startDrag = (clientX) => { isDragging = true; previousMousePosition.x = clientX; };
-  const updateDrag = (clientX) => {
+  // Smooth Interactive Touch/Drag Orbit System — TRUE 3D SPHERE ORBIT
+  // Horizontal drag rotates around Y (spin left/right), vertical drag rotates around X (tilt up/down)
+  let previousMousePositionFull = { x: 0, y: 0 };
+  const startDrag = (clientX, clientY) => { isDragging = true; previousMousePositionFull.x = clientX; previousMousePositionFull.y = clientY; };
+  const updateDrag = (clientX, clientY) => {
     if (!isDragging || !targetTracked) return;
-    const deltaX = clientX - previousMousePosition.x;
+    const deltaX = clientX - previousMousePositionFull.x;
+    const deltaY = clientY - previousMousePositionFull.y;
     const currentRotation = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
-    specsContainer.setAttribute('rotation', { x: currentRotation.x, y: currentRotation.y, z: currentRotation.z + deltaX * 0.4 });
-    previousMousePosition.x = clientX;
+    specsContainer.setAttribute('rotation', {
+      x: currentRotation.x - deltaY * 0.4,
+      y: currentRotation.y + deltaX * 0.4,
+      z: currentRotation.z
+    });
+    previousMousePositionFull.x = clientX;
+    previousMousePositionFull.y = clientY;
   };
   const endDrag = () => { isDragging = false; };
 
-  window.addEventListener('mousedown', (e) => startDrag(e.clientX));
-  window.addEventListener('mousemove', (e) => updateDrag(e.clientX));
+  window.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+  window.addEventListener('mousemove', (e) => updateDrag(e.clientX, e.clientY));
   window.addEventListener('mouseup', endDrag);
-  window.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientX); });
-  window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientX); });
+  window.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY); });
+  window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientX, e.touches[0].clientY); });
   window.addEventListener('touchend', endDrag);
 
-  // Auto Orbit Engine Control
+  // Auto Orbit Engine Control — slow tumble on two axes so every card drifts
+  // through view over time, giving a genuine 360° 3D feel around the object.
   function autoSpin() {
     requestAnimationFrame(autoSpin);
     if (!isDragging && targetTracked) {
       const currentRot = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
-      specsContainer.setAttribute('rotation', { x: currentRot.x, y: currentRot.y, z: currentRot.z + 0.2 });
+      specsContainer.setAttribute('rotation', {
+        x: currentRot.x + 0.08,
+        y: currentRot.y + 0.22,
+        z: currentRot.z
+      });
     }
   }
 
