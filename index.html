@@ -250,9 +250,10 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       const posZ = Math.cos(angle) * ringRadius;
       const accent = accentPalette[index % accentPalette.length];
 
-      // Leader line from the object center out to this card (like the arrows in the sketch)
+      // Leader line from the object center out to this card (stops just short of the
+      // card face so it never pokes through / z-fights with the glass panel while spinning)
       const leaderLine = document.createElement('a-entity');
-      leaderLine.setAttribute('line', `start: 0 0 0; end: ${posX} ${posY} ${posZ}; color: ${accent}; opacity: 0.55`);
+      leaderLine.setAttribute('line', `start: 0 0 0; end: ${posX * 0.9} ${posY * 0.9} ${posZ * 0.9}; color: ${accent}; opacity: 0.5`);
       specsContainer.appendChild(leaderLine);
 
       // Small node dot where the line meets the object surface
@@ -271,68 +272,99 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       // Card always faces outward, away from the object (front side toward the viewer)
       cardEntity.setAttribute('look-at', '0 0 0');
 
-      // Soft glow backdrop (slightly larger, low opacity, accent tinted)
-      const glowPlane = document.createElement('a-plane');
-      glowPlane.setAttribute('width', '0.52');
-      glowPlane.setAttribute('height', '0.24');
-      glowPlane.setAttribute('color', accent);
-      glowPlane.setAttribute('opacity', '0.16');
-      glowPlane.setAttribute('material', 'transparent: true; side: double; shader: flat');
-      glowPlane.setAttribute('position', '0 0 -0.004');
+      // GLASS TAG — built as two real, independent faces (front + back, 180° apart)
+      // instead of one double-sided plane. This is what actually keeps the text
+      // crisp and correctly readable (not mirrored/glitchy) no matter which side
+      // of the ring is currently facing the camera as it spins past.
+      const buildGlassFace = (rotY) => {
+        const face = document.createElement('a-entity');
+        face.setAttribute('rotation', `0 ${rotY} 0`);
 
-      // Futuristic Background Plane for readability
-      const bgPlane = document.createElement('a-plane');
-      bgPlane.setAttribute('width', '0.46');
-      bgPlane.setAttribute('height', '0.2');
-      bgPlane.setAttribute('color', '#0e0e10');
-      bgPlane.setAttribute('opacity', '0.9');
-      bgPlane.setAttribute('material', 'transparent: true; side: double; shader: flat');
+        // Soft accent bloom behind the glass
+        const glow = document.createElement('a-plane');
+        glow.setAttribute('width', '0.54');
+        glow.setAttribute('height', '0.26');
+        glow.setAttribute('color', accent);
+        glow.setAttribute('opacity', '0.15');
+        glow.setAttribute('material', 'transparent: true; shader: flat; side: front');
+        glow.setAttribute('position', '0 0 -0.006');
+        face.appendChild(glow);
 
-      // Card Frame Border (top/bottom accent lines + full outline)
-      const outline = document.createElement('a-entity');
-      outline.setAttribute('line', `start: -0.23 0.1 0.002; end: 0.23 0.1 0.002; color: ${accent}`);
-      const outlineBottom = document.createElement('a-entity');
-      outlineBottom.setAttribute('line', `start: -0.23 -0.1 0.002; end: 0.23 -0.1 0.002; color: ${accent}`);
-      const outlineLeft = document.createElement('a-entity');
-      outlineLeft.setAttribute('line', `start: -0.23 -0.1 0.002; end: -0.23 0.1 0.002; color: ${accent}`);
-      const outlineRight = document.createElement('a-entity');
-      outlineRight.setAttribute('line', `start: 0.23 -0.1 0.002; end: 0.23 0.1 0.002; color: ${accent}`);
+        // Frosted glass tint
+        const glass = document.createElement('a-plane');
+        glass.setAttribute('width', '0.46');
+        glass.setAttribute('height', '0.2');
+        glass.setAttribute('color', '#dbe7ee');
+        glass.setAttribute('opacity', '0.12');
+        glass.setAttribute('material', 'transparent: true; shader: flat; side: front');
+        glass.setAttribute('position', '0 0 -0.003');
+        face.appendChild(glass);
 
-      // Small accent dot / chip in top-left corner for a "telemetry" feel
-      const chip = document.createElement('a-circle');
-      chip.setAttribute('radius', '0.012');
-      chip.setAttribute('color', accent);
-      chip.setAttribute('position', '-0.19 0.075 0.003');
+        // Dark backing so the text keeps contrast through the "glass"
+        const tint = document.createElement('a-plane');
+        tint.setAttribute('width', '0.46');
+        tint.setAttribute('height', '0.2');
+        tint.setAttribute('color', '#05070a');
+        tint.setAttribute('opacity', '0.45');
+        tint.setAttribute('material', 'transparent: true; shader: flat; side: front');
+        tint.setAttribute('position', '0 0 -0.0015');
+        face.appendChild(tint);
 
-      // Header Text inside Card
-      const titleText = document.createElement('a-text');
-      titleText.setAttribute('value', card.title);
-      titleText.setAttribute('color', accent);
-      titleText.setAttribute('align', 'center');
-      titleText.setAttribute('position', '0 0.045 0.01');
-      titleText.setAttribute('width', '0.85');
-      titleText.setAttribute('font', 'roboto');
-      titleText.setAttribute('letter-spacing', '1');
+        // Glass shine sliver near the top edge
+        const shine = document.createElement('a-plane');
+        shine.setAttribute('width', '0.4');
+        shine.setAttribute('height', '0.04');
+        shine.setAttribute('color', '#ffffff');
+        shine.setAttribute('opacity', '0.12');
+        shine.setAttribute('material', 'transparent: true; shader: flat; side: front');
+        shine.setAttribute('position', '0 0.072 0.0005');
+        face.appendChild(shine);
 
-      // Description Text inside Card
-      const descText = document.createElement('a-text');
-      descText.setAttribute('value', card.desc);
-      descText.setAttribute('color', '#f3efe6');
-      descText.setAttribute('align', 'center');
-      descText.setAttribute('position', '0 -0.035 0.01');
-      descText.setAttribute('width', '0.68');
-      descText.setAttribute('font', 'roboto');
+        // Thin accent frame
+        const mkLine = (x1, y1, x2, y2) => {
+          const l = document.createElement('a-entity');
+          l.setAttribute('line', `start: ${x1} ${y1} 0.003; end: ${x2} ${y2} 0.003; color: ${accent}; opacity: 0.85`);
+          return l;
+        };
+        face.appendChild(mkLine(-0.21, 0.1, 0.21, 0.1));
+        face.appendChild(mkLine(-0.21, -0.1, 0.21, -0.1));
+        face.appendChild(mkLine(-0.23, -0.08, -0.23, 0.08));
+        face.appendChild(mkLine(0.23, -0.08, 0.23, 0.08));
 
-      // Assemble Entities
-      cardEntity.appendChild(glowPlane);
-      cardEntity.appendChild(bgPlane);
-      cardEntity.appendChild(outline);
-      cardEntity.appendChild(outlineBottom);
-      cardEntity.appendChild(outlineLeft);
-      cardEntity.appendChild(outlineRight);
-      cardEntity.appendChild(chip);
-      cardEntity.appendChild(titleText);
-      cardEntity.appendChild(descText);
+        // Telemetry accent chip
+        const chip = document.createElement('a-circle');
+        chip.setAttribute('radius', '0.011');
+        chip.setAttribute('color', accent);
+        chip.setAttribute('position', '-0.185 0.075 0.004');
+        chip.setAttribute('material', 'shader: flat');
+        face.appendChild(chip);
+
+        // Header Text
+        const titleText = document.createElement('a-text');
+        titleText.setAttribute('value', card.title);
+        titleText.setAttribute('color', accent);
+        titleText.setAttribute('align', 'center');
+        titleText.setAttribute('position', '0 0.045 0.006');
+        titleText.setAttribute('width', '0.85');
+        titleText.setAttribute('font', 'roboto');
+        titleText.setAttribute('letter-spacing', '1');
+        face.appendChild(titleText);
+
+        // Description Text
+        const descText = document.createElement('a-text');
+        descText.setAttribute('value', card.desc);
+        descText.setAttribute('color', '#f3efe6');
+        descText.setAttribute('align', 'center');
+        descText.setAttribute('position', '0 -0.035 0.006');
+        descText.setAttribute('width', '0.68');
+        descText.setAttribute('font', 'roboto');
+        face.appendChild(descText);
+
+        return face;
+      };
+
+      cardEntity.appendChild(buildGlassFace(0));    // front face — reads correctly toward the outside
+      cardEntity.appendChild(buildGlassFace(180));  // back face — reads correctly from the opposite side
       specsContainer.appendChild(cardEntity);
     });
 
