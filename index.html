@@ -225,31 +225,24 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     brandTitleEntity.appendChild(brandAccentBottom);
     brandTitleEntity.appendChild(brandText);
 
-    // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA — TRUE 360° SPHERE LAYOUT
+    // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA — 360° RING AROUND THE X-AXIS
+    // The object sits at the center, cards form a ring in the Y-Z plane and the
+    // whole ring spins around the X-axis (like a vertical carousel/wheel).
+    // The "BAJAJ PULSAR NS" title stays fixed on its own entity — it never rotates.
     const cardsData = backendJsonData.arSeparateCards;
     const totalCards = cardsData.length;
-    const radius = 0.85; // Distance from center object (sphere radius)
+    const radius = 0.85; // Distance from center object (ring radius)
 
     // Distinct accent colors per card, cycling through the brand + telemetry palette
     const accentPalette = ['#ff4b12', '#00e0ff', '#ffb400', '#ff4b12', '#00e0ff', '#ffb400'];
 
-    // Fibonacci-sphere distribution so text spreads evenly in ALL directions
-    // around the object (up, down, sides, diagonals) — matching a true 3D 360° burst.
-    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-
     cardsData.forEach((card, index) => {
-      const t = totalCards > 1 ? index / (totalCards - 1) : 0;
-      const yUnit = 1 - t * 2;                       // top(+1) -> bottom(-1)
-      const ringRadius = Math.sqrt(Math.max(0, 1 - yUnit * yUnit));
-      const theta = goldenAngle * index;
+      // Even angular spread around the X-axis (0° to 360°)
+      const angle = (index / totalCards) * Math.PI * 2;
 
-      const dirX = Math.cos(theta) * ringRadius;
-      const dirY = yUnit;
-      const dirZ = Math.sin(theta) * ringRadius;
-
-      const posX = dirX * radius;
-      const posY = dirY * radius;
-      const posZ = dirZ * radius;
+      const posX = 0;
+      const posY = Math.cos(angle) * radius;
+      const posZ = Math.sin(angle) * radius;
       const accent = accentPalette[index % accentPalette.length];
 
       // Leader line from the object center out to this card (like the arrows in the sketch)
@@ -261,7 +254,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       const nodeDot = document.createElement('a-circle');
       nodeDot.setAttribute('radius', '0.012');
       nodeDot.setAttribute('color', accent);
-      nodeDot.setAttribute('position', `${dirX * radius * 0.62} ${dirY * radius * 0.62} ${dirZ * radius * 0.62}`);
+      nodeDot.setAttribute('position', `${posX * 0.62} ${posY * 0.62} ${posZ * 0.62}`);
       nodeDot.setAttribute('material', 'shader: flat');
       specsContainer.appendChild(nodeDot);
 
@@ -353,41 +346,41 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     autoSpin();
   });
 
-  // Smooth Interactive Touch/Drag Orbit System — TRUE 3D SPHERE ORBIT
-  // Horizontal drag rotates around Y (spin left/right), vertical drag rotates around X (tilt up/down)
-  let previousMousePositionFull = { x: 0, y: 0 };
-  const startDrag = (clientX, clientY) => { isDragging = true; previousMousePositionFull.x = clientX; previousMousePositionFull.y = clientY; };
-  const updateDrag = (clientX, clientY) => {
+  // Smooth Interactive Touch/Drag Orbit System — RING SPINS ONLY ON THE X-AXIS
+  // Vertical drag (up/down swipe) spins the carousel, like turning a wheel.
+  // The BAJAJ PULSAR NS title lives on its own fixed entity and is never touched here.
+  let previousMousePositionFull = { y: 0 };
+  const startDrag = (clientY) => { isDragging = true; previousMousePositionFull.y = clientY; };
+  const updateDrag = (clientY) => {
     if (!isDragging || !targetTracked) return;
-    const deltaX = clientX - previousMousePositionFull.x;
     const deltaY = clientY - previousMousePositionFull.y;
     const currentRotation = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
     specsContainer.setAttribute('rotation', {
       x: currentRotation.x - deltaY * 0.4,
-      y: currentRotation.y + deltaX * 0.4,
+      y: currentRotation.y,
       z: currentRotation.z
     });
-    previousMousePositionFull.x = clientX;
     previousMousePositionFull.y = clientY;
   };
   const endDrag = () => { isDragging = false; };
 
-  window.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
-  window.addEventListener('mousemove', (e) => updateDrag(e.clientX, e.clientY));
+  window.addEventListener('mousedown', (e) => startDrag(e.clientY));
+  window.addEventListener('mousemove', (e) => updateDrag(e.clientY));
   window.addEventListener('mouseup', endDrag);
-  window.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY); });
-  window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientX, e.touches[0].clientY); });
+  window.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientY); });
+  window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientY); });
   window.addEventListener('touchend', endDrag);
 
-  // Auto Orbit Engine Control — slow tumble on two axes so every card drifts
-  // through view over time, giving a genuine 360° 3D feel around the object.
+  // Auto Orbit Engine Control — steady spin purely around the X-axis,
+  // so the ring of specs continuously cycles past the front of the object
+  // while the brand title above stays perfectly still.
   function autoSpin() {
     requestAnimationFrame(autoSpin);
     if (!isDragging && targetTracked) {
       const currentRot = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
       specsContainer.setAttribute('rotation', {
-        x: currentRot.x + 0.08,
-        y: currentRot.y + 0.22,
+        x: currentRot.x + 0.25,
+        y: currentRot.y,
         z: currentRot.z
       });
     }
