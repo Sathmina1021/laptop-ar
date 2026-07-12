@@ -251,26 +251,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     brandTitleEntity.appendChild(brandAccentBottom);
     brandTitleEntity.appendChild(brandText);
 
-    // AMBIENT STAGE GLOW — soft concentric rings beneath/around the object,
-    // like a product spotlight, so the whole scene reads as a polished showcase.
-    const stageGlowEntity = document.createElement('a-entity');
-    stageGlowEntity.setAttribute('position', '0 0 -0.02');
-    stageGlowEntity.setAttribute('rotation', '-90 0 0');
-    [
-      { r: 0.95, o: 0.05 },
-      { r: 0.75, o: 0.07 },
-      { r: 0.55, o: 0.09 }
-    ].forEach(ring => {
-      const glowRing = document.createElement('a-ring');
-      glowRing.setAttribute('color', '#00e0ff');
-      glowRing.setAttribute('radius-inner', (ring.r - 0.01).toString());
-      glowRing.setAttribute('radius-outer', ring.r.toString());
-      glowRing.setAttribute('opacity', ring.o.toString());
-      glowRing.setAttribute('material', 'shader: flat; transparent: true; side: double');
-      stageGlowEntity.appendChild(glowRing);
-    });
-    document.getElementById('target-anchor').appendChild(stageGlowEntity);
-
     // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA — 360° HELIX AROUND THE OBJECT
     // Cards are spread around a horizontal circle (X-Z plane) AND staggered in
     // height (Y) so no two cards ever line up in front of each other on screen.
@@ -304,12 +284,13 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       leaderLine.setAttribute('line', `start: 0 0 0; end: ${posX * 0.9} ${posY * 0.9} ${posZ * 0.9}; color: ${accent}; opacity: 0.5`);
       specsContainer.appendChild(leaderLine);
 
-      // Small node dot where the line meets the object surface
+      // Small node dot where the line meets the object surface — soft pulse for a modern, alive feel
       const nodeDot = document.createElement('a-circle');
       nodeDot.setAttribute('radius', '0.012');
       nodeDot.setAttribute('color', accent);
       nodeDot.setAttribute('position', `${posX * 0.62} ${posY * 0.62} ${posZ * 0.62}`);
       nodeDot.setAttribute('material', 'shader: flat');
+      nodeDot.setAttribute('animation', 'property: scale; dir: alternate; dur: 1100; easing: easeInOutSine; loop: true; to: 1.5 1.5 1.5');
       specsContainer.appendChild(nodeDot);
 
       // Outer Card Component Group
@@ -319,6 +300,10 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
       // Card always faces outward, away from the object (front side toward the viewer)
       cardEntity.setAttribute('look-at', '0 0 0');
+
+      // Gentle staggered float — each card bobs slightly out of sync with the others
+      // for a lively, modern feel (no bulky shapes, just subtle motion).
+      cardEntity.setAttribute('animation__bob', `property: position; dir: alternate; dur: ${2200 + index * 180}; easing: easeInOutSine; loop: true; to: ${posX} ${posY + 0.035} ${posZ}`);
 
       // GLASS TAG — built as two real, independent faces (front + back, 180° apart)
       // instead of one double-sided plane. This is what actually keeps the text
