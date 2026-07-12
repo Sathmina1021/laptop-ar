@@ -225,24 +225,31 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     brandTitleEntity.appendChild(brandAccentBottom);
     brandTitleEntity.appendChild(brandText);
 
-    // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA — 360° RING AROUND THE X-AXIS
-    // The object sits at the center, cards form a ring in the Y-Z plane and the
-    // whole ring spins around the X-axis (like a vertical carousel/wheel).
-    // The "BAJAJ PULSAR NS" title stays fixed on its own entity — it never rotates.
+    // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA — 360° HELIX AROUND THE OBJECT
+    // Cards are spread around a horizontal circle (X-Z plane) AND staggered in
+    // height (Y) so no two cards ever line up in front of each other on screen.
+    // The whole ring spins around the Y-axis — like a turntable circling the bike —
+    // which is what actually reads as "cards orbiting 360° around the object" to the eye.
+    // The "BAJAJ PULSAR NS" title lives on its own fixed entity and never rotates.
     const cardsData = backendJsonData.arSeparateCards;
     const totalCards = cardsData.length;
-    const radius = 0.85; // Distance from center object (ring radius)
+    const ringRadius = 0.75;     // how far out the ring sits from the object
+    const heightSpan = 0.95;     // total vertical spread of the helix (top card to bottom card)
 
     // Distinct accent colors per card, cycling through the brand + telemetry palette
     const accentPalette = ['#ff4b12', '#00e0ff', '#ffb400', '#ff4b12', '#00e0ff', '#ffb400'];
 
     cardsData.forEach((card, index) => {
-      // Even angular spread around the X-axis (0° to 360°)
+      // Even angular spread all the way around (0° to 360°)
       const angle = (index / totalCards) * Math.PI * 2;
 
-      const posX = 0;
-      const posY = Math.cos(angle) * radius;
-      const posZ = Math.sin(angle) * radius;
+      // Height staggers from top to bottom across the set of cards so, even when
+      // the ring spins, each card keeps its own vertical "lane" and never overlaps another.
+      const t = totalCards > 1 ? index / (totalCards - 1) : 0.5;
+      const posY = (0.5 - t) * heightSpan;
+
+      const posX = Math.sin(angle) * ringRadius;
+      const posZ = Math.cos(angle) * ringRadius;
       const accent = accentPalette[index % accentPalette.length];
 
       // Leader line from the object center out to this card (like the arrows in the sketch)
@@ -346,41 +353,41 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     autoSpin();
   });
 
-  // Smooth Interactive Touch/Drag Orbit System — RING SPINS ONLY ON THE X-AXIS
-  // Vertical drag (up/down swipe) spins the carousel, like turning a wheel.
-  // The BAJAJ PULSAR NS title lives on its own fixed entity and is never touched here.
-  let previousMousePositionFull = { y: 0 };
-  const startDrag = (clientY) => { isDragging = true; previousMousePositionFull.y = clientY; };
-  const updateDrag = (clientY) => {
+  // Smooth Interactive Touch/Drag Orbit System — RING SPINS ON THE Y-AXIS (TURNTABLE)
+  // Horizontal drag (left/right swipe) spins the ring around the object, like turning
+  // a turntable. The BAJAJ PULSAR NS title lives on its own fixed entity and is untouched.
+  let previousMousePositionFull = { x: 0 };
+  const startDrag = (clientX) => { isDragging = true; previousMousePositionFull.x = clientX; };
+  const updateDrag = (clientX) => {
     if (!isDragging || !targetTracked) return;
-    const deltaY = clientY - previousMousePositionFull.y;
+    const deltaX = clientX - previousMousePositionFull.x;
     const currentRotation = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
     specsContainer.setAttribute('rotation', {
-      x: currentRotation.x - deltaY * 0.4,
-      y: currentRotation.y,
+      x: currentRotation.x,
+      y: currentRotation.y + deltaX * 0.4,
       z: currentRotation.z
     });
-    previousMousePositionFull.y = clientY;
+    previousMousePositionFull.x = clientX;
   };
   const endDrag = () => { isDragging = false; };
 
-  window.addEventListener('mousedown', (e) => startDrag(e.clientY));
-  window.addEventListener('mousemove', (e) => updateDrag(e.clientY));
+  window.addEventListener('mousedown', (e) => startDrag(e.clientX));
+  window.addEventListener('mousemove', (e) => updateDrag(e.clientX));
   window.addEventListener('mouseup', endDrag);
-  window.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientY); });
-  window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientY); });
+  window.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientX); });
+  window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientX); });
   window.addEventListener('touchend', endDrag);
 
-  // Auto Orbit Engine Control — steady spin purely around the X-axis,
-  // so the ring of specs continuously cycles past the front of the object
+  // Auto Orbit Engine Control — steady spin purely around the Y-axis,
+  // so the ring of specs continuously circles the object left-to-right
   // while the brand title above stays perfectly still.
   function autoSpin() {
     requestAnimationFrame(autoSpin);
     if (!isDragging && targetTracked) {
       const currentRot = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
       specsContainer.setAttribute('rotation', {
-        x: currentRot.x + 0.25,
-        y: currentRot.y,
+        x: currentRot.x,
+        y: currentRot.y + 0.25,
         z: currentRot.z
       });
     }
