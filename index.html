@@ -134,9 +134,9 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   </div>
 </div>
 
-<div id="scan-hint">Aim Camera at Pulsar Target Image</div>
+<div id="scan-hint">Point Camera at the Marker to Begin</div>
 
-<a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 0.001; uiScanning: no;" 
+<a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 10; warmupTolerance: 2; missTolerance: 3; uiScanning: no;" 
          color-space="sRGB" 
          renderer="colorManagement: true, physicallyCorrectLights" 
          vr-mode-ui="enabled: false" 
@@ -194,20 +194,45 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       gridContainer.appendChild(statBlock);
     });
 
-    // FLOATING BRAND TITLE ABOVE OBJECT
+    // FLOATING BRAND TITLE ABOVE OBJECT — glass treatment to match the spec cards
     const brandTitleEntity = document.getElementById('brand-title');
+
+    const brandGlow = document.createElement('a-plane');
+    brandGlow.setAttribute('width', '0.74');
+    brandGlow.setAttribute('height', '0.2');
+    brandGlow.setAttribute('color', '#ff4b12');
+    brandGlow.setAttribute('opacity', '0.16');
+    brandGlow.setAttribute('material', 'transparent: true; shader: flat; side: double');
+    brandGlow.setAttribute('position', '0 0 -0.006');
+
+    const brandGlass = document.createElement('a-plane');
+    brandGlass.setAttribute('width', '0.64');
+    brandGlass.setAttribute('height', '0.15');
+    brandGlass.setAttribute('color', '#dbe7ee');
+    brandGlass.setAttribute('opacity', '0.1');
+    brandGlass.setAttribute('material', 'transparent: true; shader: flat; side: double');
+    brandGlass.setAttribute('position', '0 0 -0.003');
+
     const brandBg = document.createElement('a-plane');
-    brandBg.setAttribute('width', '0.62');
-    brandBg.setAttribute('height', '0.14');
-    brandBg.setAttribute('color', '#0a0a0c');
-    brandBg.setAttribute('opacity', '0.78');
+    brandBg.setAttribute('width', '0.64');
+    brandBg.setAttribute('height', '0.15');
+    brandBg.setAttribute('color', '#05070a');
+    brandBg.setAttribute('opacity', '0.6');
     brandBg.setAttribute('material', 'transparent: true; side: double');
-    brandBg.setAttribute('position', '0 0 0');
+    brandBg.setAttribute('position', '0 0 -0.0015');
+
+    const brandShine = document.createElement('a-plane');
+    brandShine.setAttribute('width', '0.58');
+    brandShine.setAttribute('height', '0.03');
+    brandShine.setAttribute('color', '#ffffff');
+    brandShine.setAttribute('opacity', '0.12');
+    brandShine.setAttribute('material', 'transparent: true; shader: flat; side: double');
+    brandShine.setAttribute('position', '0 0.052 0.0005');
 
     const brandAccentTop = document.createElement('a-entity');
-    brandAccentTop.setAttribute('line', 'start: -0.31 0.07 0.001; end: 0.31 0.07 0.001; color: #ff4b12');
+    brandAccentTop.setAttribute('line', 'start: -0.32 0.075 0.001; end: 0.32 0.075 0.001; color: #ff4b12; opacity: 0.9');
     const brandAccentBottom = document.createElement('a-entity');
-    brandAccentBottom.setAttribute('line', 'start: -0.31 -0.07 0.001; end: 0.31 -0.07 0.001; color: #00e0ff');
+    brandAccentBottom.setAttribute('line', 'start: -0.32 -0.075 0.001; end: 0.32 -0.075 0.001; color: #00e0ff; opacity: 0.9');
 
     const brandText = document.createElement('a-text');
     brandText.setAttribute('value', `${backendJsonData.brandName.toUpperCase()} ${backendJsonData.modelName.toUpperCase()}`);
@@ -218,10 +243,33 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     brandText.setAttribute('font', 'roboto');
     brandText.setAttribute('letter-spacing', '2');
 
+    brandTitleEntity.appendChild(brandGlow);
+    brandTitleEntity.appendChild(brandGlass);
     brandTitleEntity.appendChild(brandBg);
+    brandTitleEntity.appendChild(brandShine);
     brandTitleEntity.appendChild(brandAccentTop);
     brandTitleEntity.appendChild(brandAccentBottom);
     brandTitleEntity.appendChild(brandText);
+
+    // AMBIENT STAGE GLOW — soft concentric rings beneath/around the object,
+    // like a product spotlight, so the whole scene reads as a polished showcase.
+    const stageGlowEntity = document.createElement('a-entity');
+    stageGlowEntity.setAttribute('position', '0 0 -0.02');
+    stageGlowEntity.setAttribute('rotation', '-90 0 0');
+    [
+      { r: 0.95, o: 0.05 },
+      { r: 0.75, o: 0.07 },
+      { r: 0.55, o: 0.09 }
+    ].forEach(ring => {
+      const glowRing = document.createElement('a-ring');
+      glowRing.setAttribute('color', '#00e0ff');
+      glowRing.setAttribute('radius-inner', (ring.r - 0.01).toString());
+      glowRing.setAttribute('radius-outer', ring.r.toString());
+      glowRing.setAttribute('opacity', ring.o.toString());
+      glowRing.setAttribute('material', 'shader: flat; transparent: true; side: double');
+      stageGlowEntity.appendChild(glowRing);
+    });
+    document.getElementById('target-anchor').appendChild(stageGlowEntity);
 
     // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA — 360° HELIX AROUND THE OBJECT
     // Cards are spread around a horizontal circle (X-Z plane) AND staggered in
