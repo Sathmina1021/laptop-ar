@@ -441,35 +441,44 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     const overlay = document.getElementById('start-overlay');
     const scene = document.getElementById('ar-scene');
 
-    // Explicitly request camera permission first so we can catch the exact
-    // failure reason (denied / no camera / insecure context / already in use)
-    // instead of silently ending up on a blank white screen.
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showArError('Camera API not available. Needs HTTPS + a modern browser.');
-      return;
+    const beginAr = () => {
+      // Explicitly request camera permission first so we can catch the exact
+      // failure reason (denied / no camera / insecure context / already in use)
+      // instead of silently ending up on a blank white screen.
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showArError('Camera API not available. Needs HTTPS + a modern browser.');
+        return;
+      }
+
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then((stream) => {
+          // permission confirmed — release this test stream, MindAR opens its own
+          stream.getTracks().forEach((t) => t.stop());
+
+          overlay.style.opacity = '0';
+          overlay.style.transform = 'scale(1.05)';
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            try {
+              scene.systems['mindar-image-system'].start();
+            } catch (err) {
+              showArError('AR failed to start: ' + err.message);
+            }
+          }, 800);
+        })
+        .catch((err) => {
+          // Common err.name values: NotAllowedError, NotFoundError,
+          // NotReadableError, OverconstrainedError, SecurityError
+          showArError('Camera error (' + err.name + '): ' + err.message);
+        });
+    };
+
+    if (scene.hasLoaded) {
+      beginAr();
+    } else {
+      showArError('Scene still loading, tap again in a moment…');
+      scene.addEventListener('loaded', beginAr, { once: true });
     }
-
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-      .then((stream) => {
-        // permission confirmed — release this test stream, MindAR opens its own
-        stream.getTracks().forEach((t) => t.stop());
-
-        overlay.style.opacity = '0';
-        overlay.style.transform = 'scale(1.05)';
-        setTimeout(() => {
-          overlay.style.display = 'none';
-          try {
-            scene.components['mindar-image'].start();
-          } catch (err) {
-            showArError('AR failed to start: ' + err.message);
-          }
-        }, 800);
-      })
-      .catch((err) => {
-        // Common err.name values: NotAllowedError, NotFoundError,
-        // NotReadableError, OverconstrainedError, SecurityError
-        showArError('Camera error (' + err.name + '): ' + err.message);
-      });
   }
 
   document.addEventListener('DOMContentLoaded', () => {
