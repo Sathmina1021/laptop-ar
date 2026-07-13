@@ -110,6 +110,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   font-family:'JetBrains Mono',monospace;font-size:clamp(10px,3vw,12px);font-weight:600;z-index:99;
   border:1px solid var(--pulsar-orange);pointer-events:none;text-align:center;letter-spacing:1.5px;
   backdrop-filter: blur(8px); max-width:90vw; width:max-content;
+  display: none; /* ආරම්භයේදී සඟවා තබයි */
 }
 </style>
 </head>
@@ -140,7 +141,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
          color-space="sRGB" 
          renderer="colorManagement: true, physicallyCorrectLights" 
          vr-mode-ui="enabled: false" 
-         device-orientation-permission-ui="enabled: false">
+         device-orientation-permission-ui="enabled: true">
 
   <a-assets>
     <a-asset-item id="frame-model" src="./scooter_hud.glb"></a-asset-item>
@@ -158,7 +159,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 <script>
   const USE_GLB_FRAME = true;
 
-  // MULTI-ANGLE CONFIGURATION WITH IMAGE MAPS
   const bikeDatabase = [
     {
       "targetIdx": 0,
@@ -247,7 +247,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       cardEntity.setAttribute('position', `${posX} ${posY} 0.1`);
       cardEntity.setAttribute('rotation', `0 0 ${(angle * 180 / Math.PI) - 90}`);
 
-      // Glass treatment background
       const bgPlane = document.createElement('a-plane');
       bgPlane.setAttribute('width', '0.52');
       bgPlane.setAttribute('height', '0.24');
@@ -260,8 +259,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       const outlineBottom = document.createElement('a-entity');
       outlineBottom.setAttribute('line', `start: -0.26 -0.12 0.002; end: 0.26 -0.12 0.002; color: ${accent}`);
 
-      // 🖼️ REAL COMPONENT IMAGE COMPONENT INJECTED HERE
-      // පින්තූරය කාඩ්පතේ වම්පස කෙළවරට වන්නට පිළිවෙළකට සකසා ඇත.
       const compImage = document.createElement('a-image');
       compImage.setAttribute('src', card.imgSrc);
       compImage.setAttribute('width', '0.08');
@@ -270,7 +267,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       compImage.setAttribute('material', 'transparent: false; shader: flat; side: double');
       cardEntity.appendChild(compImage);
 
-      // Title Text (Shifted right slightly to avoid overlapping the image)
       const titleText = document.createElement('a-text');
       titleText.setAttribute('value', card.title);
       titleText.setAttribute('color', accent);
@@ -279,7 +275,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       titleText.setAttribute('width', '0.9');
       titleText.setAttribute('font', 'roboto');
 
-      // Description / Multi-line Specs Text
       const descText = document.createElement('a-text');
       descText.setAttribute('value', card.desc);
       descText.setAttribute('color', '#f3efe6');
@@ -374,7 +369,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     autoSpin();
   });
 
-  // Turntable dragging engine
   const startDrag = (clientX) => { isDragging = true; previousMousePosition.x = clientX; };
   const updateDrag = (clientX) => {
     if (!isDragging) return;
@@ -406,13 +400,21 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     });
   }
 
+  // FIXED: Launch Button එක ක්ලික් කළ විට MindAR System එක සහ කැමරාව ක්‍රියාත්මක වන ප්‍රධාන කොටස
   function startScanner() {
     const overlay = document.getElementById('start-overlay');
     overlay.style.opacity = '0';
     overlay.style.transform = 'scale(1.05)';
+    
     setTimeout(() => { 
       overlay.style.display = 'none'; 
-      document.getElementById('ar-scene').components['mindar-image'].start();
+      document.getElementById("scan-hint").style.display = "block";
+      
+      // MindAR Image System එක බලහත්කාරයෙන් කැමරාව සමඟ Start කරවීම
+      const sceneEl = document.getElementById('ar-scene');
+      if (sceneEl && sceneEl.components['mindar-image']) {
+        sceneEl.components['mindar-image'].start();
+      }
     }, 800);
   }
 </script>
