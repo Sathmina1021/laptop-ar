@@ -172,7 +172,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       ],
       "arSeparateCards": [
         { "title": "ENGINE", "imgSrc": "#img-engine", "desc": "124.8 CC\nSINGLE CYLINDER" },
-        { "title": "POWER", "imgSrc": "#img-EX-01", "desc": "9.38 PS\n@ 7000 RPM" },
+        { "title": "POWER", "imgSrc": "#img-light", "desc": "9.38 PS\n@ 7000 RPM" },
         { "title": "TORQUE", "imgSrc": "#img-light", "desc": "10.5 NM\n@ 5500 RPM" },
         { "title": "BRAKES", "imgSrc": "#img-brake", "desc": "SYNCHRONIZED\nBREATHING ABS" },
         { "title": "GEARBOX", "imgSrc": "#img-gearbox", "desc": "AUTOMATIC\nCENTRIFUGAL" }
@@ -356,7 +356,9 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       const cardEntity = document.createElement('a-entity');
       cardEntity.setAttribute('class', 'spec-card');
       cardEntity.setAttribute('position', `${posX} ${posY} 0.1`);
-      cardEntity.setAttribute('rotation', `0 0 ${(angle * 180 / Math.PI) - 90}`);
+      // Keep every poster upright/readable — no per-card pinwheel tilt.
+      // Only its position moves around the object; orientation stays flat.
+      cardEntity.setAttribute('rotation', '0 0 0');
 
       // soft glow plate behind the poster for depth
       const glowPlate = document.createElement('a-plane');
@@ -474,16 +476,13 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     autoSpin();
   });
 
-  // Turntable dragging engine
+  // Turntable dragging engine — disabled for the spec cards so they stay
+  // fixed and upright like the reference poster layout (no more scattered/
+  // upside-down cards while spinning). Kept as no-ops in case drag rotation
+  // is wanted again later.
   const startDrag = (clientX) => { isDragging = true; previousMousePosition.x = clientX; };
   const updateDrag = (clientX) => {
     if (!isDragging) return;
-    const deltaX = clientX - previousMousePosition.x;
-    anchorState.forEach(state => {
-      if (!state || !state.tracked) return;
-      const currentRotation = state.specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
-      state.specsContainer.setAttribute('rotation', { x: currentRotation.x, y: currentRotation.y, z: currentRotation.z + deltaX * 0.4 });
-    });
     previousMousePosition.x = clientX;
   };
   const endDrag = () => { isDragging = false; };
@@ -497,16 +496,8 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
   function autoSpin() {
     requestAnimationFrame(autoSpin);
-    anchorState.forEach(state => {
-      if (!state || !state.tracked) return;
-      if (!isDragging) {
-        // Rotate on Z (in-plane, like a clock hand) — same axis as the drag
-        // gesture below — so every poster card keeps facing the camera and
-        // never swings through Y into showing its mirrored back face.
-        const currentRot = state.specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
-        state.specsContainer.setAttribute('rotation', { x: currentRot.x, y: currentRot.y, z: currentRot.z + 0.2 });
-      }
-    });
+    // Spec cards no longer auto-rotate — they stay fixed, upright and
+    // readable around the object, matching the static reference layout.
   }
 
   function showArError(message) {
