@@ -246,92 +246,80 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   // same visual language as the reference "BRUTE POWER" banner, duplicated
   // per spec, now with a frosted-glass transparency finish.
   function createSpecBannerTexture(imgEl, title, desc, accent) {
-    const SCALE = 2; // higher-res bake for crisper text/edges in AR
-    const W = 720 * SCALE, H = 340 * SCALE;
+    // Fully monochrome, editorial "gallery poster" treatment — no colour
+    // anywhere. Just a grayscale photo bleeding into white/black typography,
+    // like a print magazine spec sheet. Bigger canvas than before so the
+    // baked texture stays crisp at the larger real-world card size.
+    const SCALE = 2;
+    const W = 900 * SCALE, H = 460 * SCALE;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, W, H); // keep canvas alpha channel transparent by default
+    ctx.clearRect(0, 0, W, H); // fully transparent canvas by default
 
-    // ---- photo panel, clipped to an angled quad on the left ----
+    // ---- photo panel, clipped to an angled quad on the left, desaturated ----
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.lineTo(W * 0.48, 0);
-    ctx.lineTo(W * 0.36, H);
+    ctx.lineTo(W * 0.5, 0);
+    ctx.lineTo(W * 0.38, H);
     ctx.lineTo(0, H);
     ctx.closePath();
     ctx.clip();
     if (imgEl && imgEl.naturalWidth) {
       const iw = imgEl.naturalWidth, ih = imgEl.naturalHeight;
-      const scale = Math.max((W * 0.5) / iw, H / ih);
+      const scale = Math.max((W * 0.52) / iw, H / ih);
       const dw = iw * scale, dh = ih * scale;
-      ctx.filter = 'saturate(1.15) contrast(1.08)';
-      ctx.globalAlpha = 0.92; // slight see-through even over the photo
+      // grayscale + high contrast — no colour, pure tonal image
+      ctx.filter = 'grayscale(1) contrast(1.25) brightness(1.02)';
+      ctx.globalAlpha = 1;
       ctx.drawImage(imgEl, (W * 0.28 - dw) / 2, (H - dh) / 2, dw, dh);
       ctx.filter = 'none';
-      ctx.globalAlpha = 1;
     } else {
-      ctx.fillStyle = accentRgba(accent, 0.35);
-      ctx.fillRect(0, 0, W * 0.5, H);
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.fillRect(0, 0, W * 0.52, H);
     }
-    // subtle accent-tinted glass wash over the photo for cohesion
-    ctx.fillStyle = accentRgba(accent, 0.12);
-    ctx.fillRect(0, 0, W * 0.5, H);
-    // fade the photo edge into the banner for a seamless blend
-    const edgeGrad = ctx.createLinearGradient(W * 0.22, 0, W * 0.48, 0);
+    // fine film-grain-style vignette, pure black/white, no tint
+    const edgeGrad = ctx.createLinearGradient(W * 0.24, 0, W * 0.5, 0);
     edgeGrad.addColorStop(0, 'rgba(0,0,0,0)');
-    edgeGrad.addColorStop(1, 'rgba(0,0,0,0.55)');
+    edgeGrad.addColorStop(1, 'rgba(0,0,0,0.65)');
     ctx.fillStyle = edgeGrad;
-    ctx.fillRect(0, 0, W * 0.5, H);
+    ctx.fillRect(0, 0, W * 0.52, H);
     ctx.restore();
 
-    // ---- right side is now fully transparent — no filled panel — text
-    // floats directly with an artistic gradient + glow + outline treatment ----
-
-    // faint diagonal seam only, to hint the poster's structure without a fill
-    ctx.strokeStyle = accentRgba(accent, 0.4);
-    ctx.lineWidth = 4 * SCALE / 2;
+    // ---- thin hairline seam marking the poster's fold — pure white ----
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+    ctx.lineWidth = 2 * SCALE / 2;
     ctx.beginPath();
-    ctx.moveTo(W * 0.36, 0);
-    ctx.lineTo(W * 0.24, H);
+    ctx.moveTo(W * 0.38, 0);
+    ctx.lineTo(W * 0.26, H);
     ctx.stroke();
 
-    // ---- artistic title: accent-gradient fill, dark outline, soft glow ----
-    const titleGrad = ctx.createLinearGradient(W * 0.42, 0, W * 0.42, 90 * SCALE);
-    titleGrad.addColorStop(0, '#ffffff');
-    titleGrad.addColorStop(0.55, accent);
-    titleGrad.addColorStop(1, accentRgba(accent, 0.75));
+    // ---- title: bold white type with a soft black outline for contrast,
+    // no colour fill or glow — pure editorial typography ----
     ctx.textBaseline = 'top';
-    ctx.font = `900 ${62 * SCALE}px Arial, sans-serif`;
-    ctx.shadowColor = accentRgba(accent, 0.85);
-    ctx.shadowBlur = 24 * SCALE / 2;
+    ctx.font = `900 ${72 * SCALE}px Arial, sans-serif`;
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'rgba(5,5,6,0.85)';
-    ctx.lineWidth = 7 * SCALE / 2;
-    ctx.strokeText(title.toUpperCase(), W * 0.44, 30 * SCALE);
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = titleGrad;
-    ctx.fillText(title.toUpperCase(), W * 0.44, 30 * SCALE);
+    ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+    ctx.lineWidth = 8 * SCALE / 2;
+    ctx.strokeText(title.toUpperCase(), W * 0.44, 40 * SCALE);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(title.toUpperCase(), W * 0.44, 40 * SCALE);
 
-    // slim glowing divider under the title
-    ctx.shadowColor = accentRgba(accent, 0.7);
-    ctx.shadowBlur = 10 * SCALE / 2;
-    ctx.fillStyle = accentRgba(accent, 0.9);
-    ctx.fillRect(W * 0.44, 106 * SCALE, 130 * SCALE, 5 * SCALE);
-    ctx.shadowBlur = 0;
+    // slim white divider under the title — no colour
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillRect(W * 0.44, 128 * SCALE, 150 * SCALE, 4 * SCALE);
 
-    // ---- spec description — clean white with soft dark outline for
-    // legibility straight over the camera feed (no background fill) ----
-    ctx.font = `800 ${40 * SCALE}px Arial, sans-serif`;
+    // ---- spec description — clean white with soft dark outline ----
+    ctx.font = `700 ${46 * SCALE}px Arial, sans-serif`;
     ctx.lineJoin = 'round';
     const lines = desc.split('\n');
     lines.forEach((line, i) => {
-      const y = (142 + i * 50) * SCALE;
-      ctx.strokeStyle = 'rgba(5,5,6,0.8)';
+      const y = (166 + i * 58) * SCALE;
+      ctx.strokeStyle = 'rgba(0,0,0,0.85)';
       ctx.lineWidth = 6 * SCALE / 2;
       ctx.strokeText(line, W * 0.44, y);
-      ctx.fillStyle = '#f5f2ea';
+      ctx.fillStyle = '#ffffff';
       ctx.fillText(line, W * 0.44, y);
     });
 
@@ -341,7 +329,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   function buildCards(specsContainer, bikeData) {
     const cardsData = bikeData.arSeparateCards;
     const totalCards = cardsData.length;
-    const radius = 1.38; // pushed out further to fit the enlarged poster cards
+    const radius = 1.62; // pushed out further to fit the larger, bigger poster cards
 
     cardsData.forEach((card, index) => {
       const angle = (index / totalCards) * Math.PI * 2;
@@ -356,23 +344,24 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       // Only its position moves around the object; orientation stays flat.
       cardEntity.setAttribute('rotation', '0 0 0');
 
-      // soft glow plate behind the poster for depth
+      // soft neutral (colourless) shadow plate behind the poster for depth —
+      // pure black/grey only, no accent tint anywhere on the card.
       const glowPlate = document.createElement('a-plane');
-      glowPlate.setAttribute('width', '0.88');
-      glowPlate.setAttribute('height', '0.44');
-      glowPlate.setAttribute('color', accent);
-      glowPlate.setAttribute('opacity', '0.22');
-      glowPlate.setAttribute('position', '0.012 -0.014 0.004');
+      glowPlate.setAttribute('width', '1.06');
+      glowPlate.setAttribute('height', '0.54');
+      glowPlate.setAttribute('color', '#000000');
+      glowPlate.setAttribute('opacity', '0.28');
+      glowPlate.setAttribute('position', '0.014 -0.016 0.004');
       glowPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
       cardEntity.appendChild(glowPlate);
 
-      // poster plane — texture gets baked in once the source photo is ready.
-      // transparent + opacity < 1 gives the whole card a frosted-glass HUD feel.
+      // poster plane — enlarged real-world size — texture gets baked in once
+      // the source photo is ready. Fully monochrome artistic finish.
       const posterPlane = document.createElement('a-plane');
-      posterPlane.setAttribute('width', '0.86');
-      posterPlane.setAttribute('height', '0.4');
+      posterPlane.setAttribute('width', '1.04');
+      posterPlane.setAttribute('height', '0.5');
       posterPlane.setAttribute('position', '0 0 0.01');
-      posterPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.93; alphaTest: 0.02');
+      posterPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.96; alphaTest: 0.02');
       cardEntity.appendChild(posterPlane);
 
       const applyTexture = () => {
