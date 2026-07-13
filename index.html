@@ -286,57 +286,53 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     ctx.fillRect(0, 0, W * 0.5, H);
     ctx.restore();
 
-    // ---- angled accent panel on the right — translucent frosted glass ----
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 22 * SCALE / 2;
-    ctx.shadowOffsetX = -4;
-    ctx.beginPath();
-    ctx.moveTo(W * 0.36, 0);
-    ctx.lineTo(W, 0);
-    ctx.lineTo(W, H);
-    ctx.lineTo(W * 0.24, H);
-    ctx.closePath();
-    // base dark-glass fill, then an accent tint on top — gives a glassmorphism look
-    ctx.fillStyle = 'rgba(10, 10, 14, 0.55)';
-    ctx.fill();
-    ctx.fillStyle = accentRgba(accent, 0.62);
-    ctx.fill();
-    // faint top highlight streak for a glossy glass feel
-    const glossGrad = ctx.createLinearGradient(0, 0, 0, H * 0.4);
-    glossGrad.addColorStop(0, 'rgba(255,255,255,0.22)');
-    glossGrad.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = glossGrad;
-    ctx.fill();
-    ctx.restore();
+    // ---- right side is now fully transparent — no filled panel — text
+    // floats directly with an artistic gradient + glow + outline treatment ----
 
-    // thin seam along the diagonal cut
-    ctx.strokeStyle = 'rgba(10,10,10,0.35)';
-    ctx.lineWidth = 5 * SCALE / 2;
+    // faint diagonal seam only, to hint the poster's structure without a fill
+    ctx.strokeStyle = accentRgba(accent, 0.4);
+    ctx.lineWidth = 4 * SCALE / 2;
     ctx.beginPath();
     ctx.moveTo(W * 0.36, 0);
     ctx.lineTo(W * 0.24, H);
     ctx.stroke();
 
-    // outer border for a crisp poster edge
-    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-    ctx.lineWidth = 3 * SCALE / 2;
-    ctx.strokeRect(2, 2, W - 4, H - 4);
-
-    // ---- bold title ----
-    ctx.fillStyle = '#0a0a0a';
+    // ---- artistic title: accent-gradient fill, dark outline, soft glow ----
+    const titleGrad = ctx.createLinearGradient(W * 0.42, 0, W * 0.42, 90 * SCALE);
+    titleGrad.addColorStop(0, '#ffffff');
+    titleGrad.addColorStop(0.55, accent);
+    titleGrad.addColorStop(1, accentRgba(accent, 0.75));
     ctx.textBaseline = 'top';
-    ctx.font = `900 ${58 * SCALE}px Arial, sans-serif`;
-    ctx.fillText(title.toUpperCase(), W * 0.45, 34 * SCALE);
+    ctx.font = `900 ${62 * SCALE}px Arial, sans-serif`;
+    ctx.shadowColor = accentRgba(accent, 0.85);
+    ctx.shadowBlur = 24 * SCALE / 2;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(5,5,6,0.85)';
+    ctx.lineWidth = 7 * SCALE / 2;
+    ctx.strokeText(title.toUpperCase(), W * 0.44, 30 * SCALE);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = titleGrad;
+    ctx.fillText(title.toUpperCase(), W * 0.44, 30 * SCALE);
 
-    // divider under the title
-    ctx.fillRect(W * 0.45, 108 * SCALE, 130 * SCALE, 5 * SCALE);
+    // slim glowing divider under the title
+    ctx.shadowColor = accentRgba(accent, 0.7);
+    ctx.shadowBlur = 10 * SCALE / 2;
+    ctx.fillStyle = accentRgba(accent, 0.9);
+    ctx.fillRect(W * 0.44, 106 * SCALE, 130 * SCALE, 5 * SCALE);
+    ctx.shadowBlur = 0;
 
-    // ---- spec description lines ----
-    ctx.font = `800 ${38 * SCALE}px Arial, sans-serif`;
+    // ---- spec description — clean white with soft dark outline for
+    // legibility straight over the camera feed (no background fill) ----
+    ctx.font = `800 ${40 * SCALE}px Arial, sans-serif`;
+    ctx.lineJoin = 'round';
     const lines = desc.split('\n');
     lines.forEach((line, i) => {
-      ctx.fillText(line, W * 0.45, (140 + i * 48) * SCALE);
+      const y = (142 + i * 50) * SCALE;
+      ctx.strokeStyle = 'rgba(5,5,6,0.8)';
+      ctx.lineWidth = 6 * SCALE / 2;
+      ctx.strokeText(line, W * 0.44, y);
+      ctx.fillStyle = '#f5f2ea';
+      ctx.fillText(line, W * 0.44, y);
     });
 
     return canvas.toDataURL('image/png');
@@ -345,7 +341,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   function buildCards(specsContainer, bikeData) {
     const cardsData = bikeData.arSeparateCards;
     const totalCards = cardsData.length;
-    const radius = 1.12; // pushed out to fit the larger poster cards without overlap
+    const radius = 1.38; // pushed out further to fit the enlarged poster cards
 
     cardsData.forEach((card, index) => {
       const angle = (index / totalCards) * Math.PI * 2;
@@ -362,8 +358,8 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
       // soft glow plate behind the poster for depth
       const glowPlate = document.createElement('a-plane');
-      glowPlate.setAttribute('width', '0.72');
-      glowPlate.setAttribute('height', '0.36');
+      glowPlate.setAttribute('width', '0.88');
+      glowPlate.setAttribute('height', '0.44');
       glowPlate.setAttribute('color', accent);
       glowPlate.setAttribute('opacity', '0.22');
       glowPlate.setAttribute('position', '0.012 -0.014 0.004');
@@ -373,8 +369,8 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       // poster plane — texture gets baked in once the source photo is ready.
       // transparent + opacity < 1 gives the whole card a frosted-glass HUD feel.
       const posterPlane = document.createElement('a-plane');
-      posterPlane.setAttribute('width', '0.7');
-      posterPlane.setAttribute('height', '0.33');
+      posterPlane.setAttribute('width', '0.86');
+      posterPlane.setAttribute('height', '0.4');
       posterPlane.setAttribute('position', '0 0 0.01');
       posterPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.93; alphaTest: 0.02');
       cardEntity.appendChild(posterPlane);
@@ -460,7 +456,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
   function buildBrandTitle(bikeData) {
     const brandTitleEntity = document.createElement('a-entity');
-    brandTitleEntity.setAttribute('position', '0 1.42 0.02');
+    brandTitleEntity.setAttribute('position', '0 1.7 0.02');
 
     const brandPlane = document.createElement('a-plane');
     brandPlane.setAttribute('width', '0.95');
