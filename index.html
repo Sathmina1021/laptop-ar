@@ -231,6 +231,91 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     return USE_GLB_FRAME ? buildGlbFrame(color) : buildOctagonFrame(color);
   }
 
+  // 🎨 Bakes a "moto-poster" style banner texture per spec card:
+  // component photo bleeding in from the left (angled cut), an accent-color
+  // angled panel on the right carrying bold black spec text — same visual
+  // language as the reference "BRUTE POWER" banner, duplicated per spec.
+  function createSpecBannerTexture(imgEl, title, desc, accent) {
+    const W = 720, H = 340;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // ---- photo panel, clipped to an angled quad on the left ----
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(W * 0.48, 0);
+    ctx.lineTo(W * 0.36, H);
+    ctx.lineTo(0, H);
+    ctx.closePath();
+    ctx.clip();
+    if (imgEl && imgEl.naturalWidth) {
+      const iw = imgEl.naturalWidth, ih = imgEl.naturalHeight;
+      const scale = Math.max((W * 0.5) / iw, H / ih);
+      const dw = iw * scale, dh = ih * scale;
+      ctx.filter = 'saturate(1.15) contrast(1.08)';
+      ctx.drawImage(imgEl, (W * 0.28 - dw) / 2, (H - dh) / 2, dw, dh);
+      ctx.filter = 'none';
+    } else {
+      ctx.fillStyle = '#141416';
+      ctx.fillRect(0, 0, W * 0.5, H);
+    }
+    // fade the photo edge into the banner for a seamless blend
+    const edgeGrad = ctx.createLinearGradient(W * 0.22, 0, W * 0.48, 0);
+    edgeGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    edgeGrad.addColorStop(1, 'rgba(0,0,0,0.65)');
+    ctx.fillStyle = edgeGrad;
+    ctx.fillRect(0, 0, W * 0.5, H);
+    ctx.restore();
+
+    // ---- angled accent panel on the right ----
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur = 22;
+    ctx.shadowOffsetX = -4;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.36, 0);
+    ctx.lineTo(W, 0);
+    ctx.lineTo(W, H);
+    ctx.lineTo(W * 0.24, H);
+    ctx.closePath();
+    ctx.fillStyle = accent;
+    ctx.fill();
+    ctx.restore();
+
+    // thin dark seam along the diagonal cut
+    ctx.strokeStyle = 'rgba(10,10,10,0.4)';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.36, 0);
+    ctx.lineTo(W * 0.24, H);
+    ctx.stroke();
+
+    // outer border for a crisp poster edge
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(2, 2, W - 4, H - 4);
+
+    // ---- bold title ----
+    ctx.fillStyle = '#0a0a0a';
+    ctx.textBaseline = 'top';
+    ctx.font = '900 58px Arial, sans-serif';
+    ctx.fillText(title.toUpperCase(), W * 0.45, 34);
+
+    // divider under the title
+    ctx.fillRect(W * 0.45, 108, 130, 5);
+
+    // ---- spec description lines ----
+    ctx.font = '800 38px Arial, sans-serif';
+    const lines = desc.split('\n');
+    lines.forEach((line, i) => {
+      ctx.fillText(line, W * 0.45, 140 + i * 48);
+    });
+
+    return canvas.toDataURL('image/png');
+  }
+
   function buildCards(specsContainer, bikeData) {
     const cardsData = bikeData.arSeparateCards;
     const totalCards = cardsData.length;
@@ -247,74 +332,40 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       cardEntity.setAttribute('position', `${posX} ${posY} 0.1`);
       cardEntity.setAttribute('rotation', `0 0 ${(angle * 180 / Math.PI) - 90}`);
 
-      // Glass treatment background (slightly taller to give the icon breathing room)
-      const bgPlane = document.createElement('a-plane');
-      bgPlane.setAttribute('width', '0.56');
-      bgPlane.setAttribute('height', '0.26');
-      bgPlane.setAttribute('color', '#0a0d12');
-      bgPlane.setAttribute('opacity', '0.9');
-      bgPlane.setAttribute('material', 'transparent: true; side: double; shader: flat');
+      // soft glow plate behind the poster for depth
+      const glowPlate = document.createElement('a-plane');
+      glowPlate.setAttribute('width', '0.6');
+      glowPlate.setAttribute('height', '0.3');
+      glowPlate.setAttribute('color', accent);
+      glowPlate.setAttribute('opacity', '0.25');
+      glowPlate.setAttribute('position', '0.01 -0.012 0.004');
+      glowPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
+      cardEntity.appendChild(glowPlate);
 
-      const outline = document.createElement('a-entity');
-      outline.setAttribute('line', `start: -0.28 0.13 0.002; end: 0.28 0.13 0.002; color: ${accent}`);
-      const outlineBottom = document.createElement('a-entity');
-      outlineBottom.setAttribute('line', `start: -0.28 -0.13 0.002; end: 0.28 -0.13 0.002; color: ${accent}`);
+      // poster plane — texture gets baked in once the source photo is ready
+      const posterPlane = document.createElement('a-plane');
+      posterPlane.setAttribute('width', '0.58');
+      posterPlane.setAttribute('height', '0.274');
+      posterPlane.setAttribute('position', '0 0 0.01');
+      posterPlane.setAttribute('material', 'shader: flat; side: double; transparent: false');
+      cardEntity.appendChild(posterPlane);
 
-      // 🖼️ COMPONENT ICON — small circular badge in the top-left corner of the card
-      // පින්තූරය දැන් කුඩා, රවුම් ලාංඡනයක් (badge) විදිහට කාඩ්පතේ වම් කෙළවරේ පෙන්වයි.
-      const iconGlow = document.createElement('a-circle');
-      iconGlow.setAttribute('radius', '0.052');
-      iconGlow.setAttribute('color', accent);
-      iconGlow.setAttribute('opacity', '0.16');
-      iconGlow.setAttribute('position', '-0.20 0.065 0.008');
-      iconGlow.setAttribute('material', 'shader: flat; side: double; transparent: true');
+      const applyTexture = () => {
+        const imgEl = document.querySelector(card.imgSrc);
+        const dataUrl = createSpecBannerTexture(imgEl, card.title, card.desc, accent);
+        posterPlane.setAttribute('material', 'src', dataUrl);
+      };
 
-      const iconRing = document.createElement('a-ring');
-      iconRing.setAttribute('radius-inner', '0.044');
-      iconRing.setAttribute('radius-outer', '0.05');
-      iconRing.setAttribute('color', accent);
-      iconRing.setAttribute('position', '-0.20 0.065 0.009');
-      iconRing.setAttribute('material', 'shader: flat; side: double');
+      const sourceImg = document.querySelector(card.imgSrc);
+      if (sourceImg && sourceImg.complete && sourceImg.naturalWidth) {
+        applyTexture();
+      } else if (sourceImg) {
+        sourceImg.addEventListener('load', applyTexture, { once: true });
+        sourceImg.addEventListener('error', applyTexture, { once: true });
+      } else {
+        applyTexture();
+      }
 
-      const compImage = document.createElement('a-image');
-      compImage.setAttribute('src', card.imgSrc);
-      compImage.setAttribute('width', '0.072');
-      compImage.setAttribute('height', '0.072');
-      compImage.setAttribute('position', '-0.20 0.065 0.011');
-      compImage.setAttribute('material', 'transparent: false; shader: flat; side: double');
-
-      // Title Text — sits beside the icon badge, no more overlap
-      const titleText = document.createElement('a-text');
-      titleText.setAttribute('value', card.title);
-      titleText.setAttribute('color', accent);
-      titleText.setAttribute('align', 'left');
-      titleText.setAttribute('position', '-0.135 0.065 0.01');
-      titleText.setAttribute('width', '0.95');
-      titleText.setAttribute('baseline', 'center');
-      titleText.setAttribute('font', 'roboto');
-
-      // thin divider between icon/title row and the spec description
-      const divider = document.createElement('a-entity');
-      divider.setAttribute('line', `start: -0.24 0.005 0.006; end: 0.24 0.005 0.006; color: ${accent}; opacity: 0.35`);
-
-      // Description / Multi-line Specs Text
-      const descText = document.createElement('a-text');
-      descText.setAttribute('value', card.desc);
-      descText.setAttribute('color', '#f3efe6');
-      descText.setAttribute('align', 'center');
-      descText.setAttribute('position', '0 -0.055 0.01');
-      descText.setAttribute('width', '0.62');
-      descText.setAttribute('font', 'roboto');
-
-      cardEntity.appendChild(bgPlane);
-      cardEntity.appendChild(outline);
-      cardEntity.appendChild(outlineBottom);
-      cardEntity.appendChild(iconGlow);
-      cardEntity.appendChild(iconRing);
-      cardEntity.appendChild(compImage);
-      cardEntity.appendChild(titleText);
-      cardEntity.appendChild(divider);
-      cardEntity.appendChild(descText);
       specsContainer.appendChild(cardEntity);
     });
   }
