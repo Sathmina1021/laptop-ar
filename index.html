@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>Smart Scooter — AR Spec Scanner</title>
+<title>Pulsar NS200 — AR HUD Scanner</title>
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,433 +12,164 @@
 <style>
 :root{
   --carbon:#0a0a0c;
-  --carbon-2:#141416;
-  --pulsar-orange:#00e0ff; /* Scooter එකට ගැලපෙන Tech Cyan පාට දැම්මා */
-  --pulsar-amber:#ffb400;
+  --pulsar-orange:#ff4b12;
   --telemetry-cyan:#00e0ff;
-  --geo-silver:#d9dde1;
   --ink:#f3efe6;
   --ink-dim:#9a9a9e;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;overflow:hidden;width:100%;height:100%;background-color:transparent;font-family:'Rajdhani',sans-serif;}
 a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
-
 #mindar-ui-scanning, .mindar-ui-overlay { display: none !important; }
 
-/* ============ MODERN LOADING SCREEN ============ */
+/* LOADING SCREEN */
 #start-overlay{
   position:fixed;inset:0;width:100%;height:100%;z-index:9999;
   background:radial-gradient(circle at center, #141416 0%, #050506 100%);
-  display:flex;flex-direction:column;
-  transition:all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow:hidden;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
 }
-.hero-photo-wrap{
-  position:relative;width:100%;height:48%;min-height:240px;overflow:hidden;
-  clip-path:polygon(0 0,100% 0,100% 86%,0 100%);
-  border-bottom: 2px solid var(--pulsar-orange);
-}
-.hero-photo-wrap img{
-  width:100%;height:100%;object-fit:cover;object-position:center 35%;
-  filter:saturate(1.1) contrast(1.1);
-  transition: transform 6s ease;
-}
-#start-overlay:hover .hero-photo-wrap img { transform: scale(1.06); }
-.hero-photo-wrap::after{
-  content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg, rgba(5,5,6,0) 30%, rgba(5,5,6,0.98) 98%),
-             linear-gradient(90deg, rgba(5,5,6,0.5) 0%, rgba(5,5,6,0) 50%);
-}
-
-.content-wrap{
-  flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
-  padding:20px max(26px, 5%) max(26px, env(safe-area-inset-bottom)) max(26px, 5%);
-  text-align:center;
-}
-.eyebrow-row{ display:flex;align-items:center;gap:10px;margin-bottom:12px; }
-.led-dot{width:9px;height:9px;border-radius:50%;background:var(--pulsar-orange);
-  box-shadow:0 0 12px var(--pulsar-orange);animation:pulse 1.4s ease-in-out infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(0.85);}}
-.eyebrow{
-  font-family:'JetBrains Mono',monospace;font-size:clamp(10px, 2.5vw, 13px);letter-spacing:4px;
-  color:var(--telemetry-cyan);text-transform:uppercase;
-}
-.brand-title{
-  font-family:'Orbitron',sans-serif;font-weight:900;color:var(--ink);
-  font-size:clamp(30px, 8vw, 52px);line-height:1.1;letter-spacing:2px;
-  text-transform:uppercase;margin:0;
-  text-shadow: 0 4px 20px rgba(0,0,0,0.6);
-}
-.brand-title .accent{ color:var(--pulsar-orange); }
-
-.stat-strip{
-  display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;
-  width:100%;max-width:640px;margin:28px 0;
-  background:rgba(255,255,255,0.03);border-radius:14px;
-  border:1px solid rgba(255,255,255,0.08);padding:16px;
-}
-.stat{ text-align:center;border-right:1px solid rgba(255,255,255,0.08); }
-.stat:last-child{border-right:none;}
-.stat-value{
-  font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(16px, 4.5vw, 24px);color:var(--ink);
-  display:block;
-}
-.stat-label{
-  font-family:'JetBrains Mono',monospace;font-size:clamp(9px, 2.3vw, 11px);letter-spacing:1.5px;
-  color:var(--ink-dim);text-transform:uppercase;display:block;margin-top:6px;
-}
-
 .scan-btn{
-  position:relative;overflow:hidden;
-  background:linear-gradient(135deg,var(--pulsar-orange),var(--pulsar-amber));
-  border:none;color:#0a0a0a;padding:18px 45px;font-size:clamp(13px, 3.5vw, 16px);font-weight:900;
-  font-family:'Orbitron',sans-serif;border-radius:50px;cursor:pointer;letter-spacing:3px;text-transform:uppercase;
-  box-shadow:0 8px 32px rgba(255,75,18,0.45);width:100%;max-width:340px;transition:all 0.3s ease;
+  background:linear-gradient(135deg,var(--pulsar-orange),#ffb400);
+  border:none;color:#0a0a0a;padding:18px 45px;font-size:16px;font-weight:900;
+  font-family:'Orbitron',sans-serif;border-radius:50px;cursor:pointer;letter-spacing:2px;
 }
-.scan-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,75,18,0.6); }
-.scan-btn::after{
-  content:"";position:absolute;top:0;left:-100%;width:50%;height:100%;
-  background:linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
-  animation:sweep 3s ease-in-out infinite;
-}
-@keyframes sweep{ 0%{left:-100%;} 50%{left:200%;} 100%{left:200%;} }
-
 #scan-hint{
-  position:fixed;bottom:max(36px, env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+  position:fixed;bottom:36px;left:50%;transform:translateX(-50%);
   color:var(--ink);background:rgba(10,10,12,0.92);padding:14px 24px;border-radius:12px;
-  font-family:'JetBrains Mono',monospace;font-size:clamp(10px,3vw,12px);font-weight:600;z-index:99;
-  border:1px solid var(--pulsar-orange);pointer-events:none;text-align:center;letter-spacing:1.5px;
-  backdrop-filter: blur(8px); max-width:90vw; width:max-content;
+  font-family:'JetBrains Mono',monospace;font-size:12px;z-index:99;
+  border:1px solid var(--pulsar-orange);pointer-events:none;
 }
 </style>
 </head>
 <body>
 
 <div id="start-overlay">
-  <div class="hero-photo-wrap">
-    <img id="bike-hero-img" src="front.jpg" alt="Scooter BKU 0929">
-  </div>
-  <div class="content-wrap">
-    <div>
-      <div class="eyebrow-row">
-        <div class="led-dot"></div>
-        <span id="app-eyebrow" class="eyebrow">AR Spec System</span>
-      </div>
-      <h1 id="app-title" class="brand-title">Scooter <span class="accent">BKU-0929</span></h1>
-    </div>
-    <div class="stat-strip" id="json-stats-container"></div>
-    <button class="scan-btn" onclick="startScanner()">
-      <span>Launch AR Telemetry</span>
-    </button>
-  </div>
+  <button class="scan-btn" onclick="startScanner()">Launch AR Telemetry</button>
 </div>
 
-<div id="scan-hint">Point Camera at Scooter Front to Begin</div>
+<div id="scan-hint">Aim Camera at Scooter Front Target</div>
 
-<a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; filterMinCF: 0.0001; filterBeta: 10; warmupTolerance: 2; missTolerance: 3; uiScanning: no;" 
-         color-space="sRGB" 
-         renderer="colorManagement: true, physicallyCorrectLights" 
-         vr-mode-ui="enabled: false" 
-         device-orientation-permission-ui="enabled: false">
+<a-scene id="ar-scene" mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiScanning: no;" 
+         color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false">
   
   <a-assets>
+    <!-- බ්ලෙන්ඩර් එකෙන් එක්ස්පෝට් කරපු 3D Frame එක (scooter_hud.glb නමින් සේව් කරන්න) -->
     <a-asset-item id="blender-frame" src="scooter_hud.glb"></a-asset-item>
   </a-assets>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
+  <!-- Image Marker එක අහුවුනාම ක්‍රියාත්මක වන කොටස -->
   <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
     
-    <a-entity id="3d-hud-mesh" gltf-model="#blender-frame" position="0 0 0.02" scale="1.1 1.1 1.1"></a-entity>
+    <!-- TOP TITLE: NS200 / AR SPEC SCANNER (පින්තූරයේ ඉහළින්ම ඇති කොටස) -->
+    <a-entity id="top-hud-title" position="0 0.8 0.05">
+      <a-plane width="0.8" height="0.12" color="#ff4b12" opacity="0.15" material="transparent:true; shader:flat; side:double"></a-plane>
+      <a-entity line="start: -0.4 0.06 0.001; end: 0.4 0.06 0.001; color: #ff4b12; opacity:0.9"></a-entity>
+      <a-entity line="start: -0.4 -0.06 0.001; end: 0.4 -0.06 0.001; color: #ff4b12; opacity:0.9"></a-entity>
+      <a-text value="NS200 / AR SPEC SCANNER" color="#ffffff" align="center" font="roboto" width="1.4" letter-spacing="2" position="0 -0.005 0.01"></a-text>
+    </a-entity>
 
-    <a-entity id="brand-title" position="0 0.78 0.05"></a-entity>
+    <!-- CENTER BLENDER 3D FRAME: බ්ලෙන්ඩර් කූඩුව බයිසිකලය මත හරියටම පිහිටුවීම -->
+    <a-entity id="3d-hud-mesh" gltf-model="#blender-frame" position="0 0.1 0.02" scale="1.3 1.3 1.3">
+      <!-- Frame එක පිටුපසින් පෙනෙන ලස්සන Glowing Ring එක -->
+      <a-ring color="#ff4b12" radius-inner="0.48" radius-outer="0.5" opacity="0.4" position="0 0 -0.01" rotation="0 0 0"></a-ring>
+    </a-entity>
 
-    <a-entity id="specs-container" position="0 0 0" visible="true"></a-entity>
+    <!-- FIXED UI CARDS: පින්තූරයේ පරිදි වටේට ඇති ස්ථාවර Spec Cards එකතු වන ස්ථානය -->
+    <a-entity id="static-ui-container" position="0 0 0.05"></a-entity>
 
   </a-entity>
 </a-scene>
 
 <script>
-  // Scooter එකට අදාළ දත්ත JSON එකට ඇතුළත් කළා
-  const backendJsonData = {
-    "brandName": "Scooter",
-    "modelName": "BKU-0929",
-    "systemTag": "AR Spec Telemetry",
-    "dashboardSpecs": [
-      { "value": "124.8 cc", "label": "Engine" },
-      { "value": "9.38 PS", "label": "Max Power" },
-      { "value": "SmartXonnect", "label": "System" }
-    ],
-    "arSeparateCards": [
-      { "title": "ENGINE", "desc": "124.8 CC SINGLE CYLINDER" },
-      { "title": "POWER", "desc": "9.38 PS @ 7000 RPM" },
-      { "title": "TORQUE", "desc": "10.5 NM @ 5500 RPM" },
-      { "title": "LIGHTS", "desc": "STEALTH LED HEADLAMP" },
-      { "title": "DISPLAY", "desc": "DIGITAL CONSOLE W/ BT" }
-    ]
-  };
+  // පින්තූරයේ ඇති දත්ත වලට අනුව නිවැරදි කරන ලද UI Layout Data
+  const fixedCardsData = [
+    // වම් පස කාඩ්ස් (X අගය සෘණ වේ)
+    { title: "ENGINE", desc: "199.5 CC\nLiquid Cooled\n\n199.5 CC\nJetBrains Mono\nMono", x: -0.65, y: 0.1, align: "left" },
+    
+    // මැද කාඩ් එක (බයිසිකලයේ මැදින්ම මතුවන POWER කාඩ් එක)
+    { title: "POWER", desc: "Max Power: 24.5 PS\nMax Power: 24.5 PS\nMax Grand: 24.5 PS", x: 0.1, y: 0.12, align: "center", isCenter: true },
+    
+    // දකුණු පස කාඩ්ස් (X අගය ධන වේ)
+    { title: "MOITER", desc: "Bajaj Pulsar NS200\nTelemetry: FIAR\nType: Stratent", x: 0.65, y: 0.25, align: "left" },
+    { title: "HEET", desc: "Orbitron: 24.5 PS\nPower: 15.5 KM\nMachine: 2.5 PS", x: 0.65, y: -0.05, align: "left" },
+    { title: "PLCK", desc: "MaxIrtvnc:\ner-bitztron\nPower: 15mp\nProcessor: 1mm", x: 0.65, y: -0.35, align: "left" }
+  ];
 
-  let targetTracked = false;
-  let isDragging = false;
-  let previousMousePositionFull = { x: 0 };
-  const specsContainer = document.getElementById('specs-container');
+  function buildFixedUI() {
+    const container = document.getElementById('static-ui-container');
+    
+    fixedCardsData.forEach((card) => {
+      const cardEntity = document.createElement('a-entity');
+      cardEntity.setAttribute('position', `${card.x} ${card.y} 0`);
+      
+      // Card Background Box (පින්තූරයේ තියෙන වීදුරු ස්වභාවය ලබාදීමට)
+      const bg = document.createElement('a-plane');
+      bg.setAttribute('width', card.isCenter ? '0.38' : '0.34');
+      bg.setAttribute('height', card.isCenter ? '0.22' : '0.24');
+      bg.setAttribute('color', '#05070a');
+      bg.setAttribute('opacity', '0.65');
+      bg.setAttribute('material', 'transparent: true; side: double');
+      cardEntity.appendChild(bg);
+
+      // Neon Orange Borders (රතු/තැඹිලි පාට සිහින් දාර)
+      const w = card.isCenter ? 0.19 : 0.17;
+      const h = card.isCenter ? 0.11 : 0.12;
+      const mkLine = (x1, y1, x2, y2) => {
+        const l = document.createElement('a-entity');
+        l.setAttribute('line', `start: ${x1} ${y1} 0.002; end: ${x2} ${y2} 0.002; color: #ff4b12; opacity: 0.85`);
+        return l;
+      };
+      cardEntity.appendChild(mkLine(-w, h, w, h));
+      cardEntity.appendChild(mkLine(-w, -h, w, -h));
+      cardEntity.appendChild(mkLine(-w, -h, -w, h));
+      cardEntity.appendChild(mkLine(w, -h, w, h));
+
+      // Title Text
+      const title = document.createElement('a-text');
+      title.setAttribute('value', card.title);
+      title.setAttribute('color', '#ffffff');
+      title.setAttribute('align', 'center');
+      title.setAttribute('position', `0 ${h - 0.03} 0.005`);
+      title.setAttribute('width', '0.75');
+      title.setAttribute('font', 'roboto');
+      cardEntity.appendChild(title);
+
+      // Description/Specs Text
+      const desc = document.createElement('a-text');
+      desc.setAttribute('value', card.desc);
+      desc.setAttribute('color', card.isCenter ? '#ffffff' : '#d9dde1');
+      desc.setAttribute('align', card.isCenter ? 'center' : 'left');
+      desc.setAttribute('position', card.isCenter ? '0 -0.02 0.005' : `-0.14 -0.02 0.005`);
+      desc.setAttribute('width', '0.52');
+      desc.setAttribute('font', 'roboto');
+      cardEntity.appendChild(desc);
+
+      container.appendChild(cardEntity);
+    });
+  }
 
   document.addEventListener("DOMContentLoaded", () => {
-    // Inject UI Loading Screen Content
-    document.getElementById("app-eyebrow").innerText = backendJsonData.systemTag;
-    document.getElementById("app-title").innerHTML = `${backendJsonData.brandName} <span class="accent">${backendJsonData.modelName}</span>`;
+    buildFixedUI();
     
-    const gridContainer = document.getElementById("json-stats-container");
-    gridContainer.innerHTML = "";
-    backendJsonData.dashboardSpecs.forEach(spec => {
-      const statBlock = document.createElement("div");
-      statBlock.className = "stat";
-      statBlock.innerHTML = `<span class="stat-value">${spec.value}</span><span class="stat-label">${spec.label}</span>`;
-      gridContainer.appendChild(statBlock);
-    });
-
-    // FLOATING BRAND TITLE ABOVE OBJECT
-    const brandTitleEntity = document.getElementById('brand-title');
-
-    const brandGlow = document.createElement('a-plane');
-    brandGlow.setAttribute('width', '0.74');
-    brandGlow.setAttribute('height', '0.2');
-    brandGlow.setAttribute('color', '#00e0ff');
-    brandGlow.setAttribute('opacity', '0.16');
-    brandGlow.setAttribute('material', 'transparent: true; shader: flat; side: double');
-    brandGlow.setAttribute('position', '0 0 -0.006');
-
-    const brandGlass = document.createElement('a-plane');
-    brandGlass.setAttribute('width', '0.64');
-    brandGlass.setAttribute('height', '0.15');
-    brandGlass.setAttribute('color', '#dbe7ee');
-    brandGlass.setAttribute('opacity', '0.1');
-    brandGlass.setAttribute('material', 'transparent: true; shader: flat; side: double');
-    brandGlass.setAttribute('position', '0 0 -0.003');
-
-    const brandBg = document.createElement('a-plane');
-    brandBg.setAttribute('width', '0.64');
-    brandBg.setAttribute('height', '0.15');
-    brandBg.setAttribute('color', '#05070a');
-    brandBg.setAttribute('opacity', '0.6');
-    brandBg.setAttribute('material', 'transparent: true; side: double');
-    brandBg.setAttribute('position', '0 0 -0.0015');
-
-    const brandShine = document.createElement('a-plane');
-    brandShine.setAttribute('width', '0.58');
-    brandShine.setAttribute('height', '0.03');
-    brandShine.setAttribute('color', '#ffffff');
-    brandShine.setAttribute('opacity', '0.12');
-    brandShine.setAttribute('material', 'transparent: true; shader: flat; side: double');
-    brandShine.setAttribute('position', '0 0.052 0.0005');
-
-    const brandAccentTop = document.createElement('a-entity');
-    brandAccentTop.setAttribute('line', 'start: -0.32 0.075 0.001; end: 0.32 0.075 0.001; color: #00e0ff; opacity: 0.9');
-    const brandAccentBottom = document.createElement('a-entity');
-    brandAccentBottom.setAttribute('line', 'start: -0.32 -0.075 0.001; end: 0.32 -0.075 0.001; color: #ffb400; opacity: 0.9');
-
-    const brandText = document.createElement('a-text');
-    brandText.setAttribute('value', `${backendJsonData.brandName.toUpperCase()} ${backendJsonData.modelName.toUpperCase()}`);
-    brandText.setAttribute('color', '#ffb400');
-    brandText.setAttribute('align', 'center');
-    brandText.setAttribute('position', '0 -0.008 0.01');
-    brandText.setAttribute('width', '1.1');
-    brandText.setAttribute('font', 'roboto');
-    brandText.setAttribute('letter-spacing', '2');
-
-    brandTitleEntity.appendChild(brandGlow);
-    brandTitleEntity.appendChild(brandGlass);
-    brandTitleEntity.appendChild(brandBg);
-    brandTitleEntity.appendChild(brandShine);
-    brandTitleEntity.appendChild(brandAccentTop);
-    brandTitleEntity.appendChild(brandAccentBottom);
-    brandTitleEntity.appendChild(brandText);
-
-    // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA — 360° HELIX AROUND THE OBJECT
-    const cardsData = backendJsonData.arSeparateCards;
-    const totalCards = cardsData.length;
-    const ringRadius = 0.85;     
-    const heightSpan = 0.8;     
-
-    const accentPalette = ['#00e0ff', '#ffb400', '#ff4b12', '#00e0ff', '#ffb400'];
-
-    cardsData.forEach((card, index) => {
-      const angle = (index / totalCards) * Math.PI * 2;
-      const t = totalCards > 1 ? index / (totalCards - 1) : 0.5;
-      const posY = (0.5 - t) * heightSpan;
-
-      const posX = Math.sin(angle) * ringRadius;
-      const posZ = Math.cos(angle) * ringRadius;
-      const accent = accentPalette[index % accentPalette.length];
-
-      const leaderLine = document.createElement('a-entity');
-      leaderLine.setAttribute('line', `start: 0 0 0; end: ${posX * 0.9} ${posY * 0.9} ${posZ * 0.9}; color: ${accent}; opacity: 0.5`);
-      specsContainer.appendChild(leaderLine);
-
-      const nodeDot = document.createElement('a-circle');
-      nodeDot.setAttribute('radius', '0.012');
-      nodeDot.setAttribute('color', accent);
-      nodeDot.setAttribute('position', `${posX * 0.62} ${posY * 0.62} ${posZ * 0.62}`);
-      nodeDot.setAttribute('material', 'shader: flat');
-      nodeDot.setAttribute('animation', 'property: scale; dir: alternate; dur: 1100; easing: easeInOutSine; loop: true; to: 1.5 1.5 1.5');
-      specsContainer.appendChild(nodeDot);
-
-      const cardEntity = document.createElement('a-entity');
-      cardEntity.setAttribute('class', 'spec-card');
-      cardEntity.setAttribute('position', `${posX} ${posY} ${posZ}`);
-      cardEntity.setAttribute('look-at', '0 0 0');
-      cardEntity.setAttribute('animation__bob', `property: position; dir: alternate; dur: ${2200 + index * 180}; easing: easeInOutSine; loop: true; to: ${posX} ${posY + 0.035} ${posZ}`);
-
-      const buildGlassFace = (rotY) => {
-        const face = document.createElement('a-entity');
-        face.setAttribute('rotation', `0 ${rotY} 0`);
-
-        const glow = document.createElement('a-plane');
-        glow.setAttribute('width', '0.54');
-        glow.setAttribute('height', '0.26');
-        glow.setAttribute('color', accent);
-        glow.setAttribute('opacity', '0.15');
-        glow.setAttribute('material', 'transparent: true; shader: flat; side: front');
-        glow.setAttribute('position', '0 0 -0.006');
-        face.appendChild(glow);
-
-        const glass = document.createElement('a-plane');
-        glass.setAttribute('width', '0.46');
-        glass.setAttribute('height', '0.2');
-        glass.setAttribute('color', '#dbe7ee');
-        glass.setAttribute('opacity', '0.12');
-        glass.setAttribute('material', 'transparent: true; shader: flat; side: front');
-        glass.setAttribute('position', '0 0 -0.003');
-        face.appendChild(glass);
-
-        const tint = document.createElement('a-plane');
-        tint.setAttribute('width', '0.46');
-        tint.setAttribute('height', '0.2');
-        tint.setAttribute('color', '#05070a');
-        tint.setAttribute('opacity', '0.45');
-        tint.setAttribute('material', 'transparent: true; shader: flat; side: front');
-        tint.setAttribute('position', '0 0 -0.0015');
-        face.appendChild(tint);
-
-        const shine = document.createElement('a-plane');
-        shine.setAttribute('width', '0.4');
-        shine.setAttribute('height', '0.04');
-        shine.setAttribute('color', '#ffffff');
-        shine.setAttribute('opacity', '0.12');
-        shine.setAttribute('material', 'transparent: true; shader: flat; side: front');
-        shine.setAttribute('position', '0 0.072 0.0005');
-        face.appendChild(shine);
-
-        const mkLine = (x1, y1, x2, y2) => {
-          const l = document.createElement('a-entity');
-          l.setAttribute('line', `start: ${x1} ${y1} 0.003; end: ${x2} ${y2} 0.003; color: ${accent}; opacity: 0.85`);
-          return l;
-        };
-        face.appendChild(mkLine(-0.21, 0.1, 0.21, 0.1));
-        face.appendChild(mkLine(-0.21, -0.1, 0.21, -0.1));
-        face.appendChild(mkLine(-0.23, -0.08, -0.23, 0.08));
-        face.appendChild(mkLine(0.23, -0.08, 0.23, 0.08));
-
-        const chip = document.createElement('a-circle');
-        chip.setAttribute('radius', '0.011');
-        chip.setAttribute('color', accent);
-        chip.setAttribute('position', '-0.185 0.075 0.004');
-        chip.setAttribute('material', 'shader: flat');
-        face.appendChild(chip);
-
-        const titleText = document.createElement('a-text');
-        titleText.setAttribute('value', card.title);
-        titleText.setAttribute('color', accent);
-        titleText.setAttribute('align', 'center');
-        titleText.setAttribute('position', '0 0.045 0.006');
-        titleText.setAttribute('width', '0.85');
-        titleText.setAttribute('font', 'roboto');
-        titleText.setAttribute('letter-spacing', '1');
-        face.appendChild(titleText);
-
-        const descText = document.createElement('a-text');
-        descText.setAttribute('value', card.desc);
-        descText.setAttribute('color', '#f3efe6');
-        descText.setAttribute('align', 'center');
-        descText.setAttribute('position', '0 -0.035 0.006');
-        descText.setAttribute('width', '0.68');
-        descText.setAttribute('font', 'roboto');
-        face.appendChild(descText);
-
-        return face;
-      };
-
-      cardEntity.appendChild(buildGlassFace(0));    
-      cardEntity.appendChild(buildGlassFace(180));  
-      specsContainer.appendChild(cardEntity);
-    });
-
-    // MindAR Trackers
+    // Target එක හඳුනාගත් පසු Glow Ring එක කරකැවීමේ Animation එක
     const targetAnchor = document.getElementById('target-anchor');
-    targetAnchor.addEventListener("targetFound", () => { 
-      targetTracked = true; 
+    targetAnchor.addEventListener("targetFound", () => {
       document.getElementById("scan-hint").style.display = "none";
     });
-    targetAnchor.addEventListener("targetLost", () => { 
-      targetTracked = false; 
+    targetAnchor.addEventListener("targetLost", () => {
       document.getElementById("scan-hint").style.display = "block";
     });
-
-    // Run continuous spin framework loop
-    autoSpin();
   });
-
-  // Smooth Interactive Touch/Drag Orbit System
-  const startDrag = (clientX) => { isDragging = true; previousMousePositionFull.x = clientX; };
-  const updateDrag = (clientX) => {
-    if (!isDragging || !targetTracked) return;
-    const deltaX = clientX - previousMousePositionFull.x;
-    const currentRotation = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
-    specsContainer.setAttribute('rotation', {
-      x: currentRotation.x,
-      y: currentRotation.y + deltaX * 0.4,
-      z: currentRotation.z
-    });
-    previousMousePositionFull.x = clientX;
-  };
-  const endDrag = () => { isDragging = false; };
-
-  window.addEventListener('mousedown', (e) => startDrag(e.clientX));
-  window.addEventListener('mousemove', (e) => updateDrag(e.clientX));
-  window.addEventListener('mouseup', endDrag);
-  window.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientX); });
-  window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientX); });
-  window.addEventListener('touchend', endDrag);
-
-  // Auto Orbit Engine Control
-  function autoSpin() {
-    requestAnimationFrame(autoSpin);
-    if (!isDragging && targetTracked) {
-      const currentRot = specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
-      specsContainer.setAttribute('rotation', {
-        x: currentRot.x,
-        y: currentRot.y + 0.25,
-        z: currentRot.z
-      });
-      
-      // Blender mesh එකේ රවුම වෙනම කැරකැවීමට (Optional animation)
-      const blenderMesh = document.getElementById('3d-hud-mesh');
-      if(blenderMesh) {
-         // බ්ලෙන්ඩර් mesh එක ස්ථාවරව තබා Specs පමණක් කරකවනු ලබයි
-      }
-    }
-  }
 
   function startScanner() {
     const overlay = document.getElementById('start-overlay');
     overlay.style.opacity = '0';
-    overlay.style.transform = 'scale(1.05)';
     setTimeout(() => { 
       overlay.style.display = 'none'; 
-      // User click කළ පසු කැමරාව සහ MindAR active කිරීම
       document.getElementById('ar-scene').components['mindar-image'].start();
-    }, 800);
+    }, 500);
   }
 </script>
 </body>
