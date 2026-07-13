@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>Pulsar NS200 — AR HUD Scanner</title>
+<title>Bajaj Pulsar NS200 — AR Spec Scanner</title>
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,164 +12,506 @@
 <style>
 :root{
   --carbon:#0a0a0c;
+  --carbon-2:#141416;
   --pulsar-orange:#ff4b12;
+  --pulsar-amber:#ffb400;
   --telemetry-cyan:#00e0ff;
+  --geo-silver:#d9dde1;
   --ink:#f3efe6;
   --ink-dim:#9a9a9e;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;overflow:hidden;width:100%;height:100%;background-color:transparent;font-family:'Rajdhani',sans-serif;}
 a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
+
 #mindar-ui-scanning, .mindar-ui-overlay { display: none !important; }
 
-/* LOADING SCREEN */
+/* ============ MODERN LOADING SCREEN ============ */
 #start-overlay{
   position:fixed;inset:0;width:100%;height:100%;z-index:9999;
   background:radial-gradient(circle at center, #141416 0%, #050506 100%);
-  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  display:flex;flex-direction:column;
+  transition:all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow:hidden;
 }
+.hero-photo-wrap{
+  position:relative;width:100%;height:48%;min-height:240px;overflow:hidden;
+  clip-path:polygon(0 0,100% 0,100% 86%,0 100%);
+  border-bottom: 2px solid var(--pulsar-orange);
+}
+.hero-photo-wrap img{
+  width:100%;height:100%;object-fit:cover;object-position:center 35%;
+  filter:saturate(1.1) contrast(1.1);
+  transition: transform 6s ease;
+}
+#start-overlay:hover .hero-photo-wrap img { transform: scale(1.06); }
+.hero-photo-wrap::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg, rgba(5,5,6,0) 30%, rgba(5,5,6,0.98) 98%),
+             linear-gradient(90deg, rgba(5,5,6,0.5) 0%, rgba(5,5,6,0) 50%);
+}
+
+.content-wrap{
+  flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:20px max(26px, 5%) max(26px, env(safe-area-inset-bottom)) max(26px, 5%);
+  text-align:center;
+}
+.eyebrow-row{ display:flex;align-items:center;gap:10px;margin-bottom:12px; }
+.led-dot{width:9px;height:9px;border-radius:50%;background:var(--pulsar-orange);
+  box-shadow:0 0 12px var(--pulsar-orange);animation:pulse 1.4s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(0.85);}}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:clamp(10px, 2.5vw, 13px);letter-spacing:4px;
+  color:var(--telemetry-cyan);text-transform:uppercase;
+}
+.brand-title{
+  font-family:'Orbitron',sans-serif;font-weight:900;color:var(--ink);
+  font-size:clamp(30px, 8vw, 52px);line-height:1.1;letter-spacing:2px;
+  text-transform:uppercase;margin:0;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+.brand-title .accent{ color:var(--pulsar-orange); }
+
+.stat-strip{
+  display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;
+  width:100%;max-width:640px;margin:28px 0;
+  background:rgba(255,255,255,0.03);border-radius:14px;
+  border:1px solid rgba(255,255,255,0.08);padding:16px;
+}
+.stat{ text-align:center;border-right:1px solid rgba(255,255,255,0.08); }
+.stat:last-child{border-right:none;}
+.stat-value{
+  font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(16px, 4.5vw, 24px);color:var(--ink);
+  display:block;
+}
+.stat-label{
+  font-family:'JetBrains Mono',monospace;font-size:clamp(9px, 2.3vw, 11px);letter-spacing:1.5px;
+  color:var(--ink-dim);text-transform:uppercase;display:block;margin-top:6px;
+}
+
 .scan-btn{
-  background:linear-gradient(135deg,var(--pulsar-orange),#ffb400);
-  border:none;color:#0a0a0a;padding:18px 45px;font-size:16px;font-weight:900;
-  font-family:'Orbitron',sans-serif;border-radius:50px;cursor:pointer;letter-spacing:2px;
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--pulsar-orange),var(--pulsar-amber));
+  border:none;color:#0a0a0a;padding:18px 45px;font-size:clamp(13px, 3.5vw, 16px);font-weight:900;
+  font-family:'Orbitron',sans-serif;border-radius:50px;cursor:pointer;letter-spacing:3px;text-transform:uppercase;
+  box-shadow:0 8px 32px rgba(255,75,18,0.45);width:100%;max-width:340px;transition:all 0.3s ease;
 }
+.scan-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,75,18,0.6); }
+.scan-btn::after{
+  content:"";position:absolute;top:0;left:-100%;width:50%;height:100%;
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation:sweep 3s ease-in-out infinite;
+}
+@keyframes sweep{ 0%{left:-100%;} 50%{left:200%;} 100%{left:200%;} }
+
 #scan-hint{
-  position:fixed;bottom:36px;left:50%;transform:translateX(-50%);
+  position:fixed;bottom:max(36px, env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
   color:var(--ink);background:rgba(10,10,12,0.92);padding:14px 24px;border-radius:12px;
-  font-family:'JetBrains Mono',monospace;font-size:12px;z-index:99;
-  border:1px solid var(--pulsar-orange);pointer-events:none;
+  font-family:'JetBrains Mono',monospace;font-size:clamp(10px,3vw,12px);font-weight:600;z-index:99;
+  border:1px solid var(--pulsar-orange);pointer-events:none;text-align:center;letter-spacing:1.5px;
+  backdrop-filter: blur(8px); max-width:90vw; width:max-content;
 }
 </style>
 </head>
 <body>
 
 <div id="start-overlay">
-  <button class="scan-btn" onclick="startScanner()">Launch AR Telemetry</button>
+  <div class="hero-photo-wrap">
+    <img id="bike-hero-img" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz..." alt="Bajaj Pulsar NS200">
+  </div>
+  <div class="content-wrap">
+    <div>
+      <div class="eyebrow-row">
+        <div class="led-dot"></div>
+        <span id="app-eyebrow" class="eyebrow">AR Spec System</span>
+      </div>
+      <h1 id="app-title" class="brand-title">Pulsar <span class="accent">NS200</span></h1>
+    </div>
+    <div class="stat-strip" id="json-stats-container"></div>
+    <button class="scan-btn" onclick="startScanner()">
+      <span>Launch AR Telemetry</span>
+    </button>
+  </div>
 </div>
 
-<div id="scan-hint">Aim Camera at Scooter Front Target</div>
+<div id="scan-hint">Aim Camera at Pulsar Target Image</div>
 
-<a-scene id="ar-scene" mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiScanning: no;" 
-         color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false">
-  
+<a-scene id="ar-scene" mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 0.001; uiScanning: no;" 
+         color-space="sRGB" 
+         renderer="colorManagement: true, physicallyCorrectLights" 
+         vr-mode-ui="enabled: false" 
+         device-orientation-permission-ui="enabled: false">
+
+  <!-- Real frame model, exported from Blender -->
   <a-assets>
-    <!-- බ්ලෙන්ඩර් එකෙන් එක්ස්පෝට් කරපු 3D Frame එක (scooter_hud.glb නමින් සේව් කරන්න) -->
-    <a-asset-item id="blender-frame" src="scooter_hud.glb"></a-asset-item>
+    <a-asset-item id="frame-model" src="./scooter_hud.glb"></a-asset-item>
   </a-assets>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <!-- Image Marker එක අහුවුනාම ක්‍රියාත්මක වන කොටස -->
-  <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
-    
-    <!-- TOP TITLE: NS200 / AR SPEC SCANNER (පින්තූරයේ ඉහළින්ම ඇති කොටස) -->
-    <a-entity id="top-hud-title" position="0 0.8 0.05">
-      <a-plane width="0.8" height="0.12" color="#ff4b12" opacity="0.15" material="transparent:true; shader:flat; side:double"></a-plane>
-      <a-entity line="start: -0.4 0.06 0.001; end: 0.4 0.06 0.001; color: #ff4b12; opacity:0.9"></a-entity>
-      <a-entity line="start: -0.4 -0.06 0.001; end: 0.4 -0.06 0.001; color: #ff4b12; opacity:0.9"></a-entity>
-      <a-text value="NS200 / AR SPEC SCANNER" color="#ffffff" align="center" font="roboto" width="1.4" letter-spacing="2" position="0 -0.005 0.01"></a-text>
-    </a-entity>
+  <!-- Target anchors (one per bike) are generated dynamically in JS below,
+       one <a-entity mindar-image-target="targetIndex: N"> per bike in bikeDatabase.
+       targetIndex order MUST match the order the images were compiled into targets.mind -->
 
-    <!-- CENTER BLENDER 3D FRAME: බ්ලෙන්ඩර් කූඩුව බයිසිකලය මත හරියටම පිහිටුවීම -->
-    <a-entity id="3d-hud-mesh" gltf-model="#blender-frame" position="0 0.1 0.02" scale="1.3 1.3 1.3">
-      <!-- Frame එක පිටුපසින් පෙනෙන ලස්සන Glowing Ring එක -->
-      <a-ring color="#ff4b12" radius-inner="0.48" radius-outer="0.5" opacity="0.4" position="0 0 -0.01" rotation="0 0 0"></a-ring>
-    </a-entity>
-
-    <!-- FIXED UI CARDS: පින්තූරයේ පරිදි වටේට ඇති ස්ථාවර Spec Cards එකතු වන ස්ථානය -->
-    <a-entity id="static-ui-container" position="0 0 0.05"></a-entity>
-
-  </a-entity>
 </a-scene>
 
 <script>
-  // පින්තූරයේ ඇති දත්ත වලට අනුව නිවැරදි කරන ලද UI Layout Data
-  const fixedCardsData = [
-    // වම් පස කාඩ්ස් (X අගය සෘණ වේ)
-    { title: "ENGINE", desc: "199.5 CC\nLiquid Cooled\n\n199.5 CC\nJetBrains Mono\nMono", x: -0.65, y: 0.1, align: "left" },
-    
-    // මැද කාඩ් එක (බයිසිකලයේ මැදින්ම මතුවන POWER කාඩ් එක)
-    { title: "POWER", desc: "Max Power: 24.5 PS\nMax Power: 24.5 PS\nMax Grand: 24.5 PS", x: 0.1, y: 0.12, align: "center", isCenter: true },
-    
-    // දකුණු පස කාඩ්ස් (X අගය ධන වේ)
-    { title: "MOITER", desc: "Bajaj Pulsar NS200\nTelemetry: FIAR\nType: Stratent", x: 0.65, y: 0.25, align: "left" },
-    { title: "HEET", desc: "Orbitron: 24.5 PS\nPower: 15.5 KM\nMachine: 2.5 PS", x: 0.65, y: -0.05, align: "left" },
-    { title: "PLCK", desc: "MaxIrtvnc:\ner-bitztron\nPower: 15mp\nProcessor: 1mm", x: 0.65, y: -0.35, align: "left" }
+  // ============ FRAME MODE ============
+  // Set this to true ONCE you have uploaded the real .glb export, placed it next
+  // to this HTML file, and uncommented the <a-assets> block above.
+  const USE_GLB_FRAME = true;
+
+  // ============ MULTI-BIKE DATABASE ============
+  // Each entry = one physical target image, matched by array index (targetIndex).
+  // IMPORTANT: the order here MUST match the order images were compiled into targets.mind
+  // (image #1 in the compiler -> index 0, image #2 -> index 1, and so on).
+  const bikeDatabase = [
+    {
+      "brandName": "Pulsar",
+      "modelName": "NS200",
+      "systemTag": "AR Spec Scanner",
+      "dashboardSpecs": [
+        { "value": "24.5 PS", "label": "Max Power" },
+        { "value": "18.7 Nm", "label": "Max Torque" },
+        { "value": "199.5 cc", "label": "Liquid Cooled" }
+      ],
+      "arSeparateCards": [
+        { "title": "ENGINE", "desc": "199.5 CC\nLIQUID COOLED" },
+        { "title": "POWER", "desc": "24.5 PS\n@ 9750 RPM" },
+        { "title": "TORQUE", "desc": "18.7 NM\n@ 8000 RPM" },
+        { "title": "BRAKES", "desc": "DUAL CHANNEL\nABS" },
+        { "title": "GEARBOX", "desc": "6-SPEED\nTRANSMISSION" }
+      ]
+    },
+    {
+      "brandName": "Pulsar",
+      "modelName": "220F",
+      "systemTag": "AR Spec Scanner",
+      "dashboardSpecs": [
+        { "value": "20.4 PS", "label": "Max Power" },
+        { "value": "18.55 Nm", "label": "Max Torque" },
+        { "value": "220 cc", "label": "Air Cooled" }
+      ],
+      "arSeparateCards": [
+        { "title": "ENGINE", "desc": "220 CC\nAIR COOLED" },
+        { "title": "POWER", "desc": "20.4 PS\n@ 8500 RPM" },
+        { "title": "TORQUE", "desc": "18.55 NM\n@ 7000 RPM" },
+        { "title": "BRAKES", "desc": "SINGLE CHANNEL\nABS" },
+        { "title": "GEARBOX", "desc": "5-SPEED\nTRANSMISSION" }
+      ]
+    },
+    {
+      "brandName": "Dominar",
+      "modelName": "400",
+      "systemTag": "AR Spec Scanner",
+      "dashboardSpecs": [
+        { "value": "40 PS", "label": "Max Power" },
+        { "value": "35 Nm", "label": "Max Torque" },
+        { "value": "373 cc", "label": "Liquid Cooled" }
+      ],
+      "arSeparateCards": [
+        { "title": "ENGINE", "desc": "373 CC\nLIQUID COOLED" },
+        { "title": "POWER", "desc": "40 PS\n@ 8800 RPM" },
+        { "title": "TORQUE", "desc": "35 NM\n@ 6500 RPM" },
+        { "title": "BRAKES", "desc": "DUAL CHANNEL\nABS" },
+        { "title": "GEARBOX", "desc": "6-SPEED\nTRANSMISSION" }
+      ]
+    },
+    {
+      "brandName": "Avenger",
+      "modelName": "220",
+      "systemTag": "AR Spec Scanner",
+      "dashboardSpecs": [
+        { "value": "19.03 PS", "label": "Max Power" },
+        { "value": "17.5 Nm", "label": "Max Torque" },
+        { "value": "220 cc", "label": "Air Cooled" }
+      ],
+      "arSeparateCards": [
+        { "title": "ENGINE", "desc": "220 CC\nAIR COOLED" },
+        { "title": "POWER", "desc": "19.03 PS\n@ 8500 RPM" },
+        { "title": "TORQUE", "desc": "17.5 NM\n@ 7000 RPM" },
+        { "title": "BRAKES", "desc": "SINGLE CHANNEL\nABS" },
+        { "title": "GEARBOX", "desc": "5-SPEED\nTRANSMISSION" }
+      ]
+    }
+    // Add more bikes here — just keep the same index order as targets.mind
   ];
 
-  function buildFixedUI() {
-    const container = document.getElementById('static-ui-container');
-    
-    fixedCardsData.forEach((card) => {
+  let isDragging = false;
+  let previousMousePosition = { x: 0 };
+
+  // Per-anchor runtime state, keyed by targetIndex
+  const anchorState = []; // { specsContainer, frameEntity, tracked }
+
+  const accentPalette = ['#ff4b12', '#00e0ff', '#ffb400', '#ff4b12', '#00e0ff', '#ffb400'];
+
+  // ============ FRAME: procedural octagon (fallback, no glb needed) ============
+  function buildOctagonFrame(color) {
+    const frame = document.createElement('a-entity');
+    frame.setAttribute('visible', 'false');
+    frame.setAttribute('position', '0 0 0.02');
+
+    const sides = 8;
+    const rX = 0.5;   // horizontal radius
+    const rY = 0.68;  // vertical radius (elongated, like a headlight cowl outline)
+    const points = [];
+    for (let i = 0; i < sides; i++) {
+      const angle = (i / sides) * Math.PI * 2 + Math.PI / 8;
+      points.push([Math.cos(angle) * rX, Math.sin(angle) * rY]);
+    }
+
+    // Outer glowing outline
+    for (let i = 0; i < sides; i++) {
+      const p1 = points[i];
+      const p2 = points[(i + 1) % sides];
+      const edge = document.createElement('a-entity');
+      edge.setAttribute('line', `start: ${p1[0]} ${p1[1]} 0; end: ${p2[0]} ${p2[1]} 0; color: ${color}`);
+      frame.appendChild(edge);
+    }
+    // Slightly inset inner line for a thicker "double stroke" glow look
+    for (let i = 0; i < sides; i++) {
+      const p1 = points[i];
+      const p2 = points[(i + 1) % sides];
+      const inset = 0.965;
+      const edge = document.createElement('a-entity');
+      edge.setAttribute('line', `start: ${p1[0] * inset} ${p1[1] * inset} -0.002; end: ${p2[0] * inset} ${p2[1] * inset} -0.002; color: ${color}; opacity: 0.5`);
+      frame.appendChild(edge);
+    }
+
+    frame.frameAnim = null; // static frame, no per-frame animation needed
+    return frame;
+  }
+
+  // ============ FRAME: real glb model (used once USE_GLB_FRAME = true) ============
+  function buildGlbFrame(color) {
+    const frame = document.createElement('a-entity');
+    frame.setAttribute('visible', 'false');
+    frame.setAttribute('gltf-model', '#frame-model');
+    frame.setAttribute('scale', '0.6 0.6 0.6');
+    frame.setAttribute('position', '0 0 0.02');
+    // Tint the glb's material to this bike's accent color, if the model exposes a material
+    frame.addEventListener('model-loaded', () => {
+      const mesh = frame.getObject3D('mesh');
+      if (mesh) {
+        mesh.traverse((node) => {
+          if (node.isMesh && node.material) {
+            // Clone the material per-instance — the glb asset is shared/cached across
+            // all 4 bike anchors, so tinting the original material would recolor every
+            // bike's frame at once. Cloning keeps each bike's accent color independent.
+            node.material = node.material.clone();
+            node.material.color && node.material.color.set(color);
+            node.material.emissive && node.material.emissive.set(color);
+          }
+        });
+      }
+    });
+    frame.frameAnim = null;
+    return frame;
+  }
+
+  function buildFrame(color) {
+    return USE_GLB_FRAME ? buildGlbFrame(color) : buildOctagonFrame(color);
+  }
+
+  // ============ BUILD SPEC CARDS FOR ONE BIKE (dark-box style) ============
+  function buildCards(specsContainer, bikeData) {
+    const cardsData = bikeData.arSeparateCards;
+    const totalCards = cardsData.length;
+    const radius = 0.85;
+
+    cardsData.forEach((card, index) => {
+      const angle = (index / totalCards) * Math.PI * 2;
+      const posX = Math.cos(angle) * radius;
+      const posY = Math.sin(angle) * radius;
+      const accent = accentPalette[index % accentPalette.length];
+
       const cardEntity = document.createElement('a-entity');
-      cardEntity.setAttribute('position', `${card.x} ${card.y} 0`);
-      
-      // Card Background Box (පින්තූරයේ තියෙන වීදුරු ස්වභාවය ලබාදීමට)
-      const bg = document.createElement('a-plane');
-      bg.setAttribute('width', card.isCenter ? '0.38' : '0.34');
-      bg.setAttribute('height', card.isCenter ? '0.22' : '0.24');
-      bg.setAttribute('color', '#05070a');
-      bg.setAttribute('opacity', '0.65');
-      bg.setAttribute('material', 'transparent: true; side: double');
-      cardEntity.appendChild(bg);
+      cardEntity.setAttribute('class', 'spec-card');
+      cardEntity.setAttribute('position', `${posX} ${posY} 0.15`);
 
-      // Neon Orange Borders (රතු/තැඹිලි පාට සිහින් දාර)
-      const w = card.isCenter ? 0.19 : 0.17;
-      const h = card.isCenter ? 0.11 : 0.12;
-      const mkLine = (x1, y1, x2, y2) => {
-        const l = document.createElement('a-entity');
-        l.setAttribute('line', `start: ${x1} ${y1} 0.002; end: ${x2} ${y2} 0.002; color: #ff4b12; opacity: 0.85`);
-        return l;
-      };
-      cardEntity.appendChild(mkLine(-w, h, w, h));
-      cardEntity.appendChild(mkLine(-w, -h, w, -h));
-      cardEntity.appendChild(mkLine(-w, -h, -w, h));
-      cardEntity.appendChild(mkLine(w, -h, w, h));
+      const angleDegrees = (angle * 180) / Math.PI;
+      cardEntity.setAttribute('rotation', `0 0 ${angleDegrees - 90}`);
 
-      // Title Text
-      const title = document.createElement('a-text');
-      title.setAttribute('value', card.title);
-      title.setAttribute('color', '#ffffff');
-      title.setAttribute('align', 'center');
-      title.setAttribute('position', `0 ${h - 0.03} 0.005`);
-      title.setAttribute('width', '0.75');
-      title.setAttribute('font', 'roboto');
-      cardEntity.appendChild(title);
+      // Dark semi-transparent box (matches the reference photo's card look)
+      const bgPlane = document.createElement('a-plane');
+      bgPlane.setAttribute('width', '0.48');
+      bgPlane.setAttribute('height', '0.22');
+      bgPlane.setAttribute('color', '#1a140f');
+      bgPlane.setAttribute('opacity', '0.82');
+      bgPlane.setAttribute('material', 'transparent: true; side: double; shader: flat');
 
-      // Description/Specs Text
-      const desc = document.createElement('a-text');
-      desc.setAttribute('value', card.desc);
-      desc.setAttribute('color', card.isCenter ? '#ffffff' : '#d9dde1');
-      desc.setAttribute('align', card.isCenter ? 'center' : 'left');
-      desc.setAttribute('position', card.isCenter ? '0 -0.02 0.005' : `-0.14 -0.02 0.005`);
-      desc.setAttribute('width', '0.52');
-      desc.setAttribute('font', 'roboto');
-      cardEntity.appendChild(desc);
+      // Single crisp border outline in the accent color
+      const outline = document.createElement('a-entity');
+      outline.setAttribute('line', `start: -0.24 0.11 0.002; end: 0.24 0.11 0.002; color: ${accent}`);
+      const outlineBottom = document.createElement('a-entity');
+      outlineBottom.setAttribute('line', `start: -0.24 -0.11 0.002; end: 0.24 -0.11 0.002; color: ${accent}`);
+      const outlineLeft = document.createElement('a-entity');
+      outlineLeft.setAttribute('line', `start: -0.24 -0.11 0.002; end: -0.24 0.11 0.002; color: ${accent}`);
+      const outlineRight = document.createElement('a-entity');
+      outlineRight.setAttribute('line', `start: 0.24 -0.11 0.002; end: 0.24 0.11 0.002; color: ${accent}`);
 
-      container.appendChild(cardEntity);
+      // Header Text inside Card
+      const titleText = document.createElement('a-text');
+      titleText.setAttribute('value', card.title);
+      titleText.setAttribute('color', accent);
+      titleText.setAttribute('align', 'center');
+      titleText.setAttribute('position', '0 0.06 0.01');
+      titleText.setAttribute('width', '0.85');
+      titleText.setAttribute('font', 'roboto');
+      titleText.setAttribute('letter-spacing', '1');
+
+      // Description Text inside Card (supports multi-line via \n)
+      const descText = document.createElement('a-text');
+      descText.setAttribute('value', card.desc);
+      descText.setAttribute('color', '#f3efe6');
+      descText.setAttribute('align', 'center');
+      descText.setAttribute('position', '0 -0.03 0.01');
+      descText.setAttribute('width', '0.62');
+      descText.setAttribute('line-height', '38');
+      descText.setAttribute('font', 'roboto');
+
+      cardEntity.appendChild(bgPlane);
+      cardEntity.appendChild(outline);
+      cardEntity.appendChild(outlineBottom);
+      cardEntity.appendChild(outlineLeft);
+      cardEntity.appendChild(outlineRight);
+      cardEntity.appendChild(titleText);
+      cardEntity.appendChild(descText);
+      specsContainer.appendChild(cardEntity);
     });
   }
 
+  // ============ BUILD FLOATING BRAND TITLE FOR ONE BIKE ============
+  function buildBrandTitle(bikeData) {
+    const brandTitleEntity = document.createElement('a-entity');
+    brandTitleEntity.setAttribute('position', '0 1.05 0.05');
+
+    const brandBg = document.createElement('a-plane');
+    brandBg.setAttribute('width', '0.72');
+    brandBg.setAttribute('height', '0.15');
+    brandBg.setAttribute('color', '#1a140f');
+    brandBg.setAttribute('opacity', '0.82');
+    brandBg.setAttribute('material', 'transparent: true; side: double');
+
+    const brandAccentTop = document.createElement('a-entity');
+    brandAccentTop.setAttribute('line', 'start: -0.36 0.075 0.001; end: 0.36 0.075 0.001; color: #ff4b12');
+    const brandAccentBottom = document.createElement('a-entity');
+    brandAccentBottom.setAttribute('line', 'start: -0.36 -0.075 0.001; end: 0.36 -0.075 0.001; color: #ff4b12');
+
+    const brandText = document.createElement('a-text');
+    brandText.setAttribute('value', `${bikeData.modelName.toUpperCase()} / ${bikeData.systemTag.toUpperCase()}`);
+    brandText.setAttribute('color', '#f3efe6');
+    brandText.setAttribute('align', 'center');
+    brandText.setAttribute('position', '0 -0.008 0.01');
+    brandText.setAttribute('width', '1.25');
+    brandText.setAttribute('font', 'roboto');
+    brandText.setAttribute('letter-spacing', '1');
+
+    brandTitleEntity.appendChild(brandBg);
+    brandTitleEntity.appendChild(brandAccentTop);
+    brandTitleEntity.appendChild(brandAccentBottom);
+    brandTitleEntity.appendChild(brandText);
+    return brandTitleEntity;
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
-    buildFixedUI();
-    
-    // Target එක හඳුනාගත් පසු Glow Ring එක කරකැවීමේ Animation එක
-    const targetAnchor = document.getElementById('target-anchor');
-    targetAnchor.addEventListener("targetFound", () => {
-      document.getElementById("scan-hint").style.display = "none";
+    // Loading screen shows the first bike in the database as the default preview
+    const defaultBike = bikeDatabase[0];
+    document.getElementById("app-eyebrow").innerText = defaultBike.systemTag;
+    document.getElementById("app-title").innerHTML = `${defaultBike.brandName} <span class="accent">${defaultBike.modelName}</span>`;
+
+    const gridContainer = document.getElementById("json-stats-container");
+    gridContainer.innerHTML = "";
+    defaultBike.dashboardSpecs.forEach(spec => {
+      const statBlock = document.createElement("div");
+      statBlock.className = "stat";
+      statBlock.innerHTML = `<span class="stat-value">${spec.value}</span><span class="stat-label">${spec.label}</span>`;
+      gridContainer.appendChild(statBlock);
     });
-    targetAnchor.addEventListener("targetLost", () => {
-      document.getElementById("scan-hint").style.display = "block";
+
+    // ============ BUILD ONE ANCHOR PER BIKE ============
+    const arScene = document.getElementById('ar-scene');
+
+    bikeDatabase.forEach((bikeData, targetIndex) => {
+      const anchor = document.createElement('a-entity');
+      anchor.setAttribute('mindar-image-target', `targetIndex: ${targetIndex}`);
+
+      const accent = accentPalette[targetIndex % accentPalette.length];
+
+      const frameEntity = buildFrame(accent);
+      const brandTitle = buildBrandTitle(bikeData);
+
+      const specsContainer = document.createElement('a-entity');
+      specsContainer.setAttribute('position', '0 0 0');
+      specsContainer.setAttribute('visible', 'true');
+      buildCards(specsContainer, bikeData);
+
+      anchor.appendChild(frameEntity);
+      anchor.appendChild(brandTitle);
+      anchor.appendChild(specsContainer);
+      arScene.appendChild(anchor);
+
+      const state = { specsContainer, frameEntity, tracked: false };
+      anchorState[targetIndex] = state;
+
+      anchor.addEventListener("targetFound", () => {
+        state.tracked = true;
+        frameEntity.setAttribute('visible', 'true');
+        document.getElementById("scan-hint").style.display = "none";
+      });
+      anchor.addEventListener("targetLost", () => {
+        state.tracked = false;
+        frameEntity.setAttribute('visible', 'false');
+        // Show the hint again only if no other bike is currently tracked
+        if (!anchorState.some(s => s && s.tracked)) {
+          document.getElementById("scan-hint").style.display = "block";
+        }
+      });
     });
+
+    // Run continuous spin framework loop
+    autoSpin();
   });
+
+  // Smooth Interactive Touch/Drag Orbit System
+  const startDrag = (clientX) => { isDragging = true; previousMousePosition.x = clientX; };
+  const updateDrag = (clientX) => {
+    if (!isDragging) return;
+    const deltaX = clientX - previousMousePosition.x;
+    anchorState.forEach(state => {
+      if (!state || !state.tracked) return;
+      const currentRotation = state.specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
+      state.specsContainer.setAttribute('rotation', { x: currentRotation.x, y: currentRotation.y, z: currentRotation.z + deltaX * 0.4 });
+    });
+    previousMousePosition.x = clientX;
+  };
+  const endDrag = () => { isDragging = false; };
+
+  window.addEventListener('mousedown', (e) => startDrag(e.clientX));
+  window.addEventListener('mousemove', (e) => updateDrag(e.clientX));
+  window.addEventListener('mouseup', endDrag);
+  window.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientX); });
+  window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientX); });
+  window.addEventListener('touchend', endDrag);
+
+  // Auto Orbit Engine Control (runs for every currently tracked bike)
+  function autoSpin() {
+    requestAnimationFrame(autoSpin);
+    anchorState.forEach(state => {
+      if (!state || !state.tracked) return;
+      if (!isDragging) {
+        const currentRot = state.specsContainer.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
+        state.specsContainer.setAttribute('rotation', { x: currentRot.x, y: currentRot.y, z: currentRot.z + 0.2 });
+      }
+      if (state.frameEntity.frameAnim) state.frameEntity.frameAnim();
+    });
+  }
 
   function startScanner() {
     const overlay = document.getElementById('start-overlay');
     overlay.style.opacity = '0';
-    setTimeout(() => { 
-      overlay.style.display = 'none'; 
-      document.getElementById('ar-scene').components['mindar-image'].start();
-    }, 500);
+    overlay.style.transform = 'scale(1.05)';
+    setTimeout(() => { overlay.style.display = 'none'; }, 800);
   }
 </script>
 </body>
