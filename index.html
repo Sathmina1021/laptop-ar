@@ -117,7 +117,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
 <div id="start-overlay">
   <div class="hero-photo-wrap">
-    <img id="bike-hero-img" src="images.jpeg" alt="Scooter Preview">
+    <img id="bike-hero-img" src="image/images.jpeg" alt="Scooter Preview">
   </div>
   <div class="content-wrap">
     <div>
@@ -145,10 +145,10 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   <a-assets>
     <a-asset-item id="frame-model" src="./scooter_hud.glb"></a-asset-item>
 
-    <img id="img-engine" src="images.jpeg">
-    <img id="img-light" src="light.jpeg">
-    <img id="img-brake" src="brake.jpeg">
-    <img id="img-gearbox" src="gearbox.jpeg">
+    <img id="img-engine" src="image/images.jpeg">
+    <img id="img-light" src="image/light.jpeg">
+    <img id="img-brake" src="image/brake.jpeg">
+    <img id="img-gearbox" src="image/gearbox.jpeg">
   </a-assets>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -428,15 +428,56 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     });
   }
 
+  function showArError(message) {
+    const hint = document.getElementById('scan-hint');
+    hint.innerText = message;
+    hint.style.borderColor = '#ff2b2b';
+    hint.style.color = '#ffbcbc';
+    hint.style.display = 'block';
+    console.error('[AR ERROR]', message);
+  }
+
   function startScanner() {
     const overlay = document.getElementById('start-overlay');
-    overlay.style.opacity = '0';
-    overlay.style.transform = 'scale(1.05)';
-    setTimeout(() => { 
-      overlay.style.display = 'none'; 
-      document.getElementById('ar-scene').components['mindar-image'].start();
-    }, 800);
+    const scene = document.getElementById('ar-scene');
+
+    // Explicitly request camera permission first so we can catch the exact
+    // failure reason (denied / no camera / insecure context / already in use)
+    // instead of silently ending up on a blank white screen.
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showArError('Camera API not available. Needs HTTPS + a modern browser.');
+      return;
+    }
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then((stream) => {
+        // permission confirmed — release this test stream, MindAR opens its own
+        stream.getTracks().forEach((t) => t.stop());
+
+        overlay.style.opacity = '0';
+        overlay.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          try {
+            scene.components['mindar-image'].start();
+          } catch (err) {
+            showArError('AR failed to start: ' + err.message);
+          }
+        }, 800);
+      })
+      .catch((err) => {
+        // Common err.name values: NotAllowedError, NotFoundError,
+        // NotReadableError, OverconstrainedError, SecurityError
+        showArError('Camera error (' + err.name + '): ' + err.message);
+      });
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const scene = document.getElementById('ar-scene');
+    scene.addEventListener('arError', () => {
+      showArError('MindAR failed to initialize — check that targets.mind loaded correctly (open DevTools console for details).');
+    });
+  });
 </script>
 </body>
 </html>
