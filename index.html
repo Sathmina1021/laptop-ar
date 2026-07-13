@@ -399,25 +399,80 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     });
   }
 
+  // 🎨 Bakes the brand-title banner in the same poster language as the spec
+  // cards: bold gradient title text (matching the reference "BRUTE POWER"
+  // treatment) over a dark angled plate with an accent edge.
+  function createTitleBannerTexture(modelName, systemTag, accent) {
+    const SCALE = 2;
+    const W = 900 * SCALE, H = 220 * SCALE;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+
+    // ---- dark glass plate, angled corners ----
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur = 20 * SCALE / 2;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.03, 0);
+    ctx.lineTo(W * 0.97, 0);
+    ctx.lineTo(W, H * 0.5);
+    ctx.lineTo(W * 0.97, H);
+    ctx.lineTo(W * 0.03, H);
+    ctx.lineTo(0, H * 0.5);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(8, 8, 10, 0.72)';
+    ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = accentRgba(accent, 0.85);
+    ctx.lineWidth = 4 * SCALE / 2;
+    ctx.stroke();
+
+    // ---- bold gradient title, same treatment as the reference banner ----
+    const titleGrad = ctx.createLinearGradient(0, H * 0.16, 0, H * 0.62);
+    titleGrad.addColorStop(0, '#3a0a04');
+    titleGrad.addColorStop(0.45, accent);
+    titleGrad.addColorStop(1, '#3a0a04');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `900 ${88 * SCALE}px Arial, sans-serif`;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+    ctx.lineWidth = 8 * SCALE / 2;
+    ctx.strokeText(modelName.toUpperCase(), W / 2, H * 0.4);
+    ctx.fillStyle = titleGrad;
+    ctx.fillText(modelName.toUpperCase(), W / 2, H * 0.4);
+
+    // ---- subtitle / system tag ----
+    ctx.font = `800 ${34 * SCALE}px Arial, sans-serif`;
+    ctx.fillStyle = '#f3efe6';
+    ctx.fillText(systemTag.toUpperCase(), W / 2, H * 0.76);
+
+    // thin accent rule under the subtitle
+    ctx.fillStyle = accentRgba(accent, 0.9);
+    ctx.fillRect(W / 2 - 90 * SCALE, H * 0.86, 180 * SCALE, 4 * SCALE);
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    return canvas.toDataURL('image/png');
+  }
+
   function buildBrandTitle(bikeData) {
     const brandTitleEntity = document.createElement('a-entity');
-    brandTitleEntity.setAttribute('position', '0 1.05 0.02');
+    brandTitleEntity.setAttribute('position', '0 1.42 0.02');
 
-    const brandBg = document.createElement('a-plane');
-    brandBg.setAttribute('width', '0.75');
-    brandBg.setAttribute('height', '0.16');
-    brandBg.setAttribute('color', '#0a0d12');
-    brandBg.setAttribute('opacity', '0.85');
+    const brandPlane = document.createElement('a-plane');
+    brandPlane.setAttribute('width', '0.95');
+    brandPlane.setAttribute('height', '0.23');
+    brandPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.96');
+    brandPlane.setAttribute(
+      'material',
+      'src',
+      createTitleBannerTexture(bikeData.modelName, bikeData.systemTag, accentPalette[0])
+    );
 
-    const brandText = document.createElement('a-text');
-    brandText.setAttribute('value', `${bikeData.modelName.toUpperCase()} / ${bikeData.systemTag.toUpperCase()}`);
-    brandText.setAttribute('color', '#f3efe6');
-    brandText.setAttribute('align', 'center');
-    brandText.setAttribute('width', '1.3');
-    brandText.setAttribute('font', 'roboto');
-
-    brandTitleEntity.appendChild(brandBg);
-    brandTitleEntity.appendChild(brandText);
+    brandTitleEntity.appendChild(brandPlane);
     return brandTitleEntity;
   }
 
