@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>Bajaj Pulsar NS200 — AR Spec Scanner</title>
+<title>Smart Scooter — AR Spec Scanner</title>
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
 :root{
   --carbon:#0a0a0c;
   --carbon-2:#141416;
-  --pulsar-orange:#ff4b12;
+  --pulsar-orange:#00e0ff; /* Scooter එකට ගැලපෙන Tech Cyan පාට දැම්මා */
   --pulsar-amber:#ffb400;
   --telemetry-cyan:#00e0ff;
   --geo-silver:#d9dde1;
@@ -117,7 +117,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
 <div id="start-overlay">
   <div class="hero-photo-wrap">
-    <img id="bike-hero-img" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz..." alt="Bajaj Pulsar NS200">
+    <img id="bike-hero-img" src="front.jpg" alt="Scooter BKU 0929">
   </div>
   <div class="content-wrap">
     <div>
@@ -125,7 +125,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         <div class="led-dot"></div>
         <span id="app-eyebrow" class="eyebrow">AR Spec System</span>
       </div>
-      <h1 id="app-title" class="brand-title">Pulsar <span class="accent">NS200</span></h1>
+      <h1 id="app-title" class="brand-title">Scooter <span class="accent">BKU-0929</span></h1>
     </div>
     <div class="stat-strip" id="json-stats-container"></div>
     <button class="scan-btn" onclick="startScanner()">
@@ -134,50 +134,54 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   </div>
 </div>
 
-<div id="scan-hint">Point Camera at the Marker to Begin</div>
+<div id="scan-hint">Point Camera at Scooter Front to Begin</div>
 
-<a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 10; warmupTolerance: 2; missTolerance: 3; uiScanning: no;" 
+<a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; filterMinCF: 0.0001; filterBeta: 10; warmupTolerance: 2; missTolerance: 3; uiScanning: no;" 
          color-space="sRGB" 
          renderer="colorManagement: true, physicallyCorrectLights" 
          vr-mode-ui="enabled: false" 
          device-orientation-permission-ui="enabled: false">
   
+  <a-assets>
+    <a-asset-item id="blender-frame" src="scooter_hud.glb"></a-asset-item>
+  </a-assets>
+
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
   <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
     
+    <a-entity id="3d-hud-mesh" gltf-model="#blender-frame" position="0 0 0.02" scale="1.1 1.1 1.1"></a-entity>
+
     <a-entity id="brand-title" position="0 0.78 0.05"></a-entity>
 
-    <a-entity id="specs-container" position="0 0 0" visible="true">
-       </a-entity>
+    <a-entity id="specs-container" position="0 0 0" visible="true"></a-entity>
 
   </a-entity>
 </a-scene>
 
 <script>
-  // Central JSON Database - Each item will generate a separate creative 3D card layout!
+  // Scooter එකට අදාළ දත්ත JSON එකට ඇතුළත් කළා
   const backendJsonData = {
-    "brandName": "Pulsar",
-    "modelName": "NS200",
+    "brandName": "Scooter",
+    "modelName": "BKU-0929",
     "systemTag": "AR Spec Telemetry",
     "dashboardSpecs": [
-      { "value": "24.5 PS", "label": "Max Power" },
-      { "value": "18.7 Nm", "label": "Max Torque" },
-      { "value": "199.5 cc", "label": "Liquid Cooled" }
+      { "value": "124.8 cc", "label": "Engine" },
+      { "value": "9.38 PS", "label": "Max Power" },
+      { "value": "SmartXonnect", "label": "System" }
     ],
-    // These items will instantly layout into separate cards floating around the target
     "arSeparateCards": [
-      { "title": "ENGINE", "desc": "199.5 CC LIQUID COOLED" },
-      { "title": "POWER", "desc": "24.5 PS @ 9750 RPM" },
-      { "title": "TORQUE", "desc": "18.7 NM @ 8000 RPM" },
-      { "title": "BRAKES", "desc": "DUAL CHANNEL ABS" },
-      { "title": "GEARBOX", "desc": "6-SPEED TRANSMISSION" }
+      { "title": "ENGINE", "desc": "124.8 CC SINGLE CYLINDER" },
+      { "title": "POWER", "desc": "9.38 PS @ 7000 RPM" },
+      { "title": "TORQUE", "desc": "10.5 NM @ 5500 RPM" },
+      { "title": "LIGHTS", "desc": "STEALTH LED HEADLAMP" },
+      { "title": "DISPLAY", "desc": "DIGITAL CONSOLE W/ BT" }
     ]
   };
 
   let targetTracked = false;
   let isDragging = false;
-  let previousMousePosition = { x: 0 };
+  let previousMousePositionFull = { x: 0 };
   const specsContainer = document.getElementById('specs-container');
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -194,13 +198,13 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       gridContainer.appendChild(statBlock);
     });
 
-    // FLOATING BRAND TITLE ABOVE OBJECT — glass treatment to match the spec cards
+    // FLOATING BRAND TITLE ABOVE OBJECT
     const brandTitleEntity = document.getElementById('brand-title');
 
     const brandGlow = document.createElement('a-plane');
     brandGlow.setAttribute('width', '0.74');
     brandGlow.setAttribute('height', '0.2');
-    brandGlow.setAttribute('color', '#ff4b12');
+    brandGlow.setAttribute('color', '#00e0ff');
     brandGlow.setAttribute('opacity', '0.16');
     brandGlow.setAttribute('material', 'transparent: true; shader: flat; side: double');
     brandGlow.setAttribute('position', '0 0 -0.006');
@@ -230,9 +234,9 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     brandShine.setAttribute('position', '0 0.052 0.0005');
 
     const brandAccentTop = document.createElement('a-entity');
-    brandAccentTop.setAttribute('line', 'start: -0.32 0.075 0.001; end: 0.32 0.075 0.001; color: #ff4b12; opacity: 0.9');
+    brandAccentTop.setAttribute('line', 'start: -0.32 0.075 0.001; end: 0.32 0.075 0.001; color: #00e0ff; opacity: 0.9');
     const brandAccentBottom = document.createElement('a-entity');
-    brandAccentBottom.setAttribute('line', 'start: -0.32 -0.075 0.001; end: 0.32 -0.075 0.001; color: #00e0ff; opacity: 0.9');
+    brandAccentBottom.setAttribute('line', 'start: -0.32 -0.075 0.001; end: 0.32 -0.075 0.001; color: #ffb400; opacity: 0.9');
 
     const brandText = document.createElement('a-text');
     brandText.setAttribute('value', `${backendJsonData.brandName.toUpperCase()} ${backendJsonData.modelName.toUpperCase()}`);
@@ -252,25 +256,15 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     brandTitleEntity.appendChild(brandText);
 
     // BUILD INDIVIDUAL 3D CARDS FROM JSON DATA — 360° HELIX AROUND THE OBJECT
-    // Cards are spread around a horizontal circle (X-Z plane) AND staggered in
-    // height (Y) so no two cards ever line up in front of each other on screen.
-    // The whole ring spins around the Y-axis — like a turntable circling the bike —
-    // which is what actually reads as "cards orbiting 360° around the object" to the eye.
-    // The "BAJAJ PULSAR NS" title lives on its own fixed entity and never rotates.
     const cardsData = backendJsonData.arSeparateCards;
     const totalCards = cardsData.length;
-    const ringRadius = 0.75;     // how far out the ring sits from the object
-    const heightSpan = 0.95;     // total vertical spread of the helix (top card to bottom card)
+    const ringRadius = 0.85;     
+    const heightSpan = 0.8;     
 
-    // Distinct accent colors per card, cycling through the brand + telemetry palette
-    const accentPalette = ['#ff4b12', '#00e0ff', '#ffb400', '#ff4b12', '#00e0ff', '#ffb400'];
+    const accentPalette = ['#00e0ff', '#ffb400', '#ff4b12', '#00e0ff', '#ffb400'];
 
     cardsData.forEach((card, index) => {
-      // Even angular spread all the way around (0° to 360°)
       const angle = (index / totalCards) * Math.PI * 2;
-
-      // Height staggers from top to bottom across the set of cards so, even when
-      // the ring spins, each card keeps its own vertical "lane" and never overlaps another.
       const t = totalCards > 1 ? index / (totalCards - 1) : 0.5;
       const posY = (0.5 - t) * heightSpan;
 
@@ -278,13 +272,10 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       const posZ = Math.cos(angle) * ringRadius;
       const accent = accentPalette[index % accentPalette.length];
 
-      // Leader line from the object center out to this card (stops just short of the
-      // card face so it never pokes through / z-fights with the glass panel while spinning)
       const leaderLine = document.createElement('a-entity');
       leaderLine.setAttribute('line', `start: 0 0 0; end: ${posX * 0.9} ${posY * 0.9} ${posZ * 0.9}; color: ${accent}; opacity: 0.5`);
       specsContainer.appendChild(leaderLine);
 
-      // Small node dot where the line meets the object surface — soft pulse for a modern, alive feel
       const nodeDot = document.createElement('a-circle');
       nodeDot.setAttribute('radius', '0.012');
       nodeDot.setAttribute('color', accent);
@@ -293,27 +284,16 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       nodeDot.setAttribute('animation', 'property: scale; dir: alternate; dur: 1100; easing: easeInOutSine; loop: true; to: 1.5 1.5 1.5');
       specsContainer.appendChild(nodeDot);
 
-      // Outer Card Component Group
       const cardEntity = document.createElement('a-entity');
       cardEntity.setAttribute('class', 'spec-card');
       cardEntity.setAttribute('position', `${posX} ${posY} ${posZ}`);
-
-      // Card always faces outward, away from the object (front side toward the viewer)
       cardEntity.setAttribute('look-at', '0 0 0');
-
-      // Gentle staggered float — each card bobs slightly out of sync with the others
-      // for a lively, modern feel (no bulky shapes, just subtle motion).
       cardEntity.setAttribute('animation__bob', `property: position; dir: alternate; dur: ${2200 + index * 180}; easing: easeInOutSine; loop: true; to: ${posX} ${posY + 0.035} ${posZ}`);
 
-      // GLASS TAG — built as two real, independent faces (front + back, 180° apart)
-      // instead of one double-sided plane. This is what actually keeps the text
-      // crisp and correctly readable (not mirrored/glitchy) no matter which side
-      // of the ring is currently facing the camera as it spins past.
       const buildGlassFace = (rotY) => {
         const face = document.createElement('a-entity');
         face.setAttribute('rotation', `0 ${rotY} 0`);
 
-        // Soft accent bloom behind the glass
         const glow = document.createElement('a-plane');
         glow.setAttribute('width', '0.54');
         glow.setAttribute('height', '0.26');
@@ -323,7 +303,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         glow.setAttribute('position', '0 0 -0.006');
         face.appendChild(glow);
 
-        // Frosted glass tint
         const glass = document.createElement('a-plane');
         glass.setAttribute('width', '0.46');
         glass.setAttribute('height', '0.2');
@@ -333,7 +312,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         glass.setAttribute('position', '0 0 -0.003');
         face.appendChild(glass);
 
-        // Dark backing so the text keeps contrast through the "glass"
         const tint = document.createElement('a-plane');
         tint.setAttribute('width', '0.46');
         tint.setAttribute('height', '0.2');
@@ -343,7 +321,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         tint.setAttribute('position', '0 0 -0.0015');
         face.appendChild(tint);
 
-        // Glass shine sliver near the top edge
         const shine = document.createElement('a-plane');
         shine.setAttribute('width', '0.4');
         shine.setAttribute('height', '0.04');
@@ -353,7 +330,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         shine.setAttribute('position', '0 0.072 0.0005');
         face.appendChild(shine);
 
-        // Thin accent frame
         const mkLine = (x1, y1, x2, y2) => {
           const l = document.createElement('a-entity');
           l.setAttribute('line', `start: ${x1} ${y1} 0.003; end: ${x2} ${y2} 0.003; color: ${accent}; opacity: 0.85`);
@@ -364,7 +340,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         face.appendChild(mkLine(-0.23, -0.08, -0.23, 0.08));
         face.appendChild(mkLine(0.23, -0.08, 0.23, 0.08));
 
-        // Telemetry accent chip
         const chip = document.createElement('a-circle');
         chip.setAttribute('radius', '0.011');
         chip.setAttribute('color', accent);
@@ -372,7 +347,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         chip.setAttribute('material', 'shader: flat');
         face.appendChild(chip);
 
-        // Header Text
         const titleText = document.createElement('a-text');
         titleText.setAttribute('value', card.title);
         titleText.setAttribute('color', accent);
@@ -383,7 +357,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         titleText.setAttribute('letter-spacing', '1');
         face.appendChild(titleText);
 
-        // Description Text
         const descText = document.createElement('a-text');
         descText.setAttribute('value', card.desc);
         descText.setAttribute('color', '#f3efe6');
@@ -396,8 +369,8 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         return face;
       };
 
-      cardEntity.appendChild(buildGlassFace(0));    // front face — reads correctly toward the outside
-      cardEntity.appendChild(buildGlassFace(180));  // back face — reads correctly from the opposite side
+      cardEntity.appendChild(buildGlassFace(0));    
+      cardEntity.appendChild(buildGlassFace(180));  
       specsContainer.appendChild(cardEntity);
     });
 
@@ -416,10 +389,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     autoSpin();
   });
 
-  // Smooth Interactive Touch/Drag Orbit System — RING SPINS ON THE Y-AXIS (TURNTABLE)
-  // Horizontal drag (left/right swipe) spins the ring around the object, like turning
-  // a turntable. The BAJAJ PULSAR NS title lives on its own fixed entity and is untouched.
-  let previousMousePositionFull = { x: 0 };
+  // Smooth Interactive Touch/Drag Orbit System
   const startDrag = (clientX) => { isDragging = true; previousMousePositionFull.x = clientX; };
   const updateDrag = (clientX) => {
     if (!isDragging || !targetTracked) return;
@@ -441,9 +411,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientX); });
   window.addEventListener('touchend', endDrag);
 
-  // Auto Orbit Engine Control — steady spin purely around the Y-axis,
-  // so the ring of specs continuously circles the object left-to-right
-  // while the brand title above stays perfectly still.
+  // Auto Orbit Engine Control
   function autoSpin() {
     requestAnimationFrame(autoSpin);
     if (!isDragging && targetTracked) {
@@ -453,6 +421,12 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         y: currentRot.y + 0.25,
         z: currentRot.z
       });
+      
+      // Blender mesh එකේ රවුම වෙනම කැරකැවීමට (Optional animation)
+      const blenderMesh = document.getElementById('3d-hud-mesh');
+      if(blenderMesh) {
+         // බ්ලෙන්ඩර් mesh එක ස්ථාවරව තබා Specs පමණක් කරකවනු ලබයි
+      }
     }
   }
 
@@ -460,7 +434,11 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     const overlay = document.getElementById('start-overlay');
     overlay.style.opacity = '0';
     overlay.style.transform = 'scale(1.05)';
-    setTimeout(() => { overlay.style.display = 'none'; }, 800);
+    setTimeout(() => { 
+      overlay.style.display = 'none'; 
+      // User click කළ පසු කැමරාව සහ MindAR active කිරීම
+      document.getElementById('ar-scene').components['mindar-image'].start();
+    }, 800);
   }
 </script>
 </body>
