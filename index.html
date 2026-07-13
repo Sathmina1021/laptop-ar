@@ -313,7 +313,47 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     return USE_GLB_FRAME ? buildGlbFrame(color) : buildOctagonFrame(color);
   }
 
-  // ============ BUILD SPEC CARDS FOR ONE BIKE (dark-box style) ============
+  // ============ SMALL SVG ICONS FOR SPEC CARDS ============
+  // Generated inline (no external image files needed) so the whole app stays self-contained.
+  const iconBuilders = {
+    ENGINE: (c) => `
+      <circle cx="20" cy="20" r="8" stroke="${c}" stroke-width="3" fill="none"/>
+      <circle cx="20" cy="20" r="2.5" fill="${c}"/>
+      ${[0,45,90,135,180,225,270,315].map(a => `<rect x="18.5" y="6" width="3" height="6" fill="${c}" transform="rotate(${a} 20 20)"/>`).join('')}
+    `,
+    POWER: (c) => `
+      <polygon points="22,4 10,22 18,22 16,36 30,16 20,16 22,4" fill="${c}"/>
+    `,
+    TORQUE: (c) => `
+      <path d="M 30 20 A 10 10 0 1 1 20 10" stroke="${c}" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <polygon points="20,4 20,15 29,9" fill="${c}"/>
+    `,
+    BRAKES: (c) => `
+      <circle cx="20" cy="20" r="14" stroke="${c}" stroke-width="3" fill="none"/>
+      <circle cx="20" cy="20" r="7" stroke="${c}" stroke-width="3" fill="none"/>
+      <circle cx="20" cy="20" r="2" fill="${c}"/>
+    `,
+    GEARBOX: (c) => `
+      <path d="M12 10 V30 M28 10 V30 M12 20 H28 M20 20 V10 M20 20 V30"
+            stroke="${c}" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="12" cy="10" r="2" fill="${c}"/>
+      <circle cx="12" cy="30" r="2" fill="${c}"/>
+      <circle cx="28" cy="10" r="2" fill="${c}"/>
+      <circle cx="28" cy="30" r="2" fill="${c}"/>
+      <circle cx="20" cy="10" r="2" fill="${c}"/>
+      <circle cx="20" cy="30" r="2" fill="${c}"/>
+    `
+  };
+
+  function buildIconDataUri(title, color) {
+    const key = title.toUpperCase().trim();
+    const inner = iconBuilders[key];
+    if (!inner) return null;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">${inner(color)}</svg>`;
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+  }
+
+
   function buildCards(specsContainer, bikeData) {
     const cardsData = bikeData.arSeparateCards;
     const totalCards = cardsData.length;
@@ -370,11 +410,24 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       descText.setAttribute('line-height', '38');
       descText.setAttribute('font', 'roboto');
 
+      // Small icon badge in the top-left corner of the card, matching the spec type
+      const iconUri = buildIconDataUri(card.title, accent);
+      let iconImage = null;
+      if (iconUri) {
+        iconImage = document.createElement('a-image');
+        iconImage.setAttribute('src', iconUri);
+        iconImage.setAttribute('width', '0.075');
+        iconImage.setAttribute('height', '0.075');
+        iconImage.setAttribute('position', '-0.185 0.075 0.012');
+        iconImage.setAttribute('material', 'transparent: true; shader: flat; side: double');
+      }
+
       cardEntity.appendChild(bgPlane);
       cardEntity.appendChild(outline);
       cardEntity.appendChild(outlineBottom);
       cardEntity.appendChild(outlineLeft);
       cardEntity.appendChild(outlineRight);
+      if (iconImage) cardEntity.appendChild(iconImage);
       cardEntity.appendChild(titleText);
       cardEntity.appendChild(descText);
       specsContainer.appendChild(cardEntity);
