@@ -241,149 +241,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  // 🎨 Bakes the poster texture for a spec card — "floating glass" style.
-  // No solid box fill anymore: the card is almost entirely the uploaded
-  // photo itself (transparent canvas around it), wrapped in a slim glowing
-  // gradient edge, with the title glazed as a soft caption directly over
-  // a bottom gradient scrim on the photo — so it reads as an image with a
-  // stylish glass finish, not a filled "box".
-  function createSpecBannerTexture(imgEl, title, desc, accent) {
-    const SCALE = 2;
-    const W = 900 * SCALE, H = 620 * SCALE;
-    const canvas = document.createElement('canvas');
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext('2d');
-
-    function roundedRectPath(x, y, w, h, rad) {
-      ctx.beginPath();
-      ctx.moveTo(x + rad, y);
-      ctx.lineTo(x + w - rad, y);
-      ctx.arcTo(x + w, y, x + w, y + rad, rad);
-      ctx.lineTo(x + w, y + h - rad);
-      ctx.arcTo(x + w, y + h, x + w - rad, y + h, rad);
-      ctx.lineTo(x + rad, y + h);
-      ctx.arcTo(x, y + h, x, y + h - rad, rad);
-      ctx.lineTo(x, y + rad);
-      ctx.arcTo(x, y, x + rad, y, rad);
-      ctx.closePath();
-    }
-
-    try {
-      ctx.clearRect(0, 0, W, H); // fully transparent canvas by default
-
-      const pad = 6 * SCALE;   // barely-there inset, just enough for the glow edge
-      const photoW = W - pad * 2;
-      const photoH = H - pad * 2;
-      const photoX = pad, photoY = pad;
-      const r = 30 * SCALE;
-
-      // ---- an extremely faint frosted-glass tint behind the photo, just to
-      // catch a little light — NOT a solid opaque box ----
-      roundedRectPath(photoX, photoY, photoW, photoH, r);
-      ctx.save();
-      ctx.shadowColor = 'rgba(0,0,0,0.35)';
-      ctx.shadowBlur = 22 * SCALE / 2;
-      ctx.shadowOffsetY = 6 * SCALE / 2;
-      ctx.fillStyle = 'rgba(255,255,255,0.05)';
-      ctx.fill();
-      ctx.restore();
-
-      // ---- the uploaded photo, cover-fit, rounded corners, near full-bleed.
-      // If the photo hasn't actually decoded yet, fall back to a soft accent
-      // gradient panel instead of leaving it blank/invisible. ----
-      const photoReady = imgEl && imgEl.naturalWidth > 0 && imgEl.complete;
-      roundedRectPath(photoX, photoY, photoW, photoH, r);
-      ctx.save();
-      ctx.clip();
-      if (photoReady) {
-        const iw = imgEl.naturalWidth, ih = imgEl.naturalHeight;
-        const scale = Math.max(photoW / iw, photoH / ih);
-        const dw = iw * scale, dh = ih * scale;
-        ctx.drawImage(imgEl, photoX + (photoW - dw) / 2, photoY + (photoH - dh) / 2, dw, dh);
-      } else {
-        const fallbackGrad = ctx.createLinearGradient(photoX, photoY, photoX + photoW, photoY + photoH);
-        fallbackGrad.addColorStop(0, accentRgba(accent, 0.55));
-        fallbackGrad.addColorStop(1, 'rgba(20,20,22,0.85)');
-        ctx.fillStyle = fallbackGrad;
-        ctx.fillRect(photoX, photoY, photoW, photoH);
-      }
-
-      // soft gradient scrim just behind the caption so the title stays
-      // legible without needing any solid plaque background
-      const scrim = ctx.createLinearGradient(0, photoY + photoH * 0.62, 0, photoY + photoH);
-      scrim.addColorStop(0, 'rgba(0,0,0,0)');
-      scrim.addColorStop(1, 'rgba(0,0,0,0.55)');
-      ctx.fillStyle = scrim;
-      ctx.fillRect(photoX, photoY + photoH * 0.62, photoW, photoH * 0.38);
-      ctx.restore();
-
-      // ---- slim glowing gradient border — the only "frame" element left ----
-      roundedRectPath(photoX, photoY, photoW, photoH, r);
-      const glowGrad = ctx.createLinearGradient(photoX, photoY, photoX + photoW, photoY + photoH);
-      glowGrad.addColorStop(0, accentRgba(accent, 0.95));
-      glowGrad.addColorStop(0.5, 'rgba(255,255,255,0.55)');
-      glowGrad.addColorStop(1, accentRgba(accent, 0.95));
-      ctx.lineWidth = 5 * SCALE / 2;
-      ctx.strokeStyle = glowGrad;
-      ctx.stroke();
-
-      // ---- title glazed onto the photo as a soft caption, no box behind it ----
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = `800 ${38 * SCALE}px Arial, sans-serif`;
-      ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = 'rgba(0,0,0,0.6)';
-      ctx.shadowBlur = 10 * SCALE / 2;
-      drawSpacedText(ctx, title.toUpperCase(), W / 2, photoY + photoH - 40 * SCALE, 3 * SCALE);
-      ctx.shadowBlur = 0;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'alphabetic';
-
-      return canvas.toDataURL('image/png');
-    } catch (err) {
-      // If the photo failed to draw/export (blocked, decode error, tainted
-      // canvas, etc.) bake a clean on-brand fallback card instead of
-      // silently leaving the plane blank/white, and log why for debugging.
-      console.warn('[spec card] texture bake failed for "' + title + '":', err);
-      ctx.clearRect(0, 0, W, H);
-      roundedRectPath(6 * SCALE, 6 * SCALE, W - 12 * SCALE, H - 12 * SCALE, 30 * SCALE);
-      const grad = ctx.createLinearGradient(0, 0, W, H);
-      grad.addColorStop(0, accentRgba(accent, 0.9));
-      grad.addColorStop(1, 'rgba(10,10,12,0.92)');
-      ctx.fillStyle = grad;
-      ctx.fill();
-      ctx.lineWidth = 5 * SCALE / 2;
-      ctx.strokeStyle = accentRgba(accent, 0.95);
-      ctx.stroke();
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = `800 ${44 * SCALE}px Arial, sans-serif`;
-      ctx.fillStyle = '#ffffff';
-      drawSpacedText(ctx, title.toUpperCase(), W / 2, H / 2, 3 * SCALE);
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'alphabetic';
-      try {
-        return canvas.toDataURL('image/png');
-      } catch (err2) {
-        console.warn('[spec card] fallback export also failed for "' + title + '":', err2);
-        return null;
-      }
-    }
-  }
-
-  // Draws text with manual letter-spacing (canvas has no native letterSpacing
-  // in all target browsers), centered at (cx, cy).
-  function drawSpacedText(ctx, text, cx, cy, spacing) {
-    const widths = [...text].map(ch => ctx.measureText(ch).width);
-    const totalW = widths.reduce((a, b) => a + b, 0) + spacing * (text.length - 1);
-    let x = cx - totalW / 2;
-    ctx.textAlign = 'left';
-    [...text].forEach((ch, i) => {
-      ctx.fillText(ch, x, cy);
-      x += widths[i] + spacing;
-    });
-  }
-
   function buildCards(specsContainer, bikeData) {
     const cardsData = bikeData.arSeparateCards;
     const totalCards = cardsData.length;
@@ -391,6 +248,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     // above the bike (matching the reference layout) instead of to the side
     const radius = 2.05;
     const startAngle = -Math.PI / 2;
+    const cardW = 1.38, cardH = 0.95;
 
     cardsData.forEach((card, index) => {
       const angle = startAngle + (index / totalCards) * Math.PI * 2;
@@ -401,49 +259,65 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       const cardEntity = document.createElement('a-entity');
       cardEntity.setAttribute('class', 'spec-card');
       cardEntity.setAttribute('position', `${posX} ${posY} 0.1`);
-      // Keep every poster upright/readable — no per-card pinwheel tilt.
-      // Only its position moves around the object; orientation stays flat.
       // Billboard: card always faces the camera, so the ring stays clean and
       // readable from any angle instead of scattering/skewing as you move
-      // around the bike — fixes the "flying around randomly" look.
+      // around the bike.
       cardEntity.setAttribute('look-at', '[camera]');
 
-      // soft accent-tinted shadow plate behind the poster for depth, echoing
-      // the reference banners' red glow instead of a flat grey shadow.
-      const glowPlate = document.createElement('a-plane');
-      glowPlate.setAttribute('width', '1.44');
-      glowPlate.setAttribute('height', '1.03');
-      glowPlate.setAttribute('color', accent);
-      glowPlate.setAttribute('opacity', '0.1');
-      glowPlate.setAttribute('position', '0 0 -0.005');
-      glowPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
-      cardEntity.appendChild(glowPlate);
+      // soft accent halo behind everything, for a glowing edge feel
+      const haloPlate = document.createElement('a-plane');
+      haloPlate.setAttribute('width', cardW + 0.18);
+      haloPlate.setAttribute('height', cardH + 0.18);
+      haloPlate.setAttribute('color', accent);
+      haloPlate.setAttribute('opacity', '0.16');
+      haloPlate.setAttribute('position', '0 0 -0.02');
+      haloPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
+      cardEntity.appendChild(haloPlate);
 
-      // poster plane — enlarged real-world size so the poster reads clearly
-      // wrapped around a real bike — texture gets baked in once the source
-      // photo is ready, in the full-colour artistic banner style.
+      // thin solid accent frame, just a shade larger than the photo, so it
+      // reads as a slim glowing border rather than a filled box
+      const framePlate = document.createElement('a-plane');
+      framePlate.setAttribute('width', cardW + 0.03);
+      framePlate.setAttribute('height', cardH + 0.03);
+      framePlate.setAttribute('color', accent);
+      framePlate.setAttribute('position', '0 0 -0.005');
+      framePlate.setAttribute('material', 'shader: flat; side: double');
+      cardEntity.appendChild(framePlate);
+
+      // ---- the photo itself: loaded natively by A-Frame straight from the
+      // <a-assets> image (same mechanism the 3D frame model already uses
+      // successfully) — no canvas, no toDataURL, so it can't silently fail
+      // the way a baked texture can. ----
       const posterPlane = document.createElement('a-plane');
-      posterPlane.setAttribute('width', '1.38');
-      posterPlane.setAttribute('height', '0.95');
-      posterPlane.setAttribute('position', '0 0 0.01');
-      posterPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.94; alphaTest: 0.02');
+      posterPlane.setAttribute('width', cardW);
+      posterPlane.setAttribute('height', cardH);
+      posterPlane.setAttribute('position', '0 0 0.005');
+      posterPlane.setAttribute('material', `shader: flat; side: double; src: ${card.imgSrc}`);
       cardEntity.appendChild(posterPlane);
 
-      const applyTexture = () => {
-        const imgEl = document.querySelector(card.imgSrc);
-        const dataUrl = createSpecBannerTexture(imgEl, card.title, card.desc, accent);
-        if (dataUrl) posterPlane.setAttribute('material', 'src', dataUrl);
-      };
+      // caption scrim: a slim translucent strip along the bottom edge so
+      // the title stays legible over any photo
+      const scrimPlate = document.createElement('a-plane');
+      scrimPlate.setAttribute('width', cardW);
+      scrimPlate.setAttribute('height', cardH * 0.24);
+      scrimPlate.setAttribute('color', '#000000');
+      scrimPlate.setAttribute('opacity', '0.55');
+      scrimPlate.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.24) / 2} 0.01`);
+      scrimPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
+      cardEntity.appendChild(scrimPlate);
 
-      const sourceImg = document.querySelector(card.imgSrc);
-      if (sourceImg && sourceImg.complete && sourceImg.naturalWidth) {
-        applyTexture();
-      } else if (sourceImg) {
-        sourceImg.addEventListener('load', applyTexture, { once: true });
-        sourceImg.addEventListener('error', applyTexture, { once: true });
-      } else {
-        applyTexture();
-      }
+      // caption text — native a-text component, always renders regardless
+      // of any image/canvas issue
+      const captionText = document.createElement('a-text');
+      captionText.setAttribute('value', card.title.toUpperCase());
+      captionText.setAttribute('align', 'center');
+      captionText.setAttribute('anchor', 'center');
+      captionText.setAttribute('baseline', 'center');
+      captionText.setAttribute('color', '#ffffff');
+      captionText.setAttribute('width', '2.3');
+      captionText.setAttribute('letter-spacing', '2');
+      captionText.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.24) / 2} 0.016`);
+      cardEntity.appendChild(captionText);
 
       specsContainer.appendChild(cardEntity);
     });
