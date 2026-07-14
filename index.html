@@ -210,7 +210,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     const frame = document.createElement('a-entity');
     frame.setAttribute('visible', 'false');
     frame.setAttribute('gltf-model', '#frame-model');
-    frame.setAttribute('scale', '1.15 1.15 1.15');
+    frame.setAttribute('scale', '1.35 1.35 1.35');
     frame.setAttribute('position', '0 0.05 -0.05'); 
     frame.addEventListener('model-loaded', () => {
       const mesh = frame.getObject3D('mesh');
@@ -240,88 +240,115 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  // 🎨 Bakes a "moto-poster" style banner texture per spec card:
-  // component photo bleeding in from the left (angled cut), a translucent
-  // glass-tinted accent panel on the right carrying bold black spec text —
-  // same visual language as the reference "BRUTE POWER" banner, duplicated
-  // per spec, now with a frosted-glass transparency finish.
+  // 🎨 Bakes a "moto-poster" style banner texture per spec card — same
+  // visual language as the reference marketing banners (BRUTE POWER,
+  // PERIMETER FRAME, LED LIGHTING SYSTEM etc): a big bold gradient title
+  // up top, the component photo bleeding in on an angled cut, and a
+  // slanted red/accent parallelogram carrying bold black spec copy with a
+  // small triangular accent pointer. Canvas is bigger than before so the
+  // baked poster reads clearly at real-world AR scale around the bike.
   function createSpecBannerTexture(imgEl, title, desc, accent) {
-    // Fully monochrome, editorial "gallery poster" treatment — no colour
-    // anywhere. Just a grayscale photo bleeding into white/black typography,
-    // like a print magazine spec sheet. Bigger canvas than before so the
-    // baked texture stays crisp at the larger real-world card size.
     const SCALE = 2;
-    const W = 900 * SCALE, H = 460 * SCALE;
+    const W = 1100 * SCALE, H = 620 * SCALE;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, W, H); // fully transparent canvas by default
 
-    // ---- photo panel, clipped to an angled quad on the left, desaturated ----
+    const titleH = H * 0.22;   // top strip reserved for the big gradient title
+    const bodyTop = titleH;
+    const bodyH = H - titleH;
+
+    // ---- big bold gradient title across the top, same treatment as the
+    // reference "BRUTE POWER" / "LED LIGHTING SYSTEM" banners ----
+    const titleGrad = ctx.createLinearGradient(0, titleH * 0.15, 0, titleH * 0.95);
+    titleGrad.addColorStop(0, '#2a0602');
+    titleGrad.addColorStop(0.5, accent);
+    titleGrad.addColorStop(1, '#2a0602');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `900 ${68 * SCALE}px Arial, sans-serif`;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+    ctx.lineWidth = 9 * SCALE / 2;
+    ctx.strokeText(title.toUpperCase(), W / 2, titleH * 0.56);
+    ctx.fillStyle = titleGrad;
+    ctx.fillText(title.toUpperCase(), W / 2, titleH * 0.56);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+
+    // ---- photo panel, clipped to an angled quad on the left, full colour ----
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(W * 0.5, 0);
-    ctx.lineTo(W * 0.38, H);
+    ctx.moveTo(0, bodyTop);
+    ctx.lineTo(W * 0.56, bodyTop);
+    ctx.lineTo(W * 0.44, H);
     ctx.lineTo(0, H);
     ctx.closePath();
     ctx.clip();
     if (imgEl && imgEl.naturalWidth) {
       const iw = imgEl.naturalWidth, ih = imgEl.naturalHeight;
-      const scale = Math.max((W * 0.52) / iw, H / ih);
+      const scale = Math.max((W * 0.58) / iw, bodyH / ih);
       const dw = iw * scale, dh = ih * scale;
-      // grayscale + high contrast — no colour, pure tonal image
-      ctx.filter = 'grayscale(1) contrast(1.25) brightness(1.02)';
+      ctx.filter = 'saturate(1.15) contrast(1.12) brightness(1.03)';
       ctx.globalAlpha = 1;
-      ctx.drawImage(imgEl, (W * 0.28 - dw) / 2, (H - dh) / 2, dw, dh);
+      ctx.drawImage(imgEl, (W * 0.3 - dw) / 2, bodyTop + (bodyH - dh) / 2, dw, dh);
       ctx.filter = 'none';
     } else {
       ctx.fillStyle = 'rgba(255,255,255,0.08)';
-      ctx.fillRect(0, 0, W * 0.52, H);
+      ctx.fillRect(0, bodyTop, W * 0.58, bodyH);
     }
-    // fine film-grain-style vignette, pure black/white, no tint
-    const edgeGrad = ctx.createLinearGradient(W * 0.24, 0, W * 0.5, 0);
+    // soft fade toward the accent panel
+    const edgeGrad = ctx.createLinearGradient(W * 0.3, 0, W * 0.56, 0);
     edgeGrad.addColorStop(0, 'rgba(0,0,0,0)');
-    edgeGrad.addColorStop(1, 'rgba(0,0,0,0.65)');
+    edgeGrad.addColorStop(1, 'rgba(0,0,0,0.55)');
     ctx.fillStyle = edgeGrad;
-    ctx.fillRect(0, 0, W * 0.52, H);
+    ctx.fillRect(0, bodyTop, W * 0.58, bodyH);
     ctx.restore();
 
-    // ---- thin hairline seam marking the poster's fold — pure white ----
-    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-    ctx.lineWidth = 2 * SCALE / 2;
+    // ---- slanted accent parallelogram on the right, glass-tinted, same
+    // silhouette as the reference red callout box ----
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 18 * SCALE / 2;
     ctx.beginPath();
-    ctx.moveTo(W * 0.38, 0);
-    ctx.lineTo(W * 0.26, H);
+    ctx.moveTo(W * 0.4, bodyTop);
+    ctx.lineTo(W, bodyTop);
+    ctx.lineTo(W, H);
+    ctx.lineTo(W * 0.3, H);
+    ctx.closePath();
+    ctx.clip();
+    ctx.fillStyle = accentRgba(accent, 0.92);
+    ctx.fillRect(W * 0.3, bodyTop, W * 0.7, bodyH);
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(0,0,0,0.65)';
+    ctx.lineWidth = 3 * SCALE / 2;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.4, bodyTop);
+    ctx.lineTo(W * 0.3, H);
     ctx.stroke();
 
-    // ---- title: bold white type with a soft black outline for contrast,
-    // no colour fill or glow — pure editorial typography ----
-    ctx.textBaseline = 'top';
-    ctx.font = `900 ${72 * SCALE}px Arial, sans-serif`;
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'rgba(0,0,0,0.9)';
-    ctx.lineWidth = 8 * SCALE / 2;
-    ctx.strokeText(title.toUpperCase(), W * 0.44, 40 * SCALE);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(title.toUpperCase(), W * 0.44, 40 * SCALE);
+    // small triangular accent pointer, echoing the reference banners
+    ctx.fillStyle = accentRgba(accent, 0.95);
+    ctx.beginPath();
+    ctx.moveTo(0, bodyTop + bodyH * 0.42);
+    ctx.lineTo(W * 0.09, bodyTop + bodyH * 0.5);
+    ctx.lineTo(0, bodyTop + bodyH * 0.58);
+    ctx.closePath();
+    ctx.fill();
 
-    // slim white divider under the title — no colour
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.fillRect(W * 0.44, 128 * SCALE, 150 * SCALE, 4 * SCALE);
-
-    // ---- spec description — clean white with soft dark outline ----
-    ctx.font = `700 ${46 * SCALE}px Arial, sans-serif`;
-    ctx.lineJoin = 'round';
+    // ---- spec description — bold black text on the accent panel ----
+    ctx.font = `800 ${44 * SCALE}px Arial, sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#0a0a0a';
     const lines = desc.split('\n');
+    const lineGap = 60 * SCALE;
+    const blockH = (lines.length - 1) * lineGap;
+    const startY = bodyTop + bodyH / 2 - blockH / 2;
     lines.forEach((line, i) => {
-      const y = (166 + i * 58) * SCALE;
-      ctx.strokeStyle = 'rgba(0,0,0,0.85)';
-      ctx.lineWidth = 6 * SCALE / 2;
-      ctx.strokeText(line, W * 0.44, y);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(line, W * 0.44, y);
+      ctx.fillText(line, W * 0.46, startY + i * lineGap);
     });
+    ctx.textBaseline = 'alphabetic';
 
     return canvas.toDataURL('image/png');
   }
@@ -329,12 +356,15 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   function buildCards(specsContainer, bikeData) {
     const cardsData = bikeData.arSeparateCards;
     const totalCards = cardsData.length;
-    const radius = 1.62; // pushed out further to fit the larger, bigger poster cards
+    // pushed out further and rotated a quarter turn so the first card lands
+    // above the bike (matching the reference layout) instead of to the side
+    const radius = 2.05;
+    const startAngle = -Math.PI / 2;
 
     cardsData.forEach((card, index) => {
-      const angle = (index / totalCards) * Math.PI * 2;
+      const angle = startAngle + (index / totalCards) * Math.PI * 2;
       const posX = Math.cos(angle) * radius;
-      const posY = Math.sin(angle) * radius;
+      const posY = Math.sin(angle) * radius * 0.62; // flatten the ring so cards stay near bike height
       const accent = accentPalette[index % accentPalette.length];
 
       const cardEntity = document.createElement('a-entity');
@@ -344,24 +374,25 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       // Only its position moves around the object; orientation stays flat.
       cardEntity.setAttribute('rotation', '0 0 0');
 
-      // soft neutral (colourless) shadow plate behind the poster for depth —
-      // pure black/grey only, no accent tint anywhere on the card.
+      // soft accent-tinted shadow plate behind the poster for depth, echoing
+      // the reference banners' red glow instead of a flat grey shadow.
       const glowPlate = document.createElement('a-plane');
-      glowPlate.setAttribute('width', '1.06');
-      glowPlate.setAttribute('height', '0.54');
-      glowPlate.setAttribute('color', '#000000');
-      glowPlate.setAttribute('opacity', '0.28');
-      glowPlate.setAttribute('position', '0.014 -0.016 0.004');
+      glowPlate.setAttribute('width', '1.42');
+      glowPlate.setAttribute('height', '0.8');
+      glowPlate.setAttribute('color', accent);
+      glowPlate.setAttribute('opacity', '0.22');
+      glowPlate.setAttribute('position', '0.02 -0.022 0.004');
       glowPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
       cardEntity.appendChild(glowPlate);
 
-      // poster plane — enlarged real-world size — texture gets baked in once
-      // the source photo is ready. Fully monochrome artistic finish.
+      // poster plane — enlarged real-world size so the poster reads clearly
+      // wrapped around a real bike — texture gets baked in once the source
+      // photo is ready, in the full-colour artistic banner style.
       const posterPlane = document.createElement('a-plane');
-      posterPlane.setAttribute('width', '1.04');
-      posterPlane.setAttribute('height', '0.5');
+      posterPlane.setAttribute('width', '1.38');
+      posterPlane.setAttribute('height', '0.78');
       posterPlane.setAttribute('position', '0 0 0.01');
-      posterPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.96; alphaTest: 0.02');
+      posterPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.97; alphaTest: 0.02');
       cardEntity.appendChild(posterPlane);
 
       const applyTexture = () => {
@@ -414,17 +445,18 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     ctx.lineWidth = 4 * SCALE / 2;
     ctx.stroke();
 
-    // ---- bold gradient title, same treatment as the reference banner ----
-    const titleGrad = ctx.createLinearGradient(0, H * 0.16, 0, H * 0.62);
+    // ---- bold gradient title, same treatment as the reference banner,
+    // pushed slightly bigger so it reads clearly at real-world AR scale ----
+    const titleGrad = ctx.createLinearGradient(0, H * 0.14, 0, H * 0.64);
     titleGrad.addColorStop(0, '#3a0a04');
     titleGrad.addColorStop(0.45, accent);
     titleGrad.addColorStop(1, '#3a0a04');
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `900 ${88 * SCALE}px Arial, sans-serif`;
+    ctx.font = `900 ${96 * SCALE}px Arial, sans-serif`;
     ctx.lineJoin = 'round';
     ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-    ctx.lineWidth = 8 * SCALE / 2;
+    ctx.lineWidth = 9 * SCALE / 2;
     ctx.strokeText(modelName.toUpperCase(), W / 2, H * 0.4);
     ctx.fillStyle = titleGrad;
     ctx.fillText(modelName.toUpperCase(), W / 2, H * 0.4);
