@@ -248,108 +248,66 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   // slanted red/accent parallelogram carrying bold black spec copy with a
   // small triangular accent pointer. Canvas is bigger than before so the
   // baked poster reads clearly at real-world AR scale around the bike.
+  // 🎨 Bakes the poster texture for a spec card. Per the user's markup, the
+  // coloured spec/text panel is gone — the card now shows ONLY the uploaded
+  // image itself, full-bleed, with a thin accent-coloured edge so it still
+  // reads as a distinct "card" floating in AR rather than a raw photo.
   function createSpecBannerTexture(imgEl, title, desc, accent) {
     const SCALE = 2;
-    const W = 1100 * SCALE, H = 620 * SCALE;
+    const W = 900 * SCALE, H = 620 * SCALE;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, W, H); // fully transparent canvas by default
 
-    const titleH = H * 0.22;   // top strip reserved for the big gradient title
-    const bodyTop = titleH;
-    const bodyH = H - titleH;
+    const pad = 10 * SCALE; // small inset so the accent border is visible all round
 
-    // ---- big bold gradient title across the top, same treatment as the
-    // reference "BRUTE POWER" / "LED LIGHTING SYSTEM" banners ----
-    const titleGrad = ctx.createLinearGradient(0, titleH * 0.15, 0, titleH * 0.95);
-    titleGrad.addColorStop(0, '#2a0602');
-    titleGrad.addColorStop(0.5, accent);
-    titleGrad.addColorStop(1, '#2a0602');
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = `900 ${68 * SCALE}px Arial, sans-serif`;
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'rgba(0,0,0,0.85)';
-    ctx.lineWidth = 9 * SCALE / 2;
-    ctx.strokeText(title.toUpperCase(), W / 2, titleH * 0.56);
-    ctx.fillStyle = titleGrad;
-    ctx.fillText(title.toUpperCase(), W / 2, titleH * 0.56);
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-
-    // ---- photo panel, clipped to an angled quad on the left, full colour ----
+    // ---- rounded-rect clip so the raw image gets clean, soft corners ----
+    const r = 26 * SCALE;
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(0, bodyTop);
-    ctx.lineTo(W * 0.56, bodyTop);
-    ctx.lineTo(W * 0.44, H);
-    ctx.lineTo(0, H);
+    ctx.moveTo(pad + r, pad);
+    ctx.lineTo(W - pad - r, pad);
+    ctx.arcTo(W - pad, pad, W - pad, pad + r, r);
+    ctx.lineTo(W - pad, H - pad - r);
+    ctx.arcTo(W - pad, H - pad, W - pad - r, H - pad, r);
+    ctx.lineTo(pad + r, H - pad);
+    ctx.arcTo(pad, H - pad, pad, H - pad - r, r);
+    ctx.lineTo(pad, pad + r);
+    ctx.arcTo(pad, pad, pad + r, pad, r);
     ctx.closePath();
     ctx.clip();
+
+    // ---- the uploaded image itself, full-bleed, no text/colour panel ----
     if (imgEl && imgEl.naturalWidth) {
       const iw = imgEl.naturalWidth, ih = imgEl.naturalHeight;
-      const scale = Math.max((W * 0.58) / iw, bodyH / ih);
+      const innerW = W - pad * 2, innerH = H - pad * 2;
+      const scale = Math.max(innerW / iw, innerH / ih); // cover-fit, no cropping bars
       const dw = iw * scale, dh = ih * scale;
-      ctx.filter = 'saturate(1.15) contrast(1.12) brightness(1.03)';
-      ctx.globalAlpha = 1;
-      ctx.drawImage(imgEl, (W * 0.3 - dw) / 2, bodyTop + (bodyH - dh) / 2, dw, dh);
-      ctx.filter = 'none';
+      ctx.drawImage(imgEl, pad + (innerW - dw) / 2, pad + (innerH - dh) / 2, dw, dh);
     } else {
       ctx.fillStyle = 'rgba(255,255,255,0.08)';
-      ctx.fillRect(0, bodyTop, W * 0.58, bodyH);
+      ctx.fillRect(pad, pad, W - pad * 2, H - pad * 2);
     }
-    // soft fade toward the accent panel
-    const edgeGrad = ctx.createLinearGradient(W * 0.3, 0, W * 0.56, 0);
-    edgeGrad.addColorStop(0, 'rgba(0,0,0,0)');
-    edgeGrad.addColorStop(1, 'rgba(0,0,0,0.55)');
-    ctx.fillStyle = edgeGrad;
-    ctx.fillRect(0, bodyTop, W * 0.58, bodyH);
     ctx.restore();
 
-    // ---- slanted accent parallelogram on the right, glass-tinted, same
-    // silhouette as the reference red callout box ----
+    // ---- thin accent-coloured outline so the card still pops in AR ----
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 18 * SCALE / 2;
     ctx.beginPath();
-    ctx.moveTo(W * 0.4, bodyTop);
-    ctx.lineTo(W, bodyTop);
-    ctx.lineTo(W, H);
-    ctx.lineTo(W * 0.3, H);
+    ctx.moveTo(pad + r, pad);
+    ctx.lineTo(W - pad - r, pad);
+    ctx.arcTo(W - pad, pad, W - pad, pad + r, r);
+    ctx.lineTo(W - pad, H - pad - r);
+    ctx.arcTo(W - pad, H - pad, W - pad - r, H - pad, r);
+    ctx.lineTo(pad + r, H - pad);
+    ctx.arcTo(pad, H - pad, pad, H - pad - r, r);
+    ctx.lineTo(pad, pad + r);
+    ctx.arcTo(pad, pad, pad + r, pad, r);
     ctx.closePath();
-    ctx.clip();
-    ctx.fillStyle = accentRgba(accent, 0.92);
-    ctx.fillRect(W * 0.3, bodyTop, W * 0.7, bodyH);
-    ctx.restore();
-    ctx.strokeStyle = 'rgba(0,0,0,0.65)';
-    ctx.lineWidth = 3 * SCALE / 2;
-    ctx.beginPath();
-    ctx.moveTo(W * 0.4, bodyTop);
-    ctx.lineTo(W * 0.3, H);
+    ctx.lineWidth = 7 * SCALE / 2;
+    ctx.strokeStyle = accentRgba(accent, 0.95);
     ctx.stroke();
-
-    // small triangular accent pointer, echoing the reference banners
-    ctx.fillStyle = accentRgba(accent, 0.95);
-    ctx.beginPath();
-    ctx.moveTo(0, bodyTop + bodyH * 0.42);
-    ctx.lineTo(W * 0.09, bodyTop + bodyH * 0.5);
-    ctx.lineTo(0, bodyTop + bodyH * 0.58);
-    ctx.closePath();
-    ctx.fill();
-
-    // ---- spec description — bold black text on the accent panel ----
-    ctx.font = `800 ${44 * SCALE}px Arial, sans-serif`;
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#0a0a0a';
-    const lines = desc.split('\n');
-    const lineGap = 60 * SCALE;
-    const blockH = (lines.length - 1) * lineGap;
-    const startY = bodyTop + bodyH / 2 - blockH / 2;
-    lines.forEach((line, i) => {
-      ctx.fillText(line, W * 0.46, startY + i * lineGap);
-    });
-    ctx.textBaseline = 'alphabetic';
+    ctx.restore();
 
     return canvas.toDataURL('image/png');
   }
@@ -382,7 +340,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       // the reference banners' red glow instead of a flat grey shadow.
       const glowPlate = document.createElement('a-plane');
       glowPlate.setAttribute('width', '1.42');
-      glowPlate.setAttribute('height', '0.8');
+      glowPlate.setAttribute('height', '0.98');
       glowPlate.setAttribute('color', accent);
       glowPlate.setAttribute('opacity', '0.22');
       glowPlate.setAttribute('position', '0.02 -0.022 0.004');
@@ -394,7 +352,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       // photo is ready, in the full-colour artistic banner style.
       const posterPlane = document.createElement('a-plane');
       posterPlane.setAttribute('width', '1.38');
-      posterPlane.setAttribute('height', '0.78');
+      posterPlane.setAttribute('height', '0.95');
       posterPlane.setAttribute('position', '0 0 0.01');
       posterPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.97; alphaTest: 0.02');
       cardEntity.appendChild(posterPlane);
