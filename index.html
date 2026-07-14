@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>Smart Scooter — AR Spec Scanner</title>
+<title>Pulsar NS200 — AR Spec Scanner</title>
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -117,7 +117,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
 <div id="start-overlay">
   <div class="hero-photo-wrap">
-    <img id="bike-hero-img" src="image/images.jpeg" alt="Scooter Preview">
+    <img id="bike-hero-img" src="image/frame.png" alt="Pulsar NS200 Preview">
   </div>
   <div class="content-wrap">
     <div>
@@ -125,7 +125,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         <div class="led-dot"></div>
         <span id="app-eyebrow" class="eyebrow">AR Spec System</span>
       </div>
-      <h1 id="app-title" class="brand-title">Scooter <span class="accent">BKU-0929</span></h1>
+      <h1 id="app-title" class="brand-title">Pulsar <span class="accent">NS200</span></h1>
     </div>
     <div class="stat-strip" id="json-stats-container"></div>
     <button class="scan-btn" onclick="startScanner()">
@@ -146,9 +146,10 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     <a-asset-item id="frame-model" src="./scooter_hud.glb"></a-asset-item>
 
     <img id="img-engine" src="image/engine.png">
-    <img id="img-led system" src="image/led system.png">
-    <img id="img-frok" src="image/frok.png">
     <img id="img-frame" src="image/frame.png">
+    <img id="img-frok" src="image/frok.png">
+    <img id="img-led" src="image/led_system.png">
+    <img id="img-styling" src="image/styling.png">
   </a-assets>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -162,20 +163,20 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   const bikeDatabase = [
     {
       "targetIdx": 0,
-      "brandName": "Scooter",
-      "modelName": "BKU-0929",
+      "brandName": "Pulsar",
+      "modelName": "NS200",
       "systemTag": "AR Spec Scanner",
       "dashboardSpecs": [
-        { "value": "124.8 cc", "label": "Engine Capacity" },
-        { "value": "9.38 PS", "label": "Max Power" },
-        { "value": "SmartXonnect", "label": "Telemetry" }
+        { "value": "160 cc", "label": "Oil-Cooled Engine" },
+        { "value": "17 PS", "label": "Max Power" },
+        { "value": "14.6 NM", "label": "Max Torque" }
       ],
       "arSeparateCards": [
-        { "title": "ENGINE", "imgSrc": "#img-engine", "desc": "124.8 CC\nSINGLE CYLINDER" },
-        { "title": "frame", "imgSrc": "#img-frame", "desc": "9.38 PS\n@ 7000 RPM" },
-        { "title": "light", "imgSrc": "#img-led system", "desc": "10.5 NM\n@ 5500 RPM" },
-        { "title": "frok", "imgSrc": "#img-frok", "desc": "SYNCHRONIZED\nBREATHING ABS" },
-        { "title": "styling", "imgSrc": "#img-styling", "desc": "AUTOMATIC\nCENTRIFUGAL" }
+        { "title": "BRUTE POWER", "imgSrc": "#img-engine", "desc": "OIL-COOLED 160CC\n17 PS @ 9000 RPM\n14.6 NM TORQUE" },
+        { "title": "PERIMETER FRAME", "imgSrc": "#img-frame", "desc": "HIGH STIFFNESS\nLOW FLEX CHASSIS" },
+        { "title": "USD FRONT FORK", "imgSrc": "#img-frok", "desc": "UPSIDE-DOWN FORK\nSHARP CORNERING" },
+        { "title": "LED LIGHTING", "imgSrc": "#img-led", "desc": "LED HEADLAMP\n+ LED DRL" },
+        { "title": "MUSCULAR STYLING", "imgSrc": "#img-styling", "desc": "STREET FIGHTER\nSPEED-LINE TANK" }
       ]
     },
     { "targetIdx": 1, "useSameAs": 0 },
@@ -372,7 +373,10 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       cardEntity.setAttribute('position', `${posX} ${posY} 0.1`);
       // Keep every poster upright/readable — no per-card pinwheel tilt.
       // Only its position moves around the object; orientation stays flat.
-      cardEntity.setAttribute('rotation', '0 0 0');
+      // Billboard: card always faces the camera, so the ring stays clean and
+      // readable from any angle instead of scattering/skewing as you move
+      // around the bike — fixes the "flying around randomly" look.
+      cardEntity.setAttribute('look-at', '[camera]');
 
       // soft accent-tinted shadow plate behind the poster for depth, echoing
       // the reference banners' red glow instead of a flat grey shadow.
@@ -478,6 +482,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   function buildBrandTitle(bikeData) {
     const brandTitleEntity = document.createElement('a-entity');
     brandTitleEntity.setAttribute('position', '0 1.7 0.02');
+    brandTitleEntity.setAttribute('look-at', '[camera]');
 
     const brandPlane = document.createElement('a-plane');
     brandPlane.setAttribute('width', '0.95');
