@@ -241,25 +241,25 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  // 🎨 Bakes the poster texture for a spec card, "art gallery" style:
-  // a soft-shadowed white mat frame around the uploaded photo (like a
-  // print hanging on a gallery wall), rounded photo corners, an accent
-  // rule, and a slim minimal plaque underneath carrying ONLY the title —
-  // no dense text block, no big colour panel, just a clean modern label.
+  // 🎨 Bakes the poster texture for a spec card — "floating glass" style.
+  // No solid box fill anymore: the card is almost entirely the uploaded
+  // photo itself (transparent canvas around it), wrapped in a slim glowing
+  // gradient edge, with the title glazed as a soft caption directly over
+  // a bottom gradient scrim on the photo — so it reads as an image with a
+  // stylish glass finish, not a filled "box".
   function createSpecBannerTexture(imgEl, title, desc, accent) {
     const SCALE = 2;
-    const W = 900 * SCALE, H = 760 * SCALE;
+    const W = 900 * SCALE, H = 620 * SCALE;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, W, H); // fully transparent canvas by default
 
-    const mat = 34 * SCALE;          // white mat border thickness
-    const plaqueH = 108 * SCALE;     // reserved strip at the bottom for the title
-    const photoW = W - mat * 2;
-    const photoH = H - plaqueH - mat * 2;
-    const photoX = mat, photoY = mat;
-    const r = 14 * SCALE;
+    const pad = 6 * SCALE;   // barely-there inset, just enough for the glow edge
+    const photoW = W - pad * 2;
+    const photoH = H - pad * 2;
+    const photoX = pad, photoY = pad;
+    const r = 30 * SCALE;
 
     function roundedRectPath(x, y, w, h, rad) {
       ctx.beginPath();
@@ -275,17 +275,18 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       ctx.closePath();
     }
 
-    // ---- soft drop shadow behind the whole mat, like a framed print ----
+    // ---- an extremely faint frosted-glass tint behind the photo, just to
+    // catch a little light — NOT a solid opaque box ----
+    roundedRectPath(photoX, photoY, photoW, photoH, r);
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.45)';
-    ctx.shadowBlur = 26 * SCALE / 2;
-    ctx.shadowOffsetY = 10 * SCALE / 2;
-    roundedRectPath(0, 0, W, H - plaqueH * 0.35, 22 * SCALE);
-    ctx.fillStyle = 'rgba(245,243,238,0.98)'; // gallery-mat off-white
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = 22 * SCALE / 2;
+    ctx.shadowOffsetY = 6 * SCALE / 2;
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
     ctx.fill();
     ctx.restore();
 
-    // ---- the uploaded photo, cover-fit inside the mat, rounded corners ----
+    // ---- the uploaded photo, cover-fit, rounded corners, near full-bleed ----
     roundedRectPath(photoX, photoY, photoW, photoH, r);
     ctx.save();
     ctx.clip();
@@ -295,27 +296,38 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       const dw = iw * scale, dh = ih * scale;
       ctx.drawImage(imgEl, photoX + (photoW - dw) / 2, photoY + (photoH - dh) / 2, dw, dh);
     } else {
-      ctx.fillStyle = 'rgba(0,0,0,0.08)';
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
       ctx.fillRect(photoX, photoY, photoW, photoH);
     }
+
+    // soft gradient scrim just behind the caption so the title stays
+    // legible without needing any solid plaque background
+    const scrim = ctx.createLinearGradient(0, photoY + photoH * 0.62, 0, photoY + photoH);
+    scrim.addColorStop(0, 'rgba(0,0,0,0)');
+    scrim.addColorStop(1, 'rgba(0,0,0,0.55)');
+    ctx.fillStyle = scrim;
+    ctx.fillRect(photoX, photoY + photoH * 0.62, photoW, photoH * 0.38);
     ctx.restore();
-    // thin accent keyline hugging the photo
+
+    // ---- slim glowing gradient border — the only "frame" element left ----
     roundedRectPath(photoX, photoY, photoW, photoH, r);
-    ctx.lineWidth = 4 * SCALE / 2;
-    ctx.strokeStyle = accentRgba(accent, 0.9);
+    const glowGrad = ctx.createLinearGradient(photoX, photoY, photoX + photoW, photoY + photoH);
+    glowGrad.addColorStop(0, accentRgba(accent, 0.95));
+    glowGrad.addColorStop(0.5, 'rgba(255,255,255,0.55)');
+    glowGrad.addColorStop(1, accentRgba(accent, 0.95));
+    ctx.lineWidth = 5 * SCALE / 2;
+    ctx.strokeStyle = glowGrad;
     ctx.stroke();
 
-    // ---- accent rule separating photo from the plaque ----
-    ctx.fillStyle = accentRgba(accent, 0.95);
-    ctx.fillRect(mat, photoY + photoH + 14 * SCALE, photoW, 4 * SCALE);
-
-    // ---- minimal gallery plaque: just the title, small letter-spacing ----
+    // ---- title glazed onto the photo as a soft caption, no box behind it ----
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `800 ${40 * SCALE}px Arial, sans-serif`;
-    ctx.fillStyle = '#141416';
-    const plaqueCenterY = photoY + photoH + 14 * SCALE + 4 * SCALE + (plaqueH - 18 * SCALE) / 2;
-    drawSpacedText(ctx, title.toUpperCase(), W / 2, plaqueCenterY, 3 * SCALE);
+    ctx.font = `800 ${38 * SCALE}px Arial, sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = 10 * SCALE / 2;
+    drawSpacedText(ctx, title.toUpperCase(), W / 2, photoY + photoH - 40 * SCALE, 3 * SCALE);
+    ctx.shadowBlur = 0;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
 
@@ -362,11 +374,11 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       // soft accent-tinted shadow plate behind the poster for depth, echoing
       // the reference banners' red glow instead of a flat grey shadow.
       const glowPlate = document.createElement('a-plane');
-      glowPlate.setAttribute('width', '1.42');
-      glowPlate.setAttribute('height', '1.22');
+      glowPlate.setAttribute('width', '1.44');
+      glowPlate.setAttribute('height', '1.03');
       glowPlate.setAttribute('color', accent);
-      glowPlate.setAttribute('opacity', '0.22');
-      glowPlate.setAttribute('position', '0.02 -0.022 0.004');
+      glowPlate.setAttribute('opacity', '0.1');
+      glowPlate.setAttribute('position', '0 0 -0.005');
       glowPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
       cardEntity.appendChild(glowPlate);
 
@@ -375,9 +387,9 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       // photo is ready, in the full-colour artistic banner style.
       const posterPlane = document.createElement('a-plane');
       posterPlane.setAttribute('width', '1.38');
-      posterPlane.setAttribute('height', '1.165');
+      posterPlane.setAttribute('height', '0.95');
       posterPlane.setAttribute('position', '0 0 0.01');
-      posterPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.97; alphaTest: 0.02');
+      posterPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.94; alphaTest: 0.02');
       cardEntity.appendChild(posterPlane);
 
       const applyTexture = () => {
