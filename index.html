@@ -131,38 +131,66 @@
   }
   #reticle.locked .crosshair { display: block; border-color: #39ffb0; box-shadow: 0 0 8px rgba(57,255,176,0.8); animation: cornerBreathe 1.6s ease-in-out infinite; }
 
-  /* ============ SPEC CARDS (floating AR image badges) ============ */
-  .card {
-    position: fixed; z-index: 12; width: 84px; height: 84px; border-radius: 18px;
-    overflow: hidden; background: #0a0e12;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 0 2px var(--glow), 0 0 14px color-mix(in srgb, var(--glow) 60%, transparent);
-    opacity: 0; transform: scale(0.5) translateY(10px) rotate(0deg); filter: blur(0px);
-    transition: opacity 0.45s ease, transform 0.45s cubic-bezier(.2,1.4,.4,1), filter 0.4s ease, box-shadow 0.4s ease;
+  /* ============ SPEC CARDS — floating 3D holo-panels ============ */
+  .card { position: fixed; z-index: 12; width: 84px; height: 84px; }
+  #card-engine  { top: 96px;  left: 50%; transform: translateX(-50%); }
+  #card-led     { top: 132px; left: 12px; }
+  #card-frame   { bottom: 128px; left: 12px; }
+  #card-front   { top: 132px; right: 12px; }
+  #card-styling { bottom: 128px; right: 12px; }
+
+  /* handles the appear / disappear transition (position stays put via .card above) */
+  .card-3d {
+    position: absolute; inset: 0;
+    opacity: 0; transform: scale(0.5) translateY(10px); filter: blur(0px);
+    transition: opacity 0.45s ease, transform 0.45s cubic-bezier(.2,1.4,.4,1), filter 0.4s ease;
     pointer-events: none;
   }
-  .card.show {
-    opacity: 1; transform: scale(1) translateY(0) rotate(0deg); filter: blur(0px);
-    animation: cardGlowPulse 2.6s ease-in-out infinite;
-  }
-  .card.lost {
-    opacity: 0; transform: scale(0.35) translateY(18px) rotate(14deg); filter: blur(7px);
+  .card.show .card-3d { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
+  .card.lost .card-3d {
+    opacity: 0; transform: scale(0.3) translateY(20px) rotate(14deg); filter: blur(7px);
     transition: opacity 0.4s cubic-bezier(.4,0,1,1), transform 0.4s cubic-bezier(.4,0,1,1), filter 0.4s ease;
-    animation: none;
-  }
-  @keyframes cardGlowPulse {
-    0%, 100% { box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 0 2px var(--glow), 0 0 14px color-mix(in srgb, var(--glow) 60%, transparent); }
-    50%      { box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 0 2px var(--glow), 0 0 22px color-mix(in srgb, var(--glow) 85%, transparent); }
   }
 
-  .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* continuous idle hover in 3D space: gentle rotate + rise on a per-card tilt */
+  .float {
+    position: absolute; inset: 0; transform-style: preserve-3d;
+    animation: floatHover3d 4.4s ease-in-out infinite;
+  }
+  @keyframes floatHover3d {
+    0%, 100% { transform: perspective(700px) rotateY(var(--ry,0deg)) rotateX(var(--rx,0deg)) translateY(0) translateZ(0px); }
+    50%      { transform: perspective(700px) rotateY(calc(var(--ry,0deg) + 8deg)) rotateX(calc(var(--rx,0deg) - 5deg)) translateY(-9px) translateZ(18px); }
+  }
 
-  #card-engine  { --glow: #ffb020; top: 96px;  left: 50%; transform: translateX(-50%) scale(0.5); }
-  #card-engine.show { transform: translateX(-50%) scale(1); }
-  #card-engine.lost { transform: translateX(-50%) scale(0.35) translateY(18px) rotate(14deg); }
-  #card-led     { --glow: #b866ff; top: 132px; left: 12px; }
-  #card-frame   { --glow: #4dd6ff; bottom: 128px; left: 12px; }
-  #card-front   { --glow: #ff003c; top: 132px; right: 12px; }
-  #card-styling { --glow: #39ffb0; bottom: 128px; right: 12px; }
+  /* the visible face: image + a glowing category-colored edge, pulsing gently */
+  .face {
+    position: absolute; inset: 0; z-index: 2; border-radius: 18px; overflow: hidden; background: #0a0e12;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5), 0 0 0 2px var(--glow), 0 0 14px color-mix(in srgb, var(--glow) 55%, transparent);
+    animation: glowPulse 4.4s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 8px 20px rgba(0,0,0,0.5), 0 0 0 2px var(--glow), 0 0 14px color-mix(in srgb, var(--glow) 55%, transparent); }
+    50%      { box-shadow: 0 8px 20px rgba(0,0,0,0.5), 0 0 0 2px var(--glow), 0 0 24px color-mix(in srgb, var(--glow) 85%, transparent); }
+  }
+  .face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* a slab peeking out behind the face gives the panel real thickness */
+  .float::before {
+    content: ''; position: absolute; inset: 0; z-index: 1; border-radius: 18px;
+    background: linear-gradient(160deg, var(--glow) 0%, #000 130%);
+    transform: translateZ(-10px) translate(4px, 6px);
+    filter: brightness(0.45);
+    box-shadow: 0 16px 26px rgba(0,0,0,0.55);
+  }
+
+  /* a soft ground-glow ellipse that contracts as the panel rises, faking a floating cast shadow */
+  .float::after {
+    content: ''; position: absolute; left: 12%; right: 12%; bottom: -14px; height: 10px; z-index: 0;
+    border-radius: 50%; filter: blur(3px);
+    background: radial-gradient(ellipse at center, var(--glow) 0%, transparent 72%);
+    animation: shadowPulse 4.4s ease-in-out infinite;
+  }
+  @keyframes shadowPulse { 0%, 100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(0.65); opacity: 0.22; } }
 
   /* ============ BOTTOM STATUS ============ */
   #found-bar {
@@ -220,20 +248,20 @@
   <div class="crosshair"></div>
 </div>
 
-<div id="card-engine" class="card">
-  <img src="image/engine.png" alt="engine">
+<div id="card-engine" class="card" style="--glow:#ffb020; --ry:0deg; --rx:10deg;">
+  <div class="card-3d"><div class="float"><div class="face"><img src="image/engine.png" alt="engine"></div></div></div>
 </div>
-<div id="card-led" class="card">
-  <img src="image/led%20system.png" alt="led system">
+<div id="card-led" class="card" style="--glow:#b866ff; --ry:18deg; --rx:6deg;">
+  <div class="card-3d"><div class="float"><div class="face"><img src="image/led%20system.png" alt="led system"></div></div></div>
 </div>
-<div id="card-frame" class="card">
-  <img src="image/frame.png" alt="frame">
+<div id="card-frame" class="card" style="--glow:#4dd6ff; --ry:18deg; --rx:-6deg;">
+  <div class="card-3d"><div class="float"><div class="face"><img src="image/frame.png" alt="frame"></div></div></div>
 </div>
-<div id="card-front" class="card">
-  <img src="image/frok.png" alt="front fork">
+<div id="card-front" class="card" style="--glow:#ff003c; --ry:-18deg; --rx:6deg;">
+  <div class="card-3d"><div class="float"><div class="face"><img src="image/frok.png" alt="front fork"></div></div></div>
 </div>
-<div id="card-styling" class="card">
-  <img src="image/styling.png" alt="styling">
+<div id="card-styling" class="card" style="--glow:#39ffb0; --ry:-18deg; --rx:-6deg;">
+  <div class="card-3d"><div class="float"><div class="face"><img src="image/styling.png" alt="styling"></div></div></div>
 </div>
 
 <div id="found-bar">
