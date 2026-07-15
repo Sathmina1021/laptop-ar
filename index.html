@@ -4,50 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>XQOM AR</title>
+<script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; }
 
-  /* ============ LIVE CAMERA ============ */
-  #camera-feed {
-    position: fixed; inset: 0; width: 100%; height: 100%;
-    object-fit: cover; z-index: 1; background: #000;
-  }
-
-  /* ============ SPLASH (tap to start) ============ */
-  #splash {
-    position: fixed; inset: 0; z-index: 100;
-    background: radial-gradient(ellipse at center, #071018 0%, #000 78%);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 24px;
-  }
-  #splash .logo { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 26px; letter-spacing: 5px; color: #eafcff; text-shadow: 0 0 10px #00f0ff, 0 0 26px rgba(0,240,255,0.65); }
-  #splash .logo span { color: #00f0ff; }
-  #splash .tagline { margin-top: 10px; font-size: 13px; letter-spacing: 2px; color: rgba(255,255,255,0.5); }
-  #start-btn {
-    margin-top: 44px; width: 92px; height: 92px; border-radius: 50%;
-    border: 2px solid #00f0ff; background: rgba(0,240,255,0.08);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 18px rgba(0,240,255,0.5), inset 0 0 14px rgba(0,240,255,0.25);
-    animation: pulseBtn 1.8s ease-in-out infinite;
-  }
-  #start-btn svg { width: 34px; height: 34px; }
-  @keyframes pulseBtn {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(0,240,255,0.5), inset 0 0 14px rgba(0,240,255,0.25); }
-    50% { transform: scale(1.06); box-shadow: 0 0 30px rgba(0,240,255,0.75), inset 0 0 18px rgba(0,240,255,0.35); }
-  }
-  #splash .hint { margin-top: 22px; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px; color: #9df9ff; }
-  #splash .fineprint { position: absolute; bottom: 26px; left: 0; width: 100%; text-align: center; font-size: 11px; letter-spacing: 1px; color: rgba(255,255,255,0.35); }
-
-  /* ============ LOADING ============ */
-  #loading { position: fixed; inset: 0; z-index: 90; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-  #loading.show { display: flex; }
+  /* ============ LOADING (shown until camera + tracking pipeline is ready) ============ */
+  #loading { position: fixed; inset: 0; z-index: 90; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
+  #loading.hide { opacity: 0; pointer-events: none; }
   .spinner { position: relative; width: 78px; height: 78px; }
   .spinner .ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid transparent; border-top-color: #00f0ff; border-right-color: #00f0ff; animation: spin 1.1s linear infinite; }
   .spinner .ring.r2 { inset: 12px; border-top-color: transparent; border-right-color: transparent; border-bottom-color: #ff003c; border-left-color: #ff003c; animation-duration: 1.6s; animation-direction: reverse; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  #loading .logo { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 22px; letter-spacing: 4px; color: #eafcff; text-shadow: 0 0 10px #00f0ff; margin-bottom: 36px; }
+  #loading .logo span { color: #00f0ff; }
   #loading .txt { margin-top: 24px; font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 2px; color: #9df9ff; text-shadow: 0 0 6px rgba(0,240,255,0.7); }
 
   /* ============ ERROR ============ */
@@ -56,81 +29,34 @@
   #cam-error .msg { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 1.5px; color: #ff5c7a; line-height: 1.8; }
   #cam-error button { margin-top: 26px; padding: 12px 28px; background: transparent; border: 1px solid #00f0ff; color: #00f0ff; font-family: 'Orbitron', sans-serif; letter-spacing: 2px; font-size: 12px; border-radius: 4px; }
 
-  /* ============ HEADER ============ */
-  #header {
-    position: fixed; top: 0; left: 0; width: 100%; z-index: 20; pointer-events: none;
-    padding: 18px 16px 26px; text-align: center;
-    background: linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0) 100%);
-    opacity: 0; transition: opacity 0.6s ease;
+  /* ============ Top brand bar ============ */
+  #brand-bar {
+    position: fixed; top: 0; left: 0; width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    padding: 14px 0 10px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 100%);
+    z-index: 20; pointer-events: none;
   }
-  #header.show { opacity: 1; }
-  #header .h1 {
-    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 30px; letter-spacing: 4px;
-    color: #ff2d55; text-shadow: 0 0 10px #ff2d55, 0 0 26px rgba(255,45,85,0.7);
-  }
-  #header .h2 {
-    margin-top: 4px; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 3px;
-    color: #00f0ff; text-shadow: 0 0 8px rgba(0,240,255,0.8);
-  }
+  #brand-bar .logo { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 15px; letter-spacing: 3px; color: #eafcff; text-shadow: 0 0 8px #00f0ff, 0 0 18px rgba(0,240,255,0.6); }
+  #brand-bar .logo span { color: #00f0ff; }
 
-  /* ============ SCAN RETICLE ============ */
-  #reticle {
-    position: fixed; left: 50%; top: 46%; width: 60vw; max-width: 300px; aspect-ratio: 1.7/1;
-    transform: translate(-50%, -50%); z-index: 10; pointer-events: none;
-    border: 2px solid rgba(0,240,255,0.55); border-radius: 50%;
-    box-shadow: 0 0 22px rgba(0,240,255,0.35), inset 0 0 22px rgba(0,240,255,0.18);
-    opacity: 0; transition: opacity 0.5s ease;
-  }
-  #reticle.show { opacity: 1; animation: reticlePulse 2s ease-in-out infinite; }
-  #reticle.locked { animation: none; border-color: rgba(0,240,255,0.85); }
-  @keyframes reticlePulse { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-50%,-50%) scale(1.04); } }
-  #reticle .chev {
-    position: absolute; left: 50%; top: -20px; transform: translateX(-50%);
-    width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent;
-    border-bottom: 12px solid #00f0ff; filter: drop-shadow(0 0 6px #00f0ff);
-    animation: chevBounce 1.3s ease-in-out infinite;
-  }
-  @keyframes chevBounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-8px); } }
+  /* ============ Scanning overlay (screen-space corner brackets, not drawn on the object) ============ */
+  #scan-hint { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 15; pointer-events: none; transition: opacity 0.4s ease; }
+  .scan-frame { position: relative; width: 62vw; max-width: 320px; aspect-ratio: 1/1; }
+  .scan-frame .corner { position: absolute; width: 34px; height: 34px; border: 3px solid #00f0ff; filter: drop-shadow(0 0 6px #00f0ff); }
+  .scan-frame .tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+  .scan-frame .tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+  .scan-frame .bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+  .scan-frame .br { bottom: 0; right: 0; border-left: none; border-top: none; }
+  .scan-line { position: absolute; left: 4%; width: 92%; height: 2px; background: linear-gradient(90deg, transparent, #00f0ff, transparent); box-shadow: 0 0 8px #00f0ff; animation: scanmove 2.2s ease-in-out infinite; }
+  @keyframes scanmove { 0% { top: 6%; opacity: 0.2; } 50% { top: 94%; opacity: 1; } 100% { top: 6%; opacity: 0.2; } }
+  #scan-hint .msg { margin-top: 26px; font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 2px; color: #9df9ff; text-shadow: 0 0 6px rgba(0,240,255,0.7); }
 
-  /* ============ SPEC CARDS ============ */
-  .card {
-    position: fixed; z-index: 12; width: 40vw; max-width: 180px;
-    background: rgba(6,10,14,0.55); border: 1px solid var(--glow);
-    border-radius: 4px; overflow: hidden; backdrop-filter: blur(1px);
-    box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 55%, transparent);
-    opacity: 0; transform: scale(0.6);
-    transition: opacity 0.45s ease, transform 0.45s cubic-bezier(.2,1.4,.4,1);
-    pointer-events: none;
-  }
-  .card.show { opacity: 1; transform: scale(1); }
-  .card img { display: block; width: 100%; height: auto; }
-  .card .label {
-    padding: 5px 8px 7px; font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 1.5px;
-    color: #fff; text-align: center; border-top: 1px solid var(--glow);
-    background: rgba(0,0,0,0.55); text-shadow: 0 0 6px var(--glow);
-  }
-  .card .tag {
-    position: absolute; top: 6px; left: 6px; font-family: 'Orbitron', sans-serif; font-size: 8px;
-    letter-spacing: 1px; color: var(--glow); background: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 2px;
-  }
-  /* directional connector arrow on the inner edge of each card */
-  .card .arrow { position: absolute; top: 50%; width: 0; height: 0; filter: drop-shadow(0 0 4px var(--glow)); }
-  .card.left  .arrow { right: -9px;  border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 9px solid var(--glow); transform: translateY(-50%); }
-  .card.right .arrow { left: -9px;   border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-right: 9px solid var(--glow); transform: translateY(-50%); }
-
-  #card-engine  { --glow: #ffb020; top: 92px;  left: 50%; transform: translateX(-50%) scale(0.6); width: 34vw; max-width: 140px; }
-  #card-engine.show { transform: translateX(-50%) scale(1); }
-  #card-led     { --glow: #b866ff; top: 130px; left: 12px; }
-  #card-frame   { --glow: #4dd6ff; bottom: 120px; left: 12px; }
-  #card-front   { --glow: #ff003c; top: 130px; right: 12px; }
-  #card-styling { --glow: #39ffb0; bottom: 120px; right: 12px; }
-
-  /* ============ BOTTOM STATUS ============ */
+  /* ============ Bottom status ============ */
   #found-bar {
-    position: fixed; bottom: 0; left: 0; width: 100%; padding: 14px 20px 20px; z-index: 20;
-    background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
-    text-align: center; opacity: 0; transform: translateY(12px);
-    transition: opacity 0.5s ease, transform 0.5s ease; pointer-events: none;
+    position: fixed; bottom: 0; left: 0; width: 100%; padding: 16px 20px 22px; z-index: 20; text-align: center;
+    background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+    opacity: 0; transform: translateY(12px); transition: opacity 0.4s ease, transform 0.4s ease; pointer-events: none;
   }
   #found-bar.show { opacity: 1; transform: translateY(0); }
   #found-bar .title { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 2px; color: #fff; }
@@ -140,121 +66,203 @@
 </head>
 <body>
 
-<video id="camera-feed" autoplay playsinline muted></video>
-
-<div id="splash">
-  <div class="logo">XQOM <span>AR</span></div>
-  <div class="tagline">VEHICLE SPEC SCANNER</div>
-  <div id="start-btn">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M20 8V6a2 2 0 0 0-2-2h-2M20 16v2a2 2 0 0 1-2 2h-2" stroke="#00f0ff" stroke-width="2" stroke-linecap="round"/>
-      <circle cx="12" cy="12" r="3.4" stroke="#00f0ff" stroke-width="2"/>
-    </svg>
-  </div>
-  <div class="hint">TAP TO START</div>
-  <div class="fineprint">Camera access is required to scan the vehicle</div>
-</div>
-
 <div id="loading">
+  <div class="logo">XQOM <span>AR</span></div>
   <div class="spinner"><div class="ring"></div><div class="ring r2"></div></div>
   <div class="txt">INITIALIZING CAMERA<span>...</span></div>
 </div>
 
 <div id="cam-error">
-  <div class="msg">CAMERA UNAVAILABLE<br>Please allow camera access in your<br>browser settings, then retry.</div>
-  <button id="retry-btn">RETRY</button>
+  <div class="msg">CAMERA UNAVAILABLE<br>Please allow camera access in your<br>browser settings, then reload the page.</div>
+  <button id="retry-btn">RELOAD</button>
 </div>
 
-<div id="header">
-  <div class="h1">SPORT</div>
-  <div class="h2">[ HOLOGRAPHIC TELEMETRY ]</div>
-</div>
+<div id="brand-bar"><div class="logo">XQOM <span>AR</span></div></div>
 
-<div id="reticle"><div class="chev"></div></div>
-
-<div id="card-engine" class="card">
-  <span class="tag">01</span>
-  <img src="image/engine.png" alt="engine">
-  <div class="label">ENGINE &mdash; BRUTE POWER</div>
-</div>
-<div id="card-led" class="card left">
-  <span class="tag">02</span>
-  <img src="image/led%20system.png" alt="led system">
-  <div class="label">TWIN LED SYSTEM</div>
-  <div class="arrow"></div>
-</div>
-<div id="card-frame" class="card left">
-  <span class="tag">03</span>
-  <img src="image/frame.png" alt="frame">
-  <div class="label">PERIMETER FRAME</div>
-  <div class="arrow"></div>
-</div>
-<div id="card-front" class="card right">
-  <span class="tag">04</span>
-  <img src="image/frok.png" alt="front fork">
-  <div class="label">UPSIDE-DOWN FRONT FORK</div>
-  <div class="arrow"></div>
-</div>
-<div id="card-styling" class="card right">
-  <span class="tag">05</span>
-  <img src="image/styling.png" alt="styling">
-  <div class="label">AGGRESSIVE STYLING</div>
-  <div class="arrow"></div>
+<div id="scan-hint">
+  <div class="scan-frame">
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div class="scan-line"></div>
+  </div>
+  <div class="msg">SCANNING VEHICLE...</div>
 </div>
 
 <div id="found-bar">
   <div class="title">TARGET LOCKED <span>&mdash; SPEC DATA ONLINE</span></div>
-  <div class="sub">Live camera &mdash; tap a panel to inspect</div>
+  <div class="sub">Tap a panel to inspect the component</div>
 </div>
 
+<!--
+  Minimal, proven MindAR configuration -- no "embedded", no custom alpha/renderer
+  overrides. This is the setup that reliably shows the live camera underneath the
+  tracked content. autoStart:true lets MindAR request the camera as soon as the
+  scene is ready (no extra tap-gate to go wrong).
+-->
+<a-scene
+  mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no; uiLoading: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.001; missTolerance: 30;"
+  color-space="sRGB"
+  renderer="colorManagement: true; physicallyCorrectLights: true"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+  loading-screen="enabled: false">
+
+  <a-assets>
+    <!-- පින්තූර PNG-24, Transparent Background විදියට export කරන්න (Photoshop -> Save for Web -> PNG-24) -->
+    <img id="card1" src="image/engine.png" crossorigin="anonymous">
+    <img id="card2" src="image/frame.png" crossorigin="anonymous">
+    <img id="card3" src="image/frok.png" crossorigin="anonymous">
+    <img id="card4" src="image/led%20system.png" crossorigin="anonymous">
+    <img id="card5" src="image/styling.png" crossorigin="anonymous">
+  </a-assets>
+
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+  <a-entity id="target" mindar-image-target="targetIndex: 0">
+    <!-- No reticle/ring drawn on the object itself -- only the spec cards. -->
+    <a-entity id="cards-container"></a-entity>
+  </a-entity>
+</a-scene>
+
 <script>
-  const video      = document.getElementById('camera-feed');
-  const splash     = document.getElementById('splash');
-  const startBtn   = document.getElementById('start-btn');
-  const loading    = document.getElementById('loading');
-  const camError   = document.getElementById('cam-error');
-  const retryBtn   = document.getElementById('retry-btn');
-  const header     = document.getElementById('header');
-  const reticle    = document.getElementById('reticle');
-  const foundBar   = document.getElementById('found-bar');
-  const cards      = Array.from(document.querySelectorAll('.card'));
-
-  async function startCamera() {
-    splash.style.display = 'none';
-    loading.classList.add('show');
-    camError.classList.remove('show');
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false
+  /* ---------- crisp, whole textures ---------- */
+  AFRAME.registerComponent('sharp-texture', {
+    init: function () {
+      this.el.addEventListener('materialtextureloaded', () => {
+        const mesh = this.el.getObject3D('mesh');
+        if (!mesh || !mesh.material || !mesh.material.map) return;
+        const tex = mesh.material.map;
+        tex.wrapS = THREE.ClampToEdgeWrapping;
+        tex.wrapT = THREE.ClampToEdgeWrapping;
+        tex.anisotropy = this.el.sceneEl.renderer.capabilities.getMaxAnisotropy();
+        tex.needsUpdate = true;
       });
-      video.srcObject = stream;
-      await video.play();
-      onCameraReady();
-    } catch (err) {
-      loading.classList.remove('show');
-      camError.classList.add('show');
     }
+  });
+
+  const CARD_DEFS = [
+    { img: '#card1', label: 'ENGINE &mdash; BRUTE POWER', color: '#ffb020', pos: { x: 0,     y: 0.62 } },
+    { img: '#card2', label: 'PERIMETER FRAME',            color: '#4dd6ff', pos: { x: -0.82, y: -0.32 } },
+    { img: '#card3', label: 'UPSIDE-DOWN FRONT FORK',     color: '#ff003c', pos: { x: 0.82,  y: 0.30 } },
+    { img: '#card4', label: 'TWIN LED SYSTEM',            color: '#b866ff', pos: { x: -0.82, y: 0.34 } },
+    { img: '#card5', label: 'AGGRESSIVE STYLING',         color: '#39ffb0', pos: { x: 0.82,  y: -0.30 } }
+  ];
+
+  const scene     = document.querySelector('a-scene');
+  const target    = document.querySelector('#target');
+  const container = document.querySelector('#cards-container');
+  const loading   = document.getElementById('loading');
+  const camError  = document.getElementById('cam-error');
+  const retryBtn  = document.getElementById('retry-btn');
+  const scanHint  = document.getElementById('scan-hint');
+  const foundBar  = document.getElementById('found-bar');
+
+  const CARD_W = 0.4; // base width; height auto-computed per image's real aspect ratio
+  let cardEls = [];
+  let cardsBuilt = false;
+
+  function buildCards() {
+    if (cardsBuilt) return;
+    cardsBuilt = true;
+
+    CARD_DEFS.forEach((def) => {
+      const imgEl = document.querySelector(def.img);
+      const ratio = (imgEl && imgEl.naturalWidth) ? (imgEl.naturalHeight / imgEl.naturalWidth) : 1.3;
+      const w = CARD_W;
+      const h = CARD_W * ratio;
+
+      // wrapper handles the drop-in animation (position), inner group handles scale
+      const wrap = document.createElement('a-entity');
+      wrap.setAttribute('position', `${def.pos.x} ${def.pos.y + 0.001} 0`);
+      wrap.classList.add('ar-card');
+
+      const inner = document.createElement('a-entity');
+      inner.setAttribute('scale', '0.001 0.001 0.001');
+      inner.setAttribute('visible', 'false');
+      inner.classList.add('ar-card-inner');
+      wrap.appendChild(inner);
+
+      const glow = document.createElement('a-plane');
+      glow.setAttribute('width', w + 0.1);
+      glow.setAttribute('height', h + 0.1);
+      glow.setAttribute('color', def.color);
+      glow.setAttribute('opacity', '0.22');
+      glow.setAttribute('material', 'shader: flat');
+      glow.setAttribute('animation', 'property: material.opacity; dir: alternate; dur: 1300; loop: true; to: 0.42; easing: easeInOutSine');
+      inner.appendChild(glow);
+
+      const img = document.createElement('a-plane');
+      img.setAttribute('width', w);
+      img.setAttribute('height', h);
+      img.setAttribute('src', def.img);
+      img.setAttribute('transparent', 'true');
+      img.setAttribute('alpha-test', '0.05');
+      img.setAttribute('sharp-texture', '');
+      inner.appendChild(img);
+
+      const label = document.createElement('a-text');
+      label.setAttribute('value', def.label.toUpperCase());
+      label.setAttribute('position', `0 ${-(h / 2) - 0.1} 0`);
+      label.setAttribute('align', 'center');
+      label.setAttribute('width', '1.5');
+      label.setAttribute('wrap-count', '18');
+      label.setAttribute('color', '#ffffff');
+      label.setAttribute('font', 'https://cdn.aframe.io/fonts/DejaVu-sdf.fnt');
+      inner.appendChild(label);
+
+      container.appendChild(wrap);
+      cardEls.push({ wrap, inner, homeY: def.pos.y });
+    });
   }
 
-  function onCameraReady() {
-    loading.classList.remove('show');
-    header.classList.add('show');
-    reticle.classList.add('show');
+  function showCards() {
+    scanHint.style.opacity = '0';
+    scanHint.style.pointerEvents = 'none';
+    foundBar.classList.add('show');
 
-    // Simulated lock-on sequence: gives the "scanning" moment a real feel
-    // before revealing the spec panels, exactly like a genuine detection pass.
-    setTimeout(() => {
-      reticle.classList.add('locked');
-      foundBar.classList.add('show');
-      cards.forEach((card, i) => {
-        setTimeout(() => card.classList.add('show'), i * 140);
-      });
-    }, 1800);
+    cardEls.forEach((card, i) => {
+      // start slightly above the resting position, then drop into place
+      card.wrap.setAttribute('position', `${CARD_DEFS[i].pos.x} ${card.homeY + 0.45} 0`);
+      card.inner.setAttribute('visible', 'true');
+
+      setTimeout(() => {
+        card.wrap.setAttribute('animation__drop', {
+          property: 'position',
+          to: `${CARD_DEFS[i].pos.x} ${card.homeY} 0`,
+          dur: 650,
+          easing: 'easeOutBounce'
+        });
+        card.inner.setAttribute('animation__pop', {
+          property: 'scale', to: '0.55 0.55 0.55', dur: 500, easing: 'easeOutElastic'
+        });
+      }, i * 130);
+    });
   }
 
-  startBtn.addEventListener('click', startCamera);
-  retryBtn.addEventListener('click', startCamera);
+  function hideCards() {
+    scanHint.style.opacity = '1';
+    scanHint.style.pointerEvents = '';
+    foundBar.classList.remove('show');
+
+    cardEls.forEach((card) => {
+      card.inner.setAttribute('animation__pop', { property: 'scale', to: '0.001 0.001 0.001', dur: 220, easing: 'easeInQuad' });
+      setTimeout(() => card.inner.setAttribute('visible', 'false'), 230);
+    });
+  }
+
+  scene.addEventListener('loaded', buildCards);
+  target.addEventListener('targetFound', showCards);
+  target.addEventListener('targetLost', hideCards);
+
+  scene.addEventListener('arReady', () => loading.classList.add('hide'));
+  scene.addEventListener('arError', () => {
+    loading.classList.add('hide');
+    camError.classList.add('show');
+  });
+  // safety fallback in case arReady doesn't fire for any reason
+  setTimeout(() => loading.classList.add('hide'), 6000);
+
+  retryBtn.addEventListener('click', () => location.reload());
 </script>
 
 </body>
