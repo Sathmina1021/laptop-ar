@@ -13,9 +13,9 @@
 :root{
   --carbon:#0a0a0c;
   --carbon-2:#141416;
-  --pulsar-orange:#ff4b12;
-  --pulsar-amber:#ffb400;
-  --telemetry-cyan:#00e0ff;
+  --pulsar-orange:#ff3b00;
+  --pulsar-amber:#ffaa00;
+  --telemetry-cyan:#00f0ff;
   --geo-silver:#d9dde1;
   --ink:#f3efe6;
   --ink-dim:#9a9a9e;
@@ -29,87 +29,128 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 /* ============ MODERN LOADING SCREEN ============ */
 #start-overlay{
   position:fixed;inset:0;width:100%;height:100%;z-index:9999;
-  background:radial-gradient(circle at center, #141416 0%, #050506 100%);
+  background: radial-gradient(circle at top right, rgba(20,20,22,1) 0%, rgba(5,5,6,1) 100%);
   display:flex;flex-direction:column;
   transition:all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   overflow:hidden;
 }
 .hero-photo-wrap{
-  position:relative;width:100%;height:48%;min-height:240px;overflow:hidden;
-  clip-path:polygon(0 0,100% 0,100% 86%,0 100%);
-  border-bottom: 2px solid var(--pulsar-orange);
+  position:relative;width:100%;height:52%;min-height:260px;overflow:hidden;
+  clip-path:polygon(0 0,100% 0,100% 90%,0 100%);
+  border-bottom: 3px solid var(--pulsar-orange);
+  box-shadow: 0 10px 30px rgba(255, 59, 0, 0.2);
 }
 .hero-photo-wrap img{
   width:100%;height:100%;object-fit:cover;object-position:center 35%;
-  filter:saturate(1.1) contrast(1.1);
+  filter:saturate(1.2) contrast(1.15);
   transition: transform 6s ease;
 }
-#start-overlay:hover .hero-photo-wrap img { transform: scale(1.06); }
+#start-overlay:hover .hero-photo-wrap img { transform: scale(1.08); }
+
+/* Sci-Fi Scanline overlay on image */
+.hero-photo-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 2px,
+    rgba(0, 240, 255, 0.05) 3px,
+    transparent 4px
+  );
+  z-index: 2;
+  pointer-events: none;
+}
+
 .hero-photo-wrap::after{
   content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg, rgba(5,5,6,0) 30%, rgba(5,5,6,0.98) 98%),
-             linear-gradient(90deg, rgba(5,5,6,0.5) 0%, rgba(5,5,6,0) 50%);
+  background:linear-gradient(180deg, rgba(5,5,6,0) 20%, rgba(5,5,6,0.98) 98%),
+             linear-gradient(90deg, rgba(5,5,6,0.6) 0%, rgba(5,5,6,0) 50%);
+  z-index: 3;
 }
 
 .content-wrap{
   flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
   padding:20px max(26px, 5%) max(26px, env(safe-area-inset-bottom)) max(26px, 5%);
   text-align:center;
+  position: relative;
+  z-index: 5;
 }
-.eyebrow-row{ display:flex;align-items:center;gap:10px;margin-bottom:12px; }
-.led-dot{width:9px;height:9px;border-radius:50%;background:var(--pulsar-orange);
-  box-shadow:0 0 12px var(--pulsar-orange);animation:pulse 1.4s ease-in-out infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(0.85);}}
+.eyebrow-row{ display:flex;align-items:center;gap:12px;margin-bottom:14px; }
+.led-dot{width:10px;height:10px;border-radius:50%;background:var(--telemetry-cyan);
+  box-shadow:0 0 15px var(--telemetry-cyan);animation:pulse 1.2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(0.8);}}
 .eyebrow{
-  font-family:'JetBrains Mono',monospace;font-size:clamp(10px, 2.5vw, 13px);letter-spacing:4px;
-  color:var(--telemetry-cyan);text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;font-size:clamp(11px, 2.8vw, 14px);letter-spacing:5px;
+  color:var(--telemetry-cyan);text-transform:uppercase; font-weight: 700;
 }
 .brand-title{
   font-family:'Orbitron',sans-serif;font-weight:900;color:var(--ink);
-  font-size:clamp(30px, 8vw, 52px);line-height:1.1;letter-spacing:2px;
+  font-size:clamp(34px, 9vw, 58px);line-height:1.1;letter-spacing:3px;
   text-transform:uppercase;margin:0;
-  text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  text-shadow: 0 6px 25px rgba(0,0,0,0.8);
 }
-.brand-title .accent{ color:var(--pulsar-orange); }
+.brand-title .accent{ 
+  background: -webkit-linear-gradient(135deg, var(--pulsar-orange), var(--pulsar-amber));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
+/* Glassmorphism Stat Strip */
 .stat-strip{
-  display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;
-  width:100%;max-width:640px;margin:28px 0;
-  background:rgba(255,255,255,0.03);border-radius:14px;
-  border:1px solid rgba(255,255,255,0.08);padding:16px;
+  display:grid;grid-template-columns:repeat(3, 1fr);gap:15px;
+  width:100%;max-width:680px;margin:32px 0;
+  background:rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  padding:20px;
 }
-.stat{ text-align:center;border-right:1px solid rgba(255,255,255,0.08); }
+.stat{ text-align:center;border-right:1px solid rgba(255,255,255,0.1); }
 .stat:last-child{border-right:none;}
 .stat-value{
-  font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(16px, 4.5vw, 24px);color:var(--ink);
+  font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(18px, 5vw, 26px);
+  color:var(--telemetry-cyan);
   display:block;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
 }
 .stat-label{
-  font-family:'JetBrains Mono',monospace;font-size:clamp(9px, 2.3vw, 11px);letter-spacing:1.5px;
-  color:var(--ink-dim);text-transform:uppercase;display:block;margin-top:6px;
+  font-family:'JetBrains Mono',monospace;font-size:clamp(10px, 2.5vw, 12px);letter-spacing:2px;
+  color:var(--ink-dim);text-transform:uppercase;display:block;margin-top:8px;
 }
 
 .scan-btn{
   position:relative;overflow:hidden;
   background:linear-gradient(135deg,var(--pulsar-orange),var(--pulsar-amber));
-  border:none;color:#0a0a0a;padding:18px 45px;font-size:clamp(13px, 3.5vw, 16px);font-weight:900;
-  font-family:'Orbitron',sans-serif;border-radius:50px;cursor:pointer;letter-spacing:3px;text-transform:uppercase;
-  box-shadow:0 8px 32px rgba(255,75,18,0.45);width:100%;max-width:340px;transition:all 0.3s ease;
+  border:none;color:#050505;padding:20px 50px;font-size:clamp(14px, 4vw, 18px);font-weight:900;
+  font-family:'Orbitron',sans-serif;border-radius:50px;cursor:pointer;letter-spacing:4px;text-transform:uppercase;
+  box-shadow:0 10px 40px rgba(255,59,0,0.5);width:100%;max-width:380px;transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.scan-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,75,18,0.6); }
+.scan-btn:hover { 
+  transform: translateY(-4px) scale(1.02); 
+  box-shadow: 0 15px 50px rgba(255,59,0,0.7); 
+}
 .scan-btn::after{
   content:"";position:absolute;top:0;left:-100%;width:50%;height:100%;
-  background:linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
-  animation:sweep 3s ease-in-out infinite;
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,0.8), transparent);
+  animation:sweep 2.5s ease-in-out infinite;
 }
 @keyframes sweep{ 0%{left:-100%;} 50%{left:200%;} 100%{left:200%;} }
 
 #scan-hint{
-  position:fixed;bottom:max(36px, env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
-  color:var(--ink);background:rgba(10,10,12,0.92);padding:14px 24px;border-radius:12px;
-  font-family:'JetBrains Mono',monospace;font-size:clamp(10px,3vw,12px);font-weight:600;z-index:99;
-  border:1px solid var(--pulsar-orange);pointer-events:none;text-align:center;letter-spacing:1.5px;
-  backdrop-filter: blur(8px); max-width:90vw; width:max-content;
+  position:fixed;bottom:max(40px, env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+  color:var(--telemetry-cyan);
+  background:rgba(10,10,12,0.85);
+  padding:16px 28px;border-radius:16px;
+  font-family:'JetBrains Mono',monospace;font-size:clamp(11px,3.5vw,13px);font-weight:700;z-index:99;
+  border:1px solid rgba(0, 240, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+  pointer-events:none;text-align:center;letter-spacing:2px;
+  backdrop-filter: blur(10px); max-width:90vw; width:max-content;
+  text-transform: uppercase;
 }
 </style>
 </head>
@@ -144,7 +185,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
   <a-assets>
     <a-asset-item id="frame-model" src="./scooter_hud.glb"></a-asset-item>
-
     <img id="img-engine" src="image/engine.png" crossorigin="anonymous">
     <img id="img-frame" src="image/frame.png" crossorigin="anonymous">
     <img id="img-frok" src="image/frok.png" crossorigin="anonymous">
@@ -159,17 +199,16 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 <script>
   const USE_GLB_FRAME = true;
 
-  // MULTI-ANGLE CONFIGURATION WITH IMAGE MAPS
   const bikeDatabase = [
     {
       "targetIdx": 0,
       "brandName": "Pulsar",
       "modelName": "NS200",
-      "systemTag": "AR Spec Scanner",
+      "systemTag": "Holographic Telemetry",
       "dashboardSpecs": [
-        { "value": "160 cc", "label": "Oil-Cooled Engine" },
+        { "value": "160 cc", "label": "Oil-Cooled" },
         { "value": "17 PS", "label": "Max Power" },
-        { "value": "14.6 NM", "label": "Max Torque" }
+        { "value": "14.6 NM", "label": "Torque" }
       ],
       "arSeparateCards": [
         { "title": "BRUTE POWER", "imgSrc": "#img-engine", "desc": "OIL-COOLED 160CC\n17 PS @ 9000 RPM\n14.6 NM TORQUE" },
@@ -184,28 +223,9 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     { "targetIdx": 3, "useSameAs": 0 }
   ];
 
-  let isDragging = false;
-  let previousMousePosition = { x: 0 };
   const anchorState = []; 
-  const accentPalette = ['#ff4b12', '#00e0ff', '#ffb400', '#ff4b12', '#00e0ff'];
-
-  function buildOctagonFrame(color) {
-    const frame = document.createElement('a-entity');
-    frame.setAttribute('visible', 'false');
-    frame.setAttribute('position', '0 0.1 0.02');
-    const sides = 8; const rX = 0.52; const rY = 0.65; const points = [];
-    for (let i = 0; i < sides; i++) {
-      const angle = (i / sides) * Math.PI * 2 + Math.PI / 8;
-      points.push([Math.cos(angle) * rX, Math.sin(angle) * rY]);
-    }
-    for (let i = 0; i < sides; i++) {
-      const p1 = points[i]; const p2 = points[(i + 1) % sides];
-      const edge = document.createElement('a-entity');
-      edge.setAttribute('line', `start: ${p1[0]} ${p1[1]} 0; end: ${p2[0]} ${p2[1]} 0; color: ${color}`);
-      frame.appendChild(edge);
-    }
-    return frame;
-  }
+  // Futuristic Palette
+  const accentPalette = ['#00f0ff', '#ff3b00', '#ffaa00', '#00ff66', '#d900ff'];
 
   function buildGlbFrame(color) {
     const frame = document.createElement('a-entity');
@@ -213,6 +233,10 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     frame.setAttribute('gltf-model', '#frame-model');
     frame.setAttribute('scale', '1.35 1.35 1.35');
     frame.setAttribute('position', '0 0.05 -0.05'); 
+    
+    // Add a slow rotation animation for the 3D HUD frame
+    frame.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear');
+
     frame.addEventListener('model-loaded', () => {
       const mesh = frame.getObject3D('mesh');
       if (mesh) {
@@ -221,6 +245,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
             node.material = node.material.clone();
             if(node.material.color) node.material.color.set(color);
             if(node.material.emissive) node.material.emissive.set(color);
+            node.material.emissiveIntensity = 1.5; // Make it pop
           }
         });
       }
@@ -229,10 +254,9 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   }
 
   function buildFrame(color) {
-    return USE_GLB_FRAME ? buildGlbFrame(color) : buildOctagonFrame(color);
+    return buildGlbFrame(color);
   }
 
-  // Converts a '#rrggbb' accent color into an rgba() string at a given alpha
   function accentRgba(hex, alpha) {
     const h = hex.replace('#', '');
     const r = parseInt(h.substring(0, 2), 16);
@@ -241,162 +265,166 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
+  // --- ARTISTIC SPEC CARDS (Holographic effect) ---
   function buildCards(specsContainer, bikeData) {
     const cardsData = bikeData.arSeparateCards;
     const totalCards = cardsData.length;
-    // pushed out further and rotated a quarter turn so the first card lands
-    // above the bike (matching the reference layout) instead of to the side
-    const radius = 2.05;
+    const radius = 2.15; // Slightly pushed out
     const startAngle = -Math.PI / 2;
-    const cardW = 1.38, cardH = 0.95;
+    const cardW = 1.45, cardH = 1.0; // Slightly wider for a modern cinematic ratio
 
     cardsData.forEach((card, index) => {
       const angle = startAngle + (index / totalCards) * Math.PI * 2;
       const posX = Math.cos(angle) * radius;
-      const posY = Math.sin(angle) * radius * 0.62; // flatten the ring so cards stay near bike height
+      const posY = Math.sin(angle) * radius * 0.65; 
       const accent = accentPalette[index % accentPalette.length];
 
       const cardEntity = document.createElement('a-entity');
       cardEntity.setAttribute('class', 'spec-card');
       cardEntity.setAttribute('position', `${posX} ${posY} 0.1`);
-      // Billboard: card always faces the camera, so the ring stays clean and
-      // readable from any angle instead of scattering/skewing as you move
-      // around the bike.
       cardEntity.setAttribute('look-at', '[camera]');
 
-      // soft accent halo behind everything, for a glowing edge feel
+      // Floating animation for each card (staggered based on index)
+      const floatY = posY + 0.1;
+      const floatDur = 2500 + (index * 300);
+      cardEntity.setAttribute('animation', `property: position; to: ${posX} ${floatY} 0.1; dir: alternate; dur: ${floatDur}; loop: true; easing: easeInOutSine`);
+
+      // Deep glow background
       const haloPlate = document.createElement('a-plane');
-      haloPlate.setAttribute('width', cardW + 0.18);
-      haloPlate.setAttribute('height', cardH + 0.18);
+      haloPlate.setAttribute('width', cardW + 0.3);
+      haloPlate.setAttribute('height', cardH + 0.3);
       haloPlate.setAttribute('color', accent);
-      haloPlate.setAttribute('opacity', '0.16');
-      haloPlate.setAttribute('position', '0 0 -0.02');
+      haloPlate.setAttribute('opacity', '0.08');
+      haloPlate.setAttribute('position', '0 0 -0.04');
       haloPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
       cardEntity.appendChild(haloPlate);
 
-      // thin solid accent frame, just a shade larger than the photo, so it
-      // reads as a slim glowing border rather than a filled box
+      // Tech/Cyber border (Solid glowing line)
       const framePlate = document.createElement('a-plane');
-      framePlate.setAttribute('width', cardW + 0.03);
-      framePlate.setAttribute('height', cardH + 0.03);
+      framePlate.setAttribute('width', cardW + 0.04);
+      framePlate.setAttribute('height', cardH + 0.04);
       framePlate.setAttribute('color', accent);
-      framePlate.setAttribute('position', '0 0 -0.005');
-      framePlate.setAttribute('material', 'shader: flat; side: double');
+      framePlate.setAttribute('position', '0 0 -0.01');
+      framePlate.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.9');
       cardEntity.appendChild(framePlate);
 
-      // ---- the photo itself: loaded natively by A-Frame straight from the
-      // <a-assets> image (same mechanism the 3D frame model already uses
-      // successfully) — no canvas, no toDataURL, so it can't silently fail
-      // the way a baked texture can. ----
+      // Main Image
       const posterPlane = document.createElement('a-plane');
       posterPlane.setAttribute('width', cardW);
       posterPlane.setAttribute('height', cardH);
-      posterPlane.setAttribute('position', '0 0 0.005');
+      posterPlane.setAttribute('position', '0 0 0.01');
       posterPlane.setAttribute('material', `shader: flat; side: double; src: ${card.imgSrc}`);
       cardEntity.appendChild(posterPlane);
 
-      // caption scrim: a slim translucent strip along the bottom edge so
-      // the title stays legible over any photo
+      // High-tech lower gradient scrim for text clarity
       const scrimPlate = document.createElement('a-plane');
       scrimPlate.setAttribute('width', cardW);
-      scrimPlate.setAttribute('height', cardH * 0.24);
+      scrimPlate.setAttribute('height', cardH * 0.35); // Taller scrim
       scrimPlate.setAttribute('color', '#000000');
-      scrimPlate.setAttribute('opacity', '0.55');
-      scrimPlate.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.24) / 2} 0.01`);
+      scrimPlate.setAttribute('opacity', '0.75');
+      scrimPlate.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35) / 2} 0.02`);
       scrimPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
       cardEntity.appendChild(scrimPlate);
 
-      // caption text — native a-text component, always renders regardless
-      // of any image/canvas issue
+      // Accent line separating image and text area
+      const accentLine = document.createElement('a-plane');
+      accentLine.setAttribute('width', cardW);
+      accentLine.setAttribute('height', 0.02);
+      accentLine.setAttribute('color', accent);
+      accentLine.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35)} 0.025`);
+      accentLine.setAttribute('material', 'shader: flat; transparent: true; opacity: 0.8');
+      cardEntity.appendChild(accentLine);
+
+      // Modern typography for the title
       const captionText = document.createElement('a-text');
       captionText.setAttribute('value', card.title.toUpperCase());
       captionText.setAttribute('align', 'center');
-      captionText.setAttribute('anchor', 'center');
-      captionText.setAttribute('baseline', 'center');
+      captionText.setAttribute('font', 'kelsonsans');
       captionText.setAttribute('color', '#ffffff');
-      captionText.setAttribute('width', '2.3');
-      captionText.setAttribute('letter-spacing', '2');
-      captionText.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.24) / 2} 0.016`);
+      captionText.setAttribute('width', '2.8');
+      captionText.setAttribute('letter-spacing', '3');
+      captionText.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.18)} 0.03`);
       cardEntity.appendChild(captionText);
 
       specsContainer.appendChild(cardEntity);
     });
   }
 
-  // 🎨 Bakes the brand-title banner in the same poster language as the spec
-  // cards: bold gradient title text (matching the reference "BRUTE POWER"
-  // treatment) over a dark angled plate with an accent edge.
+  // --- SCI-FI CANVAS BANNER ---
   function createTitleBannerTexture(modelName, systemTag, accent) {
     const SCALE = 2;
-    const W = 900 * SCALE, H = 220 * SCALE;
+    const W = 1000 * SCALE, H = 260 * SCALE;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, W, H);
 
-    // ---- dark glass plate, angled corners ----
+    // Futuristic angled background
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.55)';
-    ctx.shadowBlur = 20 * SCALE / 2;
+    ctx.shadowColor = accentRgba(accent, 0.6);
+    ctx.shadowBlur = 25 * SCALE / 2;
     ctx.beginPath();
-    ctx.moveTo(W * 0.03, 0);
-    ctx.lineTo(W * 0.97, 0);
+    ctx.moveTo(W * 0.05, 0);
+    ctx.lineTo(W * 0.95, 0);
     ctx.lineTo(W, H * 0.5);
-    ctx.lineTo(W * 0.97, H);
-    ctx.lineTo(W * 0.03, H);
+    ctx.lineTo(W * 0.95, H);
+    ctx.lineTo(W * 0.05, H);
     ctx.lineTo(0, H * 0.5);
     ctx.closePath();
-    ctx.fillStyle = 'rgba(8, 8, 10, 0.72)';
+    
+    // Tech grid / scanline pattern for banner background
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, 'rgba(15, 15, 20, 0.9)');
+    bgGrad.addColorStop(1, 'rgba(5, 5, 8, 0.95)');
+    ctx.fillStyle = bgGrad;
     ctx.fill();
     ctx.restore();
-    ctx.strokeStyle = accentRgba(accent, 0.85);
-    ctx.lineWidth = 4 * SCALE / 2;
+    
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 6 * SCALE / 2;
     ctx.stroke();
 
-    // ---- bold gradient title, same treatment as the reference banner,
-    // pushed slightly bigger so it reads clearly at real-world AR scale ----
-    const titleGrad = ctx.createLinearGradient(0, H * 0.14, 0, H * 0.64);
-    titleGrad.addColorStop(0, '#3a0a04');
-    titleGrad.addColorStop(0.45, accent);
-    titleGrad.addColorStop(1, '#3a0a04');
+    // Metallic Title
+    const titleGrad = ctx.createLinearGradient(0, H * 0.2, 0, H * 0.7);
+    titleGrad.addColorStop(0, '#ffffff');
+    titleGrad.addColorStop(0.5, accent);
+    titleGrad.addColorStop(1, '#111111');
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `900 ${96 * SCALE}px Arial, sans-serif`;
+    ctx.font = `900 ${105 * SCALE}px 'Arial Black', sans-serif`;
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-    ctx.lineWidth = 9 * SCALE / 2;
-    ctx.strokeText(modelName.toUpperCase(), W / 2, H * 0.4);
+    ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+    ctx.lineWidth = 12 * SCALE / 2;
+    ctx.strokeText(modelName.toUpperCase(), W / 2, H * 0.42);
     ctx.fillStyle = titleGrad;
-    ctx.fillText(modelName.toUpperCase(), W / 2, H * 0.4);
+    ctx.fillText(modelName.toUpperCase(), W / 2, H * 0.42);
 
-    // ---- subtitle / system tag ----
-    ctx.font = `800 ${34 * SCALE}px Arial, sans-serif`;
-    ctx.fillStyle = '#f3efe6';
-    ctx.fillText(systemTag.toUpperCase(), W / 2, H * 0.76);
+    // Tech Subtitle
+    ctx.font = `800 ${36 * SCALE}px 'Courier New', monospace`;
+    ctx.fillStyle = '#00f0ff';
+    ctx.letterSpacing = "8px";
+    ctx.fillText(`[ ${systemTag.toUpperCase()} ]`, W / 2, H * 0.78);
 
-    // thin accent rule under the subtitle
-    ctx.fillStyle = accentRgba(accent, 0.9);
-    ctx.fillRect(W / 2 - 90 * SCALE, H * 0.86, 180 * SCALE, 4 * SCALE);
-
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
     return canvas.toDataURL('image/png');
   }
 
   function buildBrandTitle(bikeData) {
     const brandTitleEntity = document.createElement('a-entity');
-    brandTitleEntity.setAttribute('position', '0 1.7 0.02');
+    brandTitleEntity.setAttribute('position', '0 1.9 0.02'); // Moved slightly up
     brandTitleEntity.setAttribute('look-at', '[camera]');
 
     const brandPlane = document.createElement('a-plane');
-    brandPlane.setAttribute('width', '0.95');
-    brandPlane.setAttribute('height', '0.23');
-    brandPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.96');
+    brandPlane.setAttribute('width', '1.2'); // Made wider for the new canvas
+    brandPlane.setAttribute('height', '0.31');
+    brandPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 1');
     brandPlane.setAttribute(
       'material',
       'src',
       createTitleBannerTexture(bikeData.modelName, bikeData.systemTag, accentPalette[0])
     );
+
+    // Add a gentle hover float to the main title too
+    brandTitleEntity.setAttribute('animation', 'property: position; to: 0 1.95 0.02; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine');
 
     brandTitleEntity.appendChild(brandPlane);
     return brandTitleEntity;
@@ -453,39 +481,14 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         }
       });
     });
-
-    autoSpin();
   });
-
-  // Turntable dragging engine — disabled for the spec cards so they stay
-  // fixed and upright like the reference poster layout (no more scattered/
-  // upside-down cards while spinning). Kept as no-ops in case drag rotation
-  // is wanted again later.
-  const startDrag = (clientX) => { isDragging = true; previousMousePosition.x = clientX; };
-  const updateDrag = (clientX) => {
-    if (!isDragging) return;
-    previousMousePosition.x = clientX;
-  };
-  const endDrag = () => { isDragging = false; };
-
-  window.addEventListener('mousedown', (e) => startDrag(e.clientX));
-  window.addEventListener('mousemove', (e) => updateDrag(e.clientX));
-  window.addEventListener('mouseup', endDrag);
-  window.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientX); });
-  window.addEventListener('touchmove', (e) => { if(e.touches.length === 1) updateDrag(e.touches[0].clientX); });
-  window.addEventListener('touchend', endDrag);
-
-  function autoSpin() {
-    requestAnimationFrame(autoSpin);
-    // Spec cards no longer auto-rotate — they stay fixed, upright and
-    // readable around the object, matching the static reference layout.
-  }
 
   function showArError(message) {
     const hint = document.getElementById('scan-hint');
     hint.innerText = message;
     hint.style.borderColor = '#ff2b2b';
     hint.style.color = '#ffbcbc';
+    hint.style.boxShadow = '0 0 20px rgba(255, 43, 43, 0.4)';
     hint.style.display = 'block';
     console.error('[AR ERROR]', message);
   }
@@ -495,9 +498,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     const scene = document.getElementById('ar-scene');
 
     const beginAr = () => {
-      // Explicitly request camera permission first so we can catch the exact
-      // failure reason (denied / no camera / insecure context / already in use)
-      // instead of silently ending up on a blank white screen.
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         showArError('Camera API not available. Needs HTTPS + a modern browser.');
         return;
@@ -505,11 +505,11 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
         .then((stream) => {
-          // permission confirmed — release this test stream, MindAR opens its own
           stream.getTracks().forEach((t) => t.stop());
 
           overlay.style.opacity = '0';
-          overlay.style.transform = 'scale(1.05)';
+          overlay.style.transform = 'scale(1.1)';
+          overlay.style.filter = 'blur(10px)';
           setTimeout(() => {
             overlay.style.display = 'none';
             try {
@@ -520,8 +520,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
           }, 800);
         })
         .catch((err) => {
-          // Common err.name values: NotAllowedError, NotFoundError,
-          // NotReadableError, OverconstrainedError, SecurityError
           showArError('Camera error (' + err.name + '): ' + err.message);
         });
     };
@@ -529,7 +527,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     if (scene.hasLoaded) {
       beginAr();
     } else {
-      showArError('Scene still loading, tap again in a moment…');
+      showArError('System booting up, please wait...');
       scene.addEventListener('loaded', beginAr, { once: true });
     }
   }
@@ -537,7 +535,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   document.addEventListener('DOMContentLoaded', () => {
     const scene = document.getElementById('ar-scene');
     scene.addEventListener('arError', () => {
-      showArError('MindAR failed to initialize — check that targets.mind loaded correctly (open DevTools console for details).');
+      showArError('MindAR failed to initialize. Check targets.mind.');
     });
   });
 </script>
