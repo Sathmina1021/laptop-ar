@@ -12,6 +12,76 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; }
 
+  /* ============ SPLASH (tap to start) ============ */
+  #splash {
+    position: fixed; inset: 0; z-index: 100;
+    background: radial-gradient(ellipse at center, #071018 0%, #000 78%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 24px;
+  }
+  #splash .logo {
+    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 26px; letter-spacing: 5px;
+    color: #eafcff; text-shadow: 0 0 10px #00f0ff, 0 0 26px rgba(0,240,255,0.65);
+  }
+  #splash .logo span { color: #00f0ff; }
+  #splash .tagline {
+    margin-top: 10px; font-size: 13px; letter-spacing: 2px; color: rgba(255,255,255,0.5);
+  }
+  #start-btn {
+    margin-top: 44px; width: 92px; height: 92px; border-radius: 50%;
+    border: 2px solid #00f0ff; background: rgba(0,240,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 18px rgba(0,240,255,0.5), inset 0 0 14px rgba(0,240,255,0.25);
+    animation: pulseBtn 1.8s ease-in-out infinite;
+  }
+  #start-btn svg { width: 34px; height: 34px; }
+  @keyframes pulseBtn {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(0,240,255,0.5), inset 0 0 14px rgba(0,240,255,0.25); }
+    50% { transform: scale(1.06); box-shadow: 0 0 30px rgba(0,240,255,0.75), inset 0 0 18px rgba(0,240,255,0.35); }
+  }
+  #splash .hint {
+    margin-top: 22px; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px;
+    color: #9df9ff;
+  }
+  #splash .fineprint {
+    position: absolute; bottom: 26px; left: 0; width: 100%; text-align: center;
+    font-size: 11px; letter-spacing: 1px; color: rgba(255,255,255,0.35);
+  }
+
+  /* ============ LOADING (camera initializing) ============ */
+  #loading {
+    position: fixed; inset: 0; z-index: 90;
+    background: #000;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+  }
+  #loading.show { display: flex; }
+  .spinner { position: relative; width: 78px; height: 78px; }
+  .spinner .ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 3px solid transparent; border-top-color: #00f0ff; border-right-color: #00f0ff;
+    animation: spin 1.1s linear infinite;
+  }
+  .spinner .ring.r2 { inset: 12px; border-top-color: transparent; border-right-color: transparent; border-bottom-color: #ff003c; border-left-color: #ff003c; animation-duration: 1.6s; animation-direction: reverse; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading .txt {
+    margin-top: 24px; font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 2px; color: #9df9ff;
+    text-shadow: 0 0 6px rgba(0,240,255,0.7);
+  }
+
+  /* ============ ERROR ============ */
+  #cam-error {
+    position: fixed; inset: 0; z-index: 95; display: none;
+    background: rgba(0,0,0,0.92);
+    flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px;
+  }
+  #cam-error.show { display: flex; }
+  #cam-error .msg { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 1.5px; color: #ff5c7a; line-height: 1.8; }
+  #cam-error button {
+    margin-top: 26px; padding: 12px 28px; background: transparent; border: 1px solid #00f0ff; color: #00f0ff;
+    font-family: 'Orbitron', sans-serif; letter-spacing: 2px; font-size: 12px; border-radius: 4px;
+  }
+
+  /* ============ Top brand bar ============ */
   #brand-bar {
     position: fixed; top: 0; left: 0; width: 100%;
     display: flex; align-items: center; justify-content: center;
@@ -25,11 +95,13 @@
   }
   #brand-bar .logo span { color: #00f0ff; }
 
+  /* ============ Scanning overlay ============ */
   #scan-hint {
     position: fixed; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
     z-index: 15; pointer-events: none; transition: opacity 0.5s ease;
   }
+  #scan-hint.show { display: flex; }
   .scan-frame { position: relative; width: 62vw; max-width: 320px; aspect-ratio: 1/1; }
   .scan-frame .corner { position: absolute; width: 34px; height: 34px; border: 3px solid #00f0ff; filter: drop-shadow(0 0 6px #00f0ff); }
   .scan-frame .tl { top: 0; left: 0; border-right: none; border-bottom: none; }
@@ -51,6 +123,7 @@
   #scan-hint .msg .dots span:nth-child(3) { animation-delay: 0.4s; }
   @keyframes blink { 0%,100%{opacity:0;} 50%{opacity:1;} }
 
+  /* ============ Bottom info bar ============ */
   #found-bar {
     position: fixed; bottom: 0; left: 0; width: 100%;
     padding: 16px 20px 22px;
@@ -67,6 +140,34 @@
 </style>
 </head>
 <body>
+
+<!-- ---------- Tap-to-start splash: guarantees the camera permission prompt
+     fires inside a real user gesture (fixes silent black-screen failures,
+     especially on iOS Safari) ---------- -->
+<div id="splash">
+  <div class="logo">XQOM <span>AR</span></div>
+  <div class="tagline">VEHICLE SPEC SCANNER</div>
+  <div id="start-btn">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M20 8V6a2 2 0 0 0-2-2h-2M20 16v2a2 2 0 0 1-2 2h-2" stroke="#00f0ff" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="12" cy="12" r="3.4" stroke="#00f0ff" stroke-width="2"/>
+    </svg>
+  </div>
+  <div class="hint">TAP TO START</div>
+  <div class="fineprint">Camera access is required to scan the vehicle</div>
+</div>
+
+<!-- ---------- Camera initializing ---------- -->
+<div id="loading">
+  <div class="spinner"><div class="ring"></div><div class="ring r2"></div></div>
+  <div class="txt">INITIALIZING CAMERA<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
+</div>
+
+<!-- ---------- Camera error / permission denied ---------- -->
+<div id="cam-error">
+  <div class="msg">CAMERA UNAVAILABLE<br>Please allow camera access in your<br>browser settings, then retry.</div>
+  <button id="retry-btn">RETRY</button>
+</div>
 
 <div id="brand-bar"><div class="logo">XQOM <span>AR</span></div></div>
 
@@ -85,9 +186,9 @@
 </div>
 
 <a-scene
-  mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001; missTolerance: 30;"
+  mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiScanning: no; uiLoading: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.001; missTolerance: 30;"
   color-space="sRGB"
-  renderer="colorManagement: true, antialias: true; alpha: true"
+  renderer="colorManagement: true; antialias: true; alpha: true"
   vr-mode-ui="enabled: false"
   device-orientation-permission-ui="enabled: false"
   loading-screen="enabled: false">
@@ -105,10 +206,8 @@
 
   <a-entity id="target" mindar-image-target="targetIndex: 0">
 
-    <!-- Orbit guide ring -- the signature HUD element the cards travel along -->
     <a-entity id="orbit-ring" visible="false">
       <a-ring radius-inner="0.615" radius-outer="0.63" color="#00f0ff" opacity="0.35" material="shader:flat" segments-theta="64"></a-ring>
-      <a-ring radius-inner="0.0" radius-outer="0.01" color="#00f0ff" opacity="0.9" material="shader:flat"></a-ring>
     </a-entity>
 
     <a-entity id="cards-container"></a-entity>
@@ -151,18 +250,27 @@
     { img: '#card5', label: 'STYLING',     color: '#39ffb0' }
   ];
 
-  const scene = document.querySelector('a-scene');
-  const target = document.querySelector('#target');
-  const container = document.querySelector('#cards-container');
-  const orbitRing = document.querySelector('#orbit-ring');
-  const scanHint = document.getElementById('scan-hint');
-  const foundBar = document.getElementById('found-bar');
+  const scene       = document.querySelector('a-scene');
+  const target      = document.querySelector('#target');
+  const container   = document.querySelector('#cards-container');
+  const orbitRing   = document.querySelector('#orbit-ring');
+  const scanHint    = document.getElementById('scan-hint');
+  const foundBar    = document.getElementById('found-bar');
+  const splash      = document.getElementById('splash');
+  const startBtn    = document.getElementById('start-btn');
+  const loading     = document.getElementById('loading');
+  const camError    = document.getElementById('cam-error');
+  const retryBtn    = document.getElementById('retry-btn');
+  const brandBar    = document.getElementById('brand-bar');
 
-  const RADIUS = 0.62;      // කාර් එකේ ලොකුකමට අනුව 0.5 - 1.0 අතර වෙනස් කරන්න
-  const CARD_W = 0.34;      // base width, height auto-calculated per image's real aspect ratio
+  const RADIUS = 0.62;   // කාර් එකේ ලොකුකමට අනුව 0.5 - 1.0 අතර වෙනස් කරන්න
+  const CARD_W = 0.34;   // base width, height auto-calculated per image's real aspect ratio
   let cardEls = [];
+  let cardsBuilt = false;
 
   function buildCards() {
+    if (cardsBuilt) return;
+    cardsBuilt = true;
     CARD_DEFS.forEach((def, i) => {
       const angle = (i / CARD_DEFS.length) * Math.PI * 2;
       const imgEl = document.querySelector(def.img);
@@ -209,7 +317,7 @@
   }
 
   function showCards() {
-    scanHint.style.opacity = '0';
+    scanHint.classList.remove('show');
     foundBar.classList.add('show');
     orbitRing.setAttribute('visible', true);
 
@@ -222,7 +330,7 @@
   }
 
   function hideCards() {
-    scanHint.style.opacity = '1';
+    scanHint.classList.add('show');
     foundBar.classList.remove('show');
     orbitRing.setAttribute('visible', false);
 
@@ -236,8 +344,39 @@
   target.addEventListener('targetFound', showCards);
   target.addEventListener('targetLost', hideCards);
 
+  /* ---------- MindAR lifecycle: fires once the camera video is actually
+     playing, which is the correct moment to reveal the real-world feed
+     and switch off the loading screen ---------- */
+  scene.addEventListener('arReady', () => {
+    loading.classList.remove('show');
+    camError.classList.remove('show');
+    brandBar.style.display = 'flex';
+    scanHint.classList.add('show');
+  });
+
   scene.addEventListener('arError', () => {
-    scanHint.querySelector('.msg').innerHTML = 'CAMERA UNAVAILABLE &mdash; CHECK PERMISSIONS';
+    loading.classList.remove('show');
+    camError.classList.add('show');
+  });
+
+  function startAR() {
+    splash.style.display = 'none';
+    loading.classList.add('show');
+    const sys = scene.systems['mindar-image-system'];
+    if (sys) {
+      sys.start();
+    } else {
+      // scene not fully initialized yet - retry shortly
+      scene.addEventListener('loaded', () => scene.systems['mindar-image-system'].start(), { once: true });
+    }
+  }
+
+  startBtn.addEventListener('click', startAR);
+  retryBtn.addEventListener('click', () => {
+    camError.classList.remove('show');
+    loading.classList.add('show');
+    const sys = scene.systems['mindar-image-system'];
+    if (sys) sys.start();
   });
 </script>
 
