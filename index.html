@@ -131,11 +131,10 @@
   }
   #reticle.locked .crosshair { display: block; border-color: #39ffb0; box-shadow: 0 0 8px rgba(57,255,176,0.8); animation: cornerBreathe 1.6s ease-in-out infinite; }
 
-  /* ============ SPEC CARDS (floating AR badges) ============ */
+  /* ============ SPEC CARDS (floating AR image badges) ============ */
   .card {
-    position: fixed; z-index: 12; display: flex; align-items: center; gap: 9px;
-    max-width: 46vw; width: max-content; min-width: 128px;
-    padding: 7px 12px 7px 7px; border-radius: 15px;
+    position: fixed; z-index: 12; display: flex; align-items: center; justify-content: center;
+    width: 84px; height: 84px; border-radius: 18px;
     background: linear-gradient(155deg, var(--glow) 0%, color-mix(in srgb, var(--glow) 72%, #000) 100%);
     box-shadow: 0 6px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.18) inset;
     opacity: 0; transform: scale(0.55) translateY(10px);
@@ -145,26 +144,12 @@
   .card.show { opacity: 1; transform: scale(1) translateY(0); }
 
   .card .icon {
-    flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px;
-    background: rgba(255,255,255,0.92); padding: 5px;
+    width: 100%; height: 100%; border-radius: 18px;
+    background: rgba(255,255,255,0.92); padding: 10px;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 1px 3px rgba(0,0,0,0.25) inset;
   }
   .card .icon img { width: 100%; height: 100%; object-fit: contain; display: block; }
-
-  .card .info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  .card .title {
-    font-family: 'Orbitron', sans-serif; font-size: 9.5px; font-weight: 700; letter-spacing: 0.6px;
-    color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.45);
-  }
-  .card .meta { display: flex; align-items: center; gap: 6px; }
-  .card .stars { font-size: 9px; letter-spacing: 1px; color: rgba(255,255,255,0.4); white-space: nowrap; }
-  .card .stars .on { color: #fff; }
-  .card .value {
-    font-family: 'Rajdhani', sans-serif; font-size: 10.5px; font-weight: 700;
-    color: rgba(255,255,255,0.95); margin-left: auto; padding-left: 6px; white-space: nowrap;
-  }
 
   #card-engine  { --glow: #ffb020; top: 96px;  left: 50%; transform: translateX(-50%) scale(0.55); }
   #card-engine.show { transform: translateX(-50%) scale(1); }
@@ -233,45 +218,25 @@
   <div class="icon">
     <img src="image/engine.png" alt="engine">
   </div>
-  <div class="info">
-    <div class="title">ENGINE</div>
-    <div class="meta"><span class="stars"><span class="on">&#9733;&#9733;&#9733;&#9733;&#9733;</span></span><span class="value">199HP</span></div>
-  </div>
 </div>
 <div id="card-led" class="card">
   <div class="icon">
     <img src="image/led%20system.png" alt="led system">
-  </div>
-  <div class="info">
-    <div class="title">TWIN LED SYSTEM</div>
-    <div class="meta"><span class="stars"><span class="on">&#9733;&#9733;&#9733;&#9733;</span>&#9733;</span><span class="value">IP67</span></div>
   </div>
 </div>
 <div id="card-frame" class="card">
   <div class="icon">
     <img src="image/frame.png" alt="frame">
   </div>
-  <div class="info">
-    <div class="title">PERIMETER FRAME</div>
-    <div class="meta"><span class="stars"><span class="on">&#9733;&#9733;&#9733;&#9733;&#9733;</span></span><span class="value">ALU</span></div>
-  </div>
 </div>
 <div id="card-front" class="card">
   <div class="icon">
     <img src="image/frok.png" alt="front fork">
   </div>
-  <div class="info">
-    <div class="title">USD FRONT FORK</div>
-    <div class="meta"><span class="stars"><span class="on">&#9733;&#9733;&#9733;&#9733;</span>&#9733;</span><span class="value">43mm</span></div>
-  </div>
 </div>
 <div id="card-styling" class="card">
   <div class="icon">
     <img src="image/styling.png" alt="styling">
-  </div>
-  <div class="info">
-    <div class="title">AGGRESSIVE STYLING</div>
-    <div class="meta"><span class="stars"><span class="on">&#9733;&#9733;&#9733;&#9733;&#9733;</span></span><span class="value">SPORT</span></div>
   </div>
 </div>
 
