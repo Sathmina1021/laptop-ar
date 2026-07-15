@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>Pulsar NS200 — AR Spec Scanner</title>
+<title>XQOM Sport — AR Spec Scanner</title>
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,8 +13,9 @@
 :root{
   --carbon:#0a0a0c;
   --carbon-2:#141416;
-  --pulsar-orange:#ff3b00;
-  --pulsar-amber:#ffaa00;
+  /* Updated to Cyber-Red Theme to match the scooter */
+  --pulsar-orange:#ff003c; 
+  --pulsar-amber:#ff4a4a;
   --telemetry-cyan:#00f0ff;
   --geo-silver:#d9dde1;
   --ink:#f3efe6;
@@ -38,7 +39,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   position:relative;width:100%;height:52%;min-height:260px;overflow:hidden;
   clip-path:polygon(0 0,100% 0,100% 90%,0 100%);
   border-bottom: 3px solid var(--pulsar-orange);
-  box-shadow: 0 10px 30px rgba(255, 59, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(255, 0, 60, 0.25);
 }
 .hero-photo-wrap img{
   width:100%;height:100%;object-fit:cover;object-position:center 35%;
@@ -56,7 +57,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     to bottom,
     transparent,
     transparent 2px,
-    rgba(0, 240, 255, 0.05) 3px,
+    rgba(255, 0, 60, 0.08) 3px,
     transparent 4px
   );
   z-index: 2;
@@ -125,17 +126,17 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 .scan-btn{
   position:relative;overflow:hidden;
   background:linear-gradient(135deg,var(--pulsar-orange),var(--pulsar-amber));
-  border:none;color:#050505;padding:20px 50px;font-size:clamp(14px, 4vw, 18px);font-weight:900;
+  border:none;color:#ffffff;padding:20px 50px;font-size:clamp(14px, 4vw, 18px);font-weight:900;
   font-family:'Orbitron',sans-serif;border-radius:50px;cursor:pointer;letter-spacing:4px;text-transform:uppercase;
-  box-shadow:0 10px 40px rgba(255,59,0,0.5);width:100%;max-width:380px;transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow:0 10px 40px rgba(255,0,60,0.5);width:100%;max-width:380px;transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .scan-btn:hover { 
   transform: translateY(-4px) scale(1.02); 
-  box-shadow: 0 15px 50px rgba(255,59,0,0.7); 
+  box-shadow: 0 15px 50px rgba(255,0,60,0.7); 
 }
 .scan-btn::after{
   content:"";position:absolute;top:0;left:-100%;width:50%;height:100%;
-  background:linear-gradient(120deg, transparent, rgba(255,255,255,0.8), transparent);
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent);
   animation:sweep 2.5s ease-in-out infinite;
 }
 @keyframes sweep{ 0%{left:-100%;} 50%{left:200%;} 100%{left:200%;} }
@@ -158,7 +159,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
 <div id="start-overlay">
   <div class="hero-photo-wrap">
-    <img id="bike-hero-img" src="image/frame.png" alt="Pulsar NS200 Preview">
+    <img id="bike-hero-img" src="image/frame.png" alt="XQOM Scooter Preview">
   </div>
   <div class="content-wrap">
     <div>
@@ -166,7 +167,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         <div class="led-dot"></div>
         <span id="app-eyebrow" class="eyebrow">AR Spec System</span>
       </div>
-      <h1 id="app-title" class="brand-title">Pulsar <span class="accent">NS200</span></h1>
+      <h1 id="app-title" class="brand-title">XQOM <span class="accent">SPORT</span></h1>
     </div>
     <div class="stat-strip" id="json-stats-container"></div>
     <button class="scan-btn" onclick="startScanner()">
@@ -175,7 +176,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   </div>
 </div>
 
-<div id="scan-hint">Aim Camera at Scooter Target Image</div>
+<div id="scan-hint">Aim Camera at Scooter / Target</div>
 
 <a-scene id="ar-scene" mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; filterMinCF: 0.0001; filterBeta: 0.005; uiScanning: no;" 
          color-space="sRGB" 
@@ -197,35 +198,35 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 </a-scene>
 
 <script>
-  const USE_GLB_FRAME = true;
-
+  // Scooter specific data applied
   const bikeDatabase = [
     {
       "targetIdx": 0,
-      "brandName": "Pulsar",
-      "modelName": "NS200",
+      "brandName": "XQOM",
+      "modelName": "SPORT",
       "systemTag": "Holographic Telemetry",
       "dashboardSpecs": [
-        { "value": "160 cc", "label": "Oil-Cooled" },
-        { "value": "17 PS", "label": "Max Power" },
-        { "value": "14.6 NM", "label": "Torque" }
+        { "value": "150 cc", "label": "FI Engine" },
+        { "value": "CVT", "label": "Transmission" },
+        { "value": "118 KG", "label": "Kerb Weight" }
       ],
       "arSeparateCards": [
-        { "title": "BRUTE POWER", "imgSrc": "#img-engine", "desc": "OIL-COOLED 160CC\n17 PS @ 9000 RPM\n14.6 NM TORQUE" },
-        { "title": "PERIMETER FRAME", "imgSrc": "#img-frame", "desc": "HIGH STIFFNESS\nLOW FLEX CHASSIS" },
-        { "title": "USD FRONT FORK", "imgSrc": "#img-frok", "desc": "UPSIDE-DOWN FORK\nSHARP CORNERING" },
-        { "title": "LED LIGHTING", "imgSrc": "#img-led", "desc": "LED HEADLAMP\n+ LED DRL" },
-        { "title": "MUSCULAR STYLING", "imgSrc": "#img-styling", "desc": "STREET FIGHTER\nSPEED-LINE TANK" }
+        { "title": "FI ENGINE", "imgSrc": "#img-engine", "desc": "150CC FUEL INJECTED\nSMOOTH POWER DELIVERY" },
+        { "title": "AERO CHASSIS", "imgSrc": "#img-frame", "desc": "LIGHTWEIGHT FRAME\nSPORTY HANDLING" },
+        { "title": "CBS BRAKING", "imgSrc": "#img-frok", "desc": "FRONT DISC BRAKE\nCOMBI-BRAKE SYSTEM" },
+        { "title": "TWIN LED", "imgSrc": "#img-led", "desc": "DUAL LED HEADLAMPS\nAGGRESSIVE LOOK" },
+        { "title": "SPORT STYLING", "imgSrc": "#img-styling", "desc": "SHARP AERODYNAMICS\nPREMIUM SPORT SEAT" }
       ]
     },
+    // Linking the other 3 angles (left, right, back) to the same UI above
     { "targetIdx": 1, "useSameAs": 0 },
     { "targetIdx": 2, "useSameAs": 0 },
     { "targetIdx": 3, "useSameAs": 0 }
   ];
 
   const anchorState = []; 
-  // Futuristic Palette
-  const accentPalette = ['#00f0ff', '#ff3b00', '#ffaa00', '#00ff66', '#d900ff'];
+  // Futuristic Palette updated for the Red Scooter
+  const accentPalette = ['#ff003c', '#00f0ff', '#ff003c', '#ff4a4a', '#d900ff'];
 
   function buildGlbFrame(color) {
     const frame = document.createElement('a-entity');
@@ -234,7 +235,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     frame.setAttribute('scale', '1.35 1.35 1.35');
     frame.setAttribute('position', '0 0.05 -0.05'); 
     
-    // Add a slow rotation animation for the 3D HUD frame
+    // Rotation animation
     frame.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear');
 
     frame.addEventListener('model-loaded', () => {
@@ -245,16 +246,12 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
             node.material = node.material.clone();
             if(node.material.color) node.material.color.set(color);
             if(node.material.emissive) node.material.emissive.set(color);
-            node.material.emissiveIntensity = 1.5; // Make it pop
+            node.material.emissiveIntensity = 1.5; 
           }
         });
       }
     });
     return frame;
-  }
-
-  function buildFrame(color) {
-    return buildGlbFrame(color);
   }
 
   function accentRgba(hex, alpha) {
@@ -265,13 +262,13 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  // --- ARTISTIC SPEC CARDS (Holographic effect) ---
+  // --- ARTISTIC SPEC CARDS ---
   function buildCards(specsContainer, bikeData) {
     const cardsData = bikeData.arSeparateCards;
     const totalCards = cardsData.length;
-    const radius = 2.15; // Slightly pushed out
+    const radius = 2.15; 
     const startAngle = -Math.PI / 2;
-    const cardW = 1.45, cardH = 1.0; // Slightly wider for a modern cinematic ratio
+    const cardW = 1.45, cardH = 1.0; 
 
     cardsData.forEach((card, index) => {
       const angle = startAngle + (index / totalCards) * Math.PI * 2;
@@ -284,12 +281,10 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       cardEntity.setAttribute('position', `${posX} ${posY} 0.1`);
       cardEntity.setAttribute('look-at', '[camera]');
 
-      // Floating animation for each card (staggered based on index)
       const floatY = posY + 0.1;
       const floatDur = 2500 + (index * 300);
       cardEntity.setAttribute('animation', `property: position; to: ${posX} ${floatY} 0.1; dir: alternate; dur: ${floatDur}; loop: true; easing: easeInOutSine`);
 
-      // Deep glow background
       const haloPlate = document.createElement('a-plane');
       haloPlate.setAttribute('width', cardW + 0.3);
       haloPlate.setAttribute('height', cardH + 0.3);
@@ -299,7 +294,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       haloPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
       cardEntity.appendChild(haloPlate);
 
-      // Tech/Cyber border (Solid glowing line)
       const framePlate = document.createElement('a-plane');
       framePlate.setAttribute('width', cardW + 0.04);
       framePlate.setAttribute('height', cardH + 0.04);
@@ -308,7 +302,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       framePlate.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.9');
       cardEntity.appendChild(framePlate);
 
-      // Main Image
       const posterPlane = document.createElement('a-plane');
       posterPlane.setAttribute('width', cardW);
       posterPlane.setAttribute('height', cardH);
@@ -316,26 +309,23 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       posterPlane.setAttribute('material', `shader: flat; side: double; src: ${card.imgSrc}`);
       cardEntity.appendChild(posterPlane);
 
-      // High-tech lower gradient scrim for text clarity
       const scrimPlate = document.createElement('a-plane');
       scrimPlate.setAttribute('width', cardW);
-      scrimPlate.setAttribute('height', cardH * 0.35); // Taller scrim
+      scrimPlate.setAttribute('height', cardH * 0.35); 
       scrimPlate.setAttribute('color', '#000000');
-      scrimPlate.setAttribute('opacity', '0.75');
+      scrimPlate.setAttribute('opacity', '0.85');
       scrimPlate.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35) / 2} 0.02`);
       scrimPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
       cardEntity.appendChild(scrimPlate);
 
-      // Accent line separating image and text area
       const accentLine = document.createElement('a-plane');
       accentLine.setAttribute('width', cardW);
       accentLine.setAttribute('height', 0.02);
       accentLine.setAttribute('color', accent);
       accentLine.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35)} 0.025`);
-      accentLine.setAttribute('material', 'shader: flat; transparent: true; opacity: 0.8');
+      accentLine.setAttribute('material', 'shader: flat; transparent: true; opacity: 1');
       cardEntity.appendChild(accentLine);
 
-      // Modern typography for the title
       const captionText = document.createElement('a-text');
       captionText.setAttribute('value', card.title.toUpperCase());
       captionText.setAttribute('align', 'center');
@@ -359,7 +349,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, W, H);
 
-    // Futuristic angled background
     ctx.save();
     ctx.shadowColor = accentRgba(accent, 0.6);
     ctx.shadowBlur = 25 * SCALE / 2;
@@ -372,10 +361,9 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     ctx.lineTo(0, H * 0.5);
     ctx.closePath();
     
-    // Tech grid / scanline pattern for banner background
     const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-    bgGrad.addColorStop(0, 'rgba(15, 15, 20, 0.9)');
-    bgGrad.addColorStop(1, 'rgba(5, 5, 8, 0.95)');
+    bgGrad.addColorStop(0, 'rgba(15, 5, 5, 0.95)');
+    bgGrad.addColorStop(1, 'rgba(5, 0, 0, 0.98)');
     ctx.fillStyle = bgGrad;
     ctx.fill();
     ctx.restore();
@@ -384,11 +372,10 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     ctx.lineWidth = 6 * SCALE / 2;
     ctx.stroke();
 
-    // Metallic Title
     const titleGrad = ctx.createLinearGradient(0, H * 0.2, 0, H * 0.7);
     titleGrad.addColorStop(0, '#ffffff');
     titleGrad.addColorStop(0.5, accent);
-    titleGrad.addColorStop(1, '#111111');
+    titleGrad.addColorStop(1, '#220000');
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.font = `900 ${105 * SCALE}px 'Arial Black', sans-serif`;
@@ -399,7 +386,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     ctx.fillStyle = titleGrad;
     ctx.fillText(modelName.toUpperCase(), W / 2, H * 0.42);
 
-    // Tech Subtitle
     ctx.font = `800 ${36 * SCALE}px 'Courier New', monospace`;
     ctx.fillStyle = '#00f0ff';
     ctx.letterSpacing = "8px";
@@ -410,11 +396,11 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
   function buildBrandTitle(bikeData) {
     const brandTitleEntity = document.createElement('a-entity');
-    brandTitleEntity.setAttribute('position', '0 1.9 0.02'); // Moved slightly up
+    brandTitleEntity.setAttribute('position', '0 1.9 0.02'); 
     brandTitleEntity.setAttribute('look-at', '[camera]');
 
     const brandPlane = document.createElement('a-plane');
-    brandPlane.setAttribute('width', '1.2'); // Made wider for the new canvas
+    brandPlane.setAttribute('width', '1.2'); 
     brandPlane.setAttribute('height', '0.31');
     brandPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 1');
     brandPlane.setAttribute(
@@ -423,7 +409,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       createTitleBannerTexture(bikeData.modelName, bikeData.systemTag, accentPalette[0])
     );
 
-    // Add a gentle hover float to the main title too
     brandTitleEntity.setAttribute('animation', 'property: position; to: 0 1.95 0.02; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine');
 
     brandTitleEntity.appendChild(brandPlane);
@@ -453,7 +438,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       anchor.setAttribute('mindar-image-target', `targetIndex: ${idx}`);
 
       const accent = accentPalette[idx % accentPalette.length];
-      const frameEntity = buildFrame(accent);
+      const frameEntity = buildGlbFrame(accent);
       const brandTitle = buildBrandTitle(actualData);
 
       const specsContainer = document.createElement('a-entity');
@@ -486,9 +471,9 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   function showArError(message) {
     const hint = document.getElementById('scan-hint');
     hint.innerText = message;
-    hint.style.borderColor = '#ff2b2b';
-    hint.style.color = '#ffbcbc';
-    hint.style.boxShadow = '0 0 20px rgba(255, 43, 43, 0.4)';
+    hint.style.borderColor = '#ff003c';
+    hint.style.color = '#ff99aa';
+    hint.style.boxShadow = '0 0 20px rgba(255, 0, 60, 0.4)';
     hint.style.display = 'block';
     console.error('[AR ERROR]', message);
   }
