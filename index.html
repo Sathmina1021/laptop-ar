@@ -226,7 +226,8 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     const frame = document.createElement('a-entity');
     frame.setAttribute('visible', 'false');
     frame.setAttribute('gltf-model', '#frame-model');
-    frame.setAttribute('scale', '1.35 1.35 1.35');
+    // Reduced scale so the 3D HUD model doesn't overflow either
+    frame.setAttribute('scale', '0.6 0.6 0.6');
     frame.setAttribute('position', '0 0.05 -0.05'); 
     frame.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear');
 
@@ -254,17 +255,22 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
+  // --- ARTISTIC SPEC CARDS (Dimensions Strictly Scaled Down) ---
   function buildCards(specsContainer, bikeData) {
     const cardsData = bikeData.arSeparateCards;
     const totalCards = cardsData.length;
-    const radius = 2.15; 
+    
+    // RADIUS REDUCED: Now 0.7 instead of 2.15 to hug the object tightly
+    const radius = 0.7; 
     const startAngle = -Math.PI / 2;
-    const cardW = 1.45, cardH = 1.0; 
+    
+    // CARD SIZES REDUCED: Now 0.45 x 0.31 instead of 1.45 x 1.0
+    const cardW = 0.45, cardH = 0.31; 
 
     cardsData.forEach((card, index) => {
       const angle = startAngle + (index / totalCards) * Math.PI * 2;
       const posX = Math.cos(angle) * radius;
-      const posY = Math.sin(angle) * radius * 0.65; 
+      const posY = Math.sin(angle) * radius * 0.7; // Kept proportional
       const accent = accentPalette[index % accentPalette.length];
 
       const cardEntity = document.createElement('a-entity');
@@ -272,31 +278,32 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       cardEntity.setAttribute('position', `${posX} ${posY} 0.1`);
       cardEntity.setAttribute('look-at', '[camera]');
 
-      const floatY = posY + 0.1;
+      // Floating animation adjusted for small scale
+      const floatY = posY + 0.03;
       const floatDur = 2500 + (index * 300);
       cardEntity.setAttribute('animation', `property: position; to: ${posX} ${floatY} 0.1; dir: alternate; dur: ${floatDur}; loop: true; easing: easeInOutSine`);
 
       const haloPlate = document.createElement('a-plane');
-      haloPlate.setAttribute('width', cardW + 0.3);
-      haloPlate.setAttribute('height', cardH + 0.3);
+      haloPlate.setAttribute('width', cardW + 0.06);
+      haloPlate.setAttribute('height', cardH + 0.06);
       haloPlate.setAttribute('color', accent);
       haloPlate.setAttribute('opacity', '0.08');
-      haloPlate.setAttribute('position', '0 0 -0.04');
+      haloPlate.setAttribute('position', '0 0 -0.01');
       haloPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
       cardEntity.appendChild(haloPlate);
 
       const framePlate = document.createElement('a-plane');
-      framePlate.setAttribute('width', cardW + 0.04);
-      framePlate.setAttribute('height', cardH + 0.04);
+      framePlate.setAttribute('width', cardW + 0.015);
+      framePlate.setAttribute('height', cardH + 0.015);
       framePlate.setAttribute('color', accent);
-      framePlate.setAttribute('position', '0 0 -0.01');
+      framePlate.setAttribute('position', '0 0 -0.005');
       framePlate.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.9');
       cardEntity.appendChild(framePlate);
 
       const posterPlane = document.createElement('a-plane');
       posterPlane.setAttribute('width', cardW);
       posterPlane.setAttribute('height', cardH);
-      posterPlane.setAttribute('position', '0 0 0.01');
+      posterPlane.setAttribute('position', '0 0 0.005');
       posterPlane.setAttribute('material', `shader: flat; side: double; src: ${card.imgSrc}`);
       cardEntity.appendChild(posterPlane);
 
@@ -305,15 +312,15 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       scrimPlate.setAttribute('height', cardH * 0.35); 
       scrimPlate.setAttribute('color', '#000000');
       scrimPlate.setAttribute('opacity', '0.85');
-      scrimPlate.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35) / 2} 0.02`);
+      scrimPlate.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35) / 2} 0.01`);
       scrimPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
       cardEntity.appendChild(scrimPlate);
 
       const accentLine = document.createElement('a-plane');
       accentLine.setAttribute('width', cardW);
-      accentLine.setAttribute('height', 0.02);
+      accentLine.setAttribute('height', 0.005);
       accentLine.setAttribute('color', accent);
-      accentLine.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35)} 0.025`);
+      accentLine.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35)} 0.012`);
       accentLine.setAttribute('material', 'shader: flat; transparent: true; opacity: 1');
       cardEntity.appendChild(accentLine);
 
@@ -322,15 +329,16 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       captionText.setAttribute('align', 'center');
       captionText.setAttribute('font', 'kelsonsans');
       captionText.setAttribute('color', '#ffffff');
-      captionText.setAttribute('width', '2.8');
-      captionText.setAttribute('letter-spacing', '3');
-      captionText.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.18)} 0.03`);
+      captionText.setAttribute('width', '1.0'); // Reduced text width
+      captionText.setAttribute('letter-spacing', '2');
+      captionText.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.18)} 0.015`);
       cardEntity.appendChild(captionText);
 
       specsContainer.appendChild(cardEntity);
     });
   }
 
+  // --- SCI-FI CANVAS BANNER ---
   function createTitleBannerTexture(modelName, systemTag, accent) {
     const SCALE = 2;
     const W = 1000 * SCALE, H = 260 * SCALE;
@@ -386,12 +394,14 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
   function buildBrandTitle(bikeData) {
     const brandTitleEntity = document.createElement('a-entity');
-    brandTitleEntity.setAttribute('position', '0 1.9 0.02'); 
+    // Position brought down closer to object
+    brandTitleEntity.setAttribute('position', '0 0.65 0.02'); 
     brandTitleEntity.setAttribute('look-at', '[camera]');
 
     const brandPlane = document.createElement('a-plane');
-    brandPlane.setAttribute('width', '1.2'); 
-    brandPlane.setAttribute('height', '0.31');
+    // Width and height scaled down
+    brandPlane.setAttribute('width', '0.7'); 
+    brandPlane.setAttribute('height', '0.18');
     brandPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 1');
     brandPlane.setAttribute(
       'material',
@@ -399,7 +409,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       createTitleBannerTexture(bikeData.modelName, bikeData.systemTag, accentPalette[0])
     );
 
-    brandTitleEntity.setAttribute('animation', 'property: position; to: 0 1.95 0.02; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine');
+    brandTitleEntity.setAttribute('animation', 'property: position; to: 0 0.68 0.02; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine');
 
     brandTitleEntity.appendChild(brandPlane);
     return brandTitleEntity;
@@ -429,27 +439,15 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
       const accent = accentPalette[idx % accentPalette.length];
       const frameEntity = buildGlbFrame(accent);
-      
-      // ==========================================
-      // NEW: UI WRAPPER TO SCALE DOWN EVERYTHING
-      // ==========================================
-      const uiWrapper = document.createElement('a-entity');
-      // Scale down everything to 50% so it fits well inside the screen
-      uiWrapper.setAttribute('scale', '0.5 0.5 0.5'); 
-      uiWrapper.setAttribute('position', '0 0 0');
-
       const brandTitle = buildBrandTitle(actualData);
       
       const specsContainer = document.createElement('a-entity');
       specsContainer.setAttribute('position', '0 0 0');
       buildCards(specsContainer, actualData);
 
-      // Attach title and cards to the wrapper instead of directly to anchor
-      uiWrapper.appendChild(brandTitle);
-      uiWrapper.appendChild(specsContainer);
-
       anchor.appendChild(frameEntity);
-      anchor.appendChild(uiWrapper); // Attach scaled wrapper to anchor
+      anchor.appendChild(brandTitle);
+      anchor.appendChild(specsContainer); 
       arScene.appendChild(anchor);
 
       const state = { specsContainer, frameEntity, tracked: false };
