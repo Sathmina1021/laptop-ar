@@ -3,461 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>XQOM Sport — AR Telemetry Scanner</title>
+<title>XQOM Sport — AR Telemetry</title>
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --carbon:#0a0a0c;
-  --pulsar-orange:#ff003c; 
-  --pulsar-amber:#ff4a4a;
-  --telemetry-cyan:#00f0ff;
-  --ink:#f3efe6;
-  --ink-dim:#9a9a9e;
-}
-*{box-sizing:border-box;}
-html,body{margin:0;overflow:hidden;width:100%;height:100%;background-color:transparent;font-family:'Rajdhani',sans-serif;}
-a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
-
-#mindar-ui-scanning, .mindar-ui-overlay { display: none !important; }
-
-/* ============ MODERN LOADING SCREEN ============ */
-#start-overlay{
-  position:fixed;inset:0;width:100%;height:100%;z-index:9999;
-  background: radial-gradient(circle at top right, rgba(20,20,22,1) 0%, rgba(5,5,6,1) 100%);
-  display:flex;flex-direction:column;
-  transition:all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow:hidden;
-}
-.hero-photo-wrap{
-  position:relative;width:100%;height:52%;min-height:260px;overflow:hidden;
-  clip-path:polygon(0 0,100% 0,100% 90%,0 100%);
-  border-bottom: 3px solid var(--pulsar-orange);
-  box-shadow: 0 10px 30px rgba(255, 0, 60, 0.25);
-}
-.hero-photo-wrap img{
-  width:100%;height:100%;object-fit:cover;object-position:center 35%;
-  filter:saturate(1.2) contrast(1.15);
-  transition: transform 6s ease;
-}
-#start-overlay:hover .hero-photo-wrap img { transform: scale(1.08); }
-
-.hero-photo-wrap::before {
-  content: ""; position: absolute; inset: 0;
-  background: repeating-linear-gradient(to bottom, transparent, transparent 2px, rgba(255, 0, 60, 0.08) 3px, transparent 4px);
-  z-index: 2; pointer-events: none;
-}
-.hero-photo-wrap::after{
-  content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg, rgba(5,5,6,0) 20%, rgba(5,5,6,0.98) 98%), linear-gradient(90deg, rgba(5,5,6,0.6) 0%, rgba(5,5,6,0) 50%);
-  z-index: 3;
-}
-.content-wrap{
-  flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
-  padding:20px max(26px, 5%) max(26px, env(safe-area-inset-bottom)) max(26px, 5%);
-  text-align:center; position: relative; z-index: 5;
-}
-.eyebrow-row{ display:flex;align-items:center;gap:12px;margin-bottom:14px; }
-.led-dot{width:10px;height:10px;border-radius:50%;background:var(--telemetry-cyan);
-  box-shadow:0 0 15px var(--telemetry-cyan);animation:pulse 1.2s ease-in-out infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(0.8);}}
-.eyebrow{ font-family:'JetBrains Mono',monospace;font-size:clamp(11px, 2.8vw, 14px);letter-spacing:5px; color:var(--telemetry-cyan);text-transform:uppercase; font-weight: 700; }
-.brand-title{ font-family:'Orbitron',sans-serif;font-weight:900;color:var(--ink); font-size:clamp(34px, 9vw, 58px);line-height:1.1;letter-spacing:3px; text-transform:uppercase;margin:0; text-shadow: 0 6px 25px rgba(0,0,0,0.8); }
-.brand-title .accent{ background: -webkit-linear-gradient(135deg, var(--pulsar-orange), var(--pulsar-amber)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-.stat-strip{
-  display:grid;grid-template-columns:repeat(3, 1fr);gap:15px; width:100%;max-width:680px;margin:32px 0;
-  background:rgba(255,255,255,0.04); backdrop-filter: blur(12px); border-radius:16px; border:1px solid rgba(255,255,255,0.1); padding:20px;
-}
-.stat{ text-align:center;border-right:1px solid rgba(255,255,255,0.1); }
-.stat:last-child{border-right:none;}
-.stat-value{ font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(18px, 5vw, 26px); color:var(--telemetry-cyan); display:block; }
-.stat-label{ font-family:'JetBrains Mono',monospace;font-size:clamp(10px, 2.5vw, 12px);letter-spacing:2px; color:var(--ink-dim);text-transform:uppercase;display:block;margin-top:8px; }
-
-.scan-btn{
-  position:relative;overflow:hidden; background:linear-gradient(135deg,var(--pulsar-orange),var(--pulsar-amber));
-  border:none;color:#ffffff;padding:20px 50px;font-size:clamp(14px, 4vw, 18px);font-weight:900;
-  font-family:'Orbitron',sans-serif;border-radius:50px;cursor:pointer;letter-spacing:4px;text-transform:uppercase;
-  box-shadow:0 10px 40px rgba(255,0,60,0.5);width:100%;max-width:380px;transition:all 0.4s ease;
-}
-.scan-btn:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 15px 50px rgba(255,0,60,0.7); }
-
-#scan-hint{
-  position:fixed;bottom:max(40px, env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
-  color:var(--telemetry-cyan); background:rgba(10,10,12,0.85); padding:16px 28px;border-radius:16px;
-  font-family:'JetBrains Mono',monospace;font-size:clamp(11px,3.5vw,13px);font-weight:700;z-index:99;
-  border:1px solid rgba(0, 240, 255, 0.4); box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
-  pointer-events:none;text-align:center;letter-spacing:2px; backdrop-filter: blur(10px); text-transform: uppercase;
-}
+  html,body{margin:0;overflow:hidden;width:100%;height:100%;background-color:transparent;}
+  #scan-hint{
+    position:fixed;bottom:10%;left:50%;transform:translateX(-50%);
+    color:#00f0ff;background:rgba(0,0,0,0.7);padding:15px 25px;border-radius:20px;
+    font-family:'Rajdhani',sans-serif;font-size:18px;z-index:99;
+    border:1px solid #00f0ff;backdrop-filter: blur(5px);
+  }
 </style>
 </head>
 <body>
 
-<div id="start-overlay">
-  <div class="hero-photo-wrap">
-    <img id="bike-hero-img" src="image/frame.png" alt="AR Preview">
-  </div>
-  <div class="content-wrap">
-    <div>
-      <div class="eyebrow-row"><div class="led-dot"></div><span id="app-eyebrow" class="eyebrow">AR Spec System</span></div>
-      <h1 id="app-title" class="brand-title">XQOM <span class="accent">SPORT</span></h1>
-    </div>
-    <div class="stat-strip" id="json-stats-container"></div>
-    <button class="scan-btn" onclick="startScanner()"><span>Launch AR Telemetry</span></button>
-  </div>
-</div>
+<div id="scan-hint">Scanning Target...</div>
 
-<div id="scan-hint">Aim Camera at Object</div>
-
-<!-- JITTER FIX: filterMinCF 0.005, filterBeta 0.05, missTolerance 10 (keeps tracking alive even if it shakes) -->
-<a-scene id="ar-scene" mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; filterMinCF: 0.005; filterBeta: 0.05; missTolerance: 10; uiScanning: no;" 
-         color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+<a-scene id="ar-scene" mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; filterMinCF: 0.0001; filterBeta: 0.001; missTolerance: 20; uiScanning: no;" 
+         color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false">
 
   <a-assets>
-    <img id="img-engine" src="image/engine.png" crossorigin="anonymous">
-    <img id="img-frame" src="image/frame.png" crossorigin="anonymous">
-    <img id="img-frok" src="image/frok.png" crossorigin="anonymous">
-    <img id="img-led" src="image/led%20system.png" crossorigin="anonymous">
-    <img id="img-styling" src="image/styling.png" crossorigin="anonymous">
+    <img id="img-engine" src="image/engine.png">
+    <img id="img-frame" src="image/frame.png">
+    <img id="img-frok" src="image/frok.png">
+    <img id="img-led" src="image/led%20system.png">
+    <img id="img-styling" src="image/styling.png">
   </a-assets>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 </a-scene>
 
 <script>
-  const bikeDatabase = [
-    {
-      "targetIdx": 0,
-      "brandName": "XQOM",
-      "modelName": "SPORT",
-      "systemTag": "Holographic Telemetry",
-      "dashboardSpecs": [
-        { "value": "150 cc", "label": "FI Engine" },
-        { "value": "CVT", "label": "Transmission" },
-        { "value": "118 KG", "label": "Kerb Weight" }
-      ],
-      "arSeparateCards": [
-        { "title": "FI ENGINE", "imgSrc": "#img-engine" },
-        { "title": "AERO CHASSIS", "imgSrc": "#img-frame" },
-        { "title": "CBS BRAKING", "imgSrc": "#img-frok" },
-        { "title": "TWIN LED", "imgSrc": "#img-led" },
-        { "title": "SPORT STYLING", "imgSrc": "#img-styling" }
-      ]
-    },
-    { "targetIdx": 1, "useSameAs": 0 },
-    { "targetIdx": 2, "useSameAs": 0 },
-    { "targetIdx": 3, "useSameAs": 0 }
+  // UI Layout Settings
+  const accentPalette = ['#ff003c', '#00f0ff', '#ffaa00', '#00ff66', '#d900ff'];
+  const arData = [
+    { title: "FI ENGINE", imgSrc: "#img-engine" },
+    { title: "AERO CHASSIS", imgSrc: "#img-frame" },
+    { title: "CBS BRAKING", imgSrc: "#img-frok" },
+    { title: "TWIN LED", imgSrc: "#img-led" },
+    { title: "SPORT STYLING", imgSrc: "#img-styling" }
   ];
 
-  const anchorState = []; 
-  const accentPalette = ['#00f0ff', '#ff003c', '#ffaa00', '#ff003c', '#00f0ff'];
-
-  function accentRgba(hex, alpha) {
-    const h = hex.replace('#', '');
-    const r = parseInt(h.substring(0, 2), 16);
-    const g = parseInt(h.substring(2, 4), 16);
-    const b = parseInt(h.substring(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-
-  // --- PREMIUM WIDER ARCH LAYOUT WITH SEQUENTIAL ANIMATIONS ---
-  function buildCards(specsContainer, bikeData) {
-    const cardsData = bikeData.arSeparateCards;
-    const totalCards = cardsData.length;
-    
-    // Spread wider around the car (wider radius, pushed forward in Z axis)
-    const radiusX = 1.4; // Horizontal spread
-    const radiusY = 0.5; // Vertical arch height
-    const pushForwardZ = 0.4; // Pushes cards CLOSER to camera, so they don't clip into the car
-    
-    const maxAngle = 65 * (Math.PI / 180); 
-    const startAngle = -maxAngle;
-    const angleStep = (maxAngle * 2) / (totalCards - 1);
-    
-    const cardW = 0.55, cardH = 0.38; // Adjusted size for clear reading
-
-    // Central Hologram Ring (Anchor point for lines)
-    const centerRing = document.createElement('a-ring');
-    centerRing.setAttribute('color', '#00f0ff');
-    centerRing.setAttribute('radius-inner', '0.08');
-    centerRing.setAttribute('radius-outer', '0.1');
-    centerRing.setAttribute('position', `0 0 ${pushForwardZ - 0.2}`);
-    centerRing.setAttribute('class', 'anim-element center-ring');
-    centerRing.setAttribute('animation__scale', 'property: scale; from: 0 0 0; to: 1 1 1; dur: 800; easing: easeOutElastic; startEvents: animateIn');
-    centerRing.setAttribute('animation__spin', 'property: rotation; to: 0 0 360; loop: true; dur: 5000; easing: linear');
-    specsContainer.appendChild(centerRing);
-
-    cardsData.forEach((card, index) => {
-      const angle = startAngle + (index * angleStep);
-      
-      const posX = Math.sin(angle) * radiusX;
-      const posY = Math.cos(angle) * radiusY - 0.2; 
-      const posZ = pushForwardZ; 
-      const accent = accentPalette[index % accentPalette.length];
-
-      // TELEMETRY LINE (Animated)
-      const lineWrapper = document.createElement('a-entity');
-      lineWrapper.setAttribute('class', 'anim-element telemetry-line');
-      lineWrapper.setAttribute('line', `start: 0 0 ${pushForwardZ - 0.2}; end: ${posX} ${posY - (cardH/2)} ${posZ}; color: ${accent}; opacity: 0`);
-      // Fade in lines with delay
-      lineWrapper.setAttribute('animation__fade', `property: line.opacity; from: 0; to: 0.8; dur: 400; delay: ${600 + (index * 150)}; easing: linear; startEvents: animateIn`);
-      specsContainer.appendChild(lineWrapper);
-
-      // CARD WRAPPER
-      const cardWrapper = document.createElement('a-entity');
-      cardWrapper.setAttribute('class', 'anim-element spec-card-wrapper');
-      cardWrapper.setAttribute('position', `${posX} ${posY} ${posZ}`);
-      cardWrapper.setAttribute('scale', '0 0 0'); // Hidden initially
-      // Pop-up animation
-      cardWrapper.setAttribute('animation__pop', `property: scale; from: 0 0 0; to: 1 1 1; dur: 800; delay: ${800 + (index * 150)}; easing: easeOutElastic; startEvents: animateIn`);
-
-      const cardFace = document.createElement('a-entity');
-      cardFace.setAttribute('look-at', '[camera]');
-      
-      // Floating effect
-      const floatDur = 2500 + (index * 200);
-      cardFace.setAttribute('animation__float', `property: position; to: 0 0.04 0; dir: alternate; dur: ${floatDur}; loop: true; easing: easeInOutSine`);
-
-      // Cyber glow background
-      const haloPlate = document.createElement('a-plane');
-      haloPlate.setAttribute('width', cardW + 0.08);
-      haloPlate.setAttribute('height', cardH + 0.08);
-      haloPlate.setAttribute('color', accent);
-      haloPlate.setAttribute('opacity', '0.15');
-      haloPlate.setAttribute('position', '0 0 -0.01');
-      haloPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
-      cardFace.appendChild(haloPlate);
-
-      // Neon Frame
-      const framePlate = document.createElement('a-plane');
-      framePlate.setAttribute('width', cardW + 0.015);
-      framePlate.setAttribute('height', cardH + 0.015);
-      framePlate.setAttribute('color', accent);
-      framePlate.setAttribute('position', '0 0 -0.005');
-      framePlate.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.9');
-      cardFace.appendChild(framePlate);
-
-      // Image
-      const posterPlane = document.createElement('a-plane');
-      posterPlane.setAttribute('width', cardW);
-      posterPlane.setAttribute('height', cardH);
-      posterPlane.setAttribute('position', '0 0 0.005');
-      posterPlane.setAttribute('material', `shader: flat; side: double; src: ${card.imgSrc}`);
-      cardFace.appendChild(posterPlane);
-
-      // Text Scrim (Background for text)
-      const scrimPlate = document.createElement('a-plane');
-      scrimPlate.setAttribute('width', cardW);
-      scrimPlate.setAttribute('height', cardH * 0.35); 
-      scrimPlate.setAttribute('color', '#000000');
-      scrimPlate.setAttribute('opacity', '0.9');
-      scrimPlate.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35) / 2} 0.01`);
-      scrimPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
-      cardFace.appendChild(scrimPlate);
-
-      // Text Line
-      const accentLine = document.createElement('a-plane');
-      accentLine.setAttribute('width', cardW);
-      accentLine.setAttribute('height', 0.006);
-      accentLine.setAttribute('color', accent);
-      accentLine.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35)} 0.012`);
-      accentLine.setAttribute('material', 'shader: flat; transparent: true; opacity: 1');
-      cardFace.appendChild(accentLine);
-
-      // 3D Text
-      const captionText = document.createElement('a-text');
-      captionText.setAttribute('value', card.title.toUpperCase());
-      captionText.setAttribute('align', 'center');
-      captionText.setAttribute('font', 'kelsonsans');
-      captionText.setAttribute('color', '#ffffff');
-      captionText.setAttribute('width', '1.3'); 
-      captionText.setAttribute('letter-spacing', '2');
-      captionText.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.17)} 0.015`);
-      cardFace.appendChild(captionText);
-
-      cardWrapper.appendChild(cardFace);
-      specsContainer.appendChild(cardWrapper);
-    });
-  }
-
-  function createTitleBannerTexture(modelName, systemTag, accent) {
-    const SCALE = 2;
-    const W = 1000 * SCALE, H = 260 * SCALE;
-    const canvas = document.createElement('canvas');
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, W, H);
-
-    ctx.save();
-    ctx.shadowColor = accentRgba(accent, 0.8);
-    ctx.shadowBlur = 30 * SCALE / 2;
-    ctx.beginPath();
-    ctx.moveTo(W * 0.05, 0);
-    ctx.lineTo(W * 0.95, 0);
-    ctx.lineTo(W, H * 0.5);
-    ctx.lineTo(W * 0.95, H);
-    ctx.lineTo(W * 0.05, H);
-    ctx.lineTo(0, H * 0.5);
-    ctx.closePath();
-    
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-    bgGrad.addColorStop(0, 'rgba(15, 5, 5, 0.95)');
-    bgGrad.addColorStop(1, 'rgba(5, 0, 0, 0.98)');
-    ctx.fillStyle = bgGrad;
-    ctx.fill();
-    ctx.restore();
-    
-    ctx.strokeStyle = accent;
-    ctx.lineWidth = 6 * SCALE / 2;
-    ctx.stroke();
-
-    const titleGrad = ctx.createLinearGradient(0, H * 0.2, 0, H * 0.7);
-    titleGrad.addColorStop(0, '#ffffff');
-    titleGrad.addColorStop(0.5, accent);
-    titleGrad.addColorStop(1, '#ff4a4a');
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = `900 ${105 * SCALE}px 'Arial Black', sans-serif`;
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'rgba(0,0,0,0.9)';
-    ctx.lineWidth = 12 * SCALE / 2;
-    ctx.strokeText(modelName.toUpperCase(), W / 2, H * 0.42);
-    ctx.fillStyle = titleGrad;
-    ctx.fillText(modelName.toUpperCase(), W / 2, H * 0.42);
-
-    ctx.font = `800 ${36 * SCALE}px 'Courier New', monospace`;
-    ctx.fillStyle = '#00f0ff';
-    ctx.letterSpacing = "8px";
-    ctx.fillText(`[ ${systemTag.toUpperCase()} ]`, W / 2, H * 0.78);
-
-    return canvas.toDataURL('image/png');
-  }
-
-  function buildBrandTitle(bikeData) {
-    const brandTitleEntity = document.createElement('a-entity');
-    brandTitleEntity.setAttribute('class', 'anim-element brand-title-wrapper');
-    brandTitleEntity.setAttribute('position', '0 1.2 0.3'); // Positioned high and forward
-    brandTitleEntity.setAttribute('scale', '0 0 0'); // Hidden for pop-up
-    brandTitleEntity.setAttribute('look-at', '[camera]');
-    
-    // Title pop-up animation
-    brandTitleEntity.setAttribute('animation__pop', 'property: scale; from: 0 0 0; to: 1 1 1; dur: 1000; delay: 200; easing: easeOutElastic; startEvents: animateIn');
-
-    const brandPlane = document.createElement('a-plane');
-    brandPlane.setAttribute('width', '1.0'); 
-    brandPlane.setAttribute('height', '0.26');
-    brandPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 1');
-    brandPlane.setAttribute('material', 'src', createTitleBannerTexture(bikeData.modelName, bikeData.systemTag, accentPalette[0]));
-
-    brandTitleEntity.setAttribute('animation__float', 'property: position; to: 0 1.25 0.3; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine');
-
-    brandTitleEntity.appendChild(brandPlane);
-    return brandTitleEntity;
-  }
-
   document.addEventListener("DOMContentLoaded", () => {
-    const baseBike = bikeDatabase[0];
-    document.getElementById("app-eyebrow").innerText = baseBike.systemTag;
-    document.getElementById("app-title").innerHTML = `${baseBike.brandName} <span class="accent">${baseBike.modelName}</span>`;
+    const scene = document.querySelector('a-scene');
+    
+    // Create Anchor for all 4 targets (as defined in targets.mind)
+    for(let i = 0; i < 4; i++) {
+        const anchor = document.createElement('a-entity');
+        anchor.setAttribute('mindar-image-target', `targetIndex: ${i}`);
+        
+        // Wrapper for better control
+        const wrapper = document.createElement('a-entity');
+        
+        // Create Cards in an Arc
+        const radius = 0.55; 
+        const total = arData.length;
+        
+        arData.forEach((card, index) => {
+            const angle = (index / total) * Math.PI - (Math.PI / 2);
+            const posX = Math.sin(angle) * radius;
+            const posY = Math.cos(angle) * radius * 0.4;
+            const posZ = 0.4; // Pushed forward so it floats in front of car
 
-    const gridContainer = document.getElementById("json-stats-container");
-    gridContainer.innerHTML = "";
-    baseBike.dashboardSpecs.forEach(spec => {
-      const statBlock = document.createElement("div");
-      statBlock.className = "stat";
-      statBlock.innerHTML = `<span class="stat-value">${spec.value}</span><span class="stat-label">${spec.label}</span>`;
-      gridContainer.appendChild(statBlock);
-    });
+            const cardEnt = document.createElement('a-entity');
+            cardEnt.setAttribute('position', `${posX} ${posY} ${posZ}`);
+            cardEnt.setAttribute('look-at', '[camera]');
 
-    const arScene = document.getElementById('ar-scene');
-
-    bikeDatabase.forEach((bikeData, idx) => {
-      const actualData = bikeData.useSameAs !== undefined ? bikeDatabase[bikeData.useSameAs] : bikeData;
-      
-      const anchor = document.createElement('a-entity');
-      anchor.setAttribute('mindar-image-target', `targetIndex: ${idx}`);
-
-      // Main Wrapper for all AR elements
-      const arWrapper = document.createElement('a-entity');
-      
-      const brandTitle = buildBrandTitle(actualData);
-      const specsContainer = document.createElement('a-entity');
-      buildCards(specsContainer, actualData);
-
-      arWrapper.appendChild(brandTitle);
-      arWrapper.appendChild(specsContainer); 
-      anchor.appendChild(arWrapper);
-      arScene.appendChild(anchor);
-
-      const state = { tracked: false };
-      anchorState[idx] = state;
-
-      anchor.addEventListener("targetFound", () => {
-        state.tracked = true;
-        document.getElementById("scan-hint").style.display = "none";
-
-        // Trigger 'animateIn' event for all animated elements
-        const animElements = anchor.querySelectorAll('.anim-element');
-        animElements.forEach(el => {
-            el.emit('animateIn');
+            // The Card
+            const plane = document.createElement('a-plane');
+            plane.setAttribute('width', '0.35');
+            plane.setAttribute('height', '0.22');
+            plane.setAttribute('src', card.imgSrc);
+            plane.setAttribute('material', 'shader: flat; side: double');
+            
+            // Glow effect
+            const border = document.createElement('a-plane');
+            border.setAttribute('width', '0.37');
+            border.setAttribute('height', '0.24');
+            border.setAttribute('color', accentPalette[index]);
+            border.setAttribute('position', '0 0 -0.01');
+            
+            cardEnt.appendChild(border);
+            cardEnt.appendChild(plane);
+            wrapper.appendChild(cardEnt);
         });
-      });
 
-      anchor.addEventListener("targetLost", () => {
-        state.tracked = false;
-        
-        // Reset scale and opacity so animations can replay
-        const cards = anchor.querySelectorAll('.spec-card-wrapper');
-        cards.forEach(card => card.setAttribute('scale', '0 0 0'));
-        
-        const lines = anchor.querySelectorAll('.telemetry-line');
-        lines.forEach(line => line.setAttribute('line', 'opacity: 0'));
-
-        const rings = anchor.querySelectorAll('.center-ring');
-        rings.forEach(ring => ring.setAttribute('scale', '0 0 0'));
-
-        const titles = anchor.querySelectorAll('.brand-title-wrapper');
-        titles.forEach(title => title.setAttribute('scale', '0 0 0'));
-
-        if (!anchorState.some(s => s && s.tracked)) {
-          document.getElementById("scan-hint").style.display = "block";
-        }
-      });
-    });
+        anchor.appendChild(wrapper);
+        scene.appendChild(anchor);
+    }
   });
-
-  function showArError(message) {
-    const hint = document.getElementById('scan-hint');
-    hint.innerText = message;
-    hint.style.borderColor = '#ff003c';
-    hint.style.color = '#ff99aa';
-    hint.style.display = 'block';
-  }
-
-  function startScanner() {
-    const overlay = document.getElementById('start-overlay');
-    const scene = document.getElementById('ar-scene');
-
-    const beginAr = () => {
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        .then((stream) => {
-          stream.getTracks().forEach((t) => t.stop());
-          overlay.style.opacity = '0';
-          overlay.style.transform = 'scale(1.1)';
-          setTimeout(() => {
-            overlay.style.display = 'none';
-            scene.systems['mindar-image-system'].start();
-          }, 800);
-        })
-        .catch(() => showArError('Camera Error: Permission Denied'));
-    };
-
-    if (scene.hasLoaded) { beginAr(); } 
-    else { scene.addEventListener('loaded', beginAr, { once: true }); }
-  }
 </script>
 </body>
 </html>
