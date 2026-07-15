@@ -6,43 +6,257 @@
 <title>AR Reality Tech</title>
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; }
+
+  /* ---------- Top brand bar ---------- */
+  #brand-bar {
+    position: fixed; top: 0; left: 0; width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    padding: 14px 0 10px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 100%);
+    z-index: 20; pointer-events: none;
+  }
+  #brand-bar .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: 3px;
+    color: #eafcff;
+    text-shadow: 0 0 8px #00f0ff, 0 0 18px rgba(0,240,255,0.6);
+  }
+  #brand-bar .logo span { color: #00f0ff; }
+
+  /* ---------- Scanning overlay ---------- */
+  #scan-hint {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 15; pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  .scan-frame {
+    position: relative;
+    width: 62vw; max-width: 320px; aspect-ratio: 1/1;
+  }
+  .scan-frame .corner {
+    position: absolute; width: 34px; height: 34px;
+    border: 3px solid #00f0ff;
+    filter: drop-shadow(0 0 6px #00f0ff);
+  }
+  .scan-frame .tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+  .scan-frame .tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+  .scan-frame .bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+  .scan-frame .br { bottom: 0; right: 0; border-left: none; border-top: none; }
+  .scan-line {
+    position: absolute; left: 4%; width: 92%; height: 2px;
+    background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+    box-shadow: 0 0 8px #00f0ff;
+    animation: scanmove 2.2s ease-in-out infinite;
+  }
+  @keyframes scanmove {
+    0% { top: 6%; opacity: 0.2; }
+    50% { top: 94%; opacity: 1; }
+    100% { top: 6%; opacity: 0.2; }
+  }
+  #scan-hint .msg {
+    margin-top: 26px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #9df9ff;
+    text-shadow: 0 0 6px rgba(0,240,255,0.7);
+  }
+  #scan-hint .msg .dots span {
+    animation: blink 1.4s infinite;
+    opacity: 0;
+  }
+  #scan-hint .msg .dots span:nth-child(2) { animation-delay: 0.2s; }
+  #scan-hint .msg .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,100%{opacity:0;} 50%{opacity:1;} }
+
+  /* ---------- Bottom info bar (shown when target found) ---------- */
+  #found-bar {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    padding: 16px 20px 22px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+    z-index: 20; text-align: center;
+    opacity: 0; transform: translateY(12px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    pointer-events: none;
+  }
+  #found-bar.show { opacity: 1; transform: translateY(0); }
+  #found-bar .title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px; letter-spacing: 2px; color: #fff;
+  }
+  #found-bar .title span { color: #00f0ff; text-shadow: 0 0 8px #00f0ff; }
+  #found-bar .sub {
+    margin-top: 4px; font-size: 12px; letter-spacing: 1px;
+    color: rgba(255,255,255,0.55);
+  }
+</style>
 </head>
 <body>
 
-<a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false">
-  
+<div id="brand-bar"><div class="logo">AR REALITY <span>TECH</span></div></div>
+
+<div id="scan-hint">
+  <div class="scan-frame">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+    <div class="scan-line"></div>
+  </div>
+  <div class="msg">SCANNING TARGET<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
+</div>
+
+<div id="found-bar">
+  <div class="title">TARGET LOCKED <span>&mdash; SPEC DATA ONLINE</span></div>
+  <div class="sub">Tap a panel to inspect the component</div>
+</div>
+
+<a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, antialias: true" vr-mode-ui="enabled: false" embedded>
+
   <a-assets>
     <!-- පින්තූර ටික PNG (Transparent) විදියට දාගන්න, එතකොට පරණ සුදු box එක එන්නේ නෑ -->
     <img id="card1" src="image/engine.png">
     <img id="card2" src="image/frame.png">
     <img id="card3" src="image/frok.png">
-    <img id="card4" src="image/led.png">
+    <img id="card4" src="image/led%20system.png">
+    <img id="card5" src="image/styling.png">
   </a-assets>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <a-entity mindar-image-target="targetIndex: 0">
-    <!-- Floating Cards -->
-    <a-entity position="0.5 0.3 0" scale="0.4 0.4 0.4">
-        <!-- Glow border එකක් -->
-        <a-plane width="1.1" height="1.1" color="#00f0ff" opacity="0.3"></a-plane>
-        <!-- කාඩ් එක -->
-        <a-plane width="1.0" height="1.0" src="#card1" transparent="true" alpha-test="0.5"></a-plane>
+  <a-entity id="target" mindar-image-target="targetIndex: 0">
+
+    <!-- Thin scan-grid under the target, purely decorative HUD element -->
+    <a-entity id="hud-ring" position="0 0 -0.01" rotation="0 0 0" visible="false">
+      <a-ring radius-inner="0.62" radius-outer="0.64" color="#00f0ff" opacity="0.5" material="shader:flat"
+        animation="property: rotation; to: 0 0 360; loop: true; dur: 12000; easing: linear"></a-ring>
+      <a-ring radius-inner="0.72" radius-outer="0.73" color="#00f0ff" opacity="0.25" material="shader:flat"
+        animation="property: rotation; to: 0 0 -360; loop: true; dur: 18000; easing: linear"></a-ring>
     </a-entity>
 
-    <a-entity position="-0.5 0.3 0" scale="0.4 0.4 0.4">
-        <a-plane width="1.1" height="1.1" color="#ff003c" opacity="0.3"></a-plane>
-        <a-plane width="1.0" height="1.0" src="#card2" transparent="true" alpha-test="0.5"></a-plane>
+    <!-- ============ CARD 1 : ENGINE ============ -->
+    <a-entity class="ar-card" id="card-engine" position="0.62 0.42 0" scale="0.001 0.001 0.001" visible="false">
+      <a-entity class="connector" line="start: -0.62 -0.42 0; end: -0.15 -0.1 0; color: #ffb020; opacity: 0.6"></a-entity>
+      <a-entity animation="property: position; dir: alternate; dur: 1900; loop: true; to: 0 0.05 0; easing: easeInOutSine">
+        <a-plane width="0.98" height="0.98" color="#ffb020" opacity="0.22" material="shader:flat"
+          animation="property: material.opacity; dir: alternate; dur: 1400; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
+        <a-plane width="0.86" height="0.86" src="#card1" transparent="true" alpha-test="0.5"></a-plane>
+        <a-plane width="0.9" height="0.9" color="#ffb020" opacity="0.9" material="shader:flat" side="back"
+          geometry="primitive: plane; width: 0.9; height: 0.02"></a-plane>
+        <a-text value="ENGINE" position="0 -0.58 0" align="center" width="1.6" color="#ffe9c2"
+          font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
+      </a-entity>
     </a-entity>
+
+    <!-- ============ CARD 2 : FRAME ============ -->
+    <a-entity class="ar-card" id="card-frame" position="-0.62 0.42 0" scale="0.001 0.001 0.001" visible="false">
+      <a-entity class="connector" line="start: 0.62 -0.42 0; end: 0.15 -0.1 0; color: #4dd6ff; opacity: 0.6"></a-entity>
+      <a-entity animation="property: position; dir: alternate; dur: 2100; loop: true; to: 0 0.05 0; easing: easeInOutSine">
+        <a-plane width="0.98" height="0.98" color="#4dd6ff" opacity="0.22" material="shader:flat"
+          animation="property: material.opacity; dir: alternate; dur: 1500; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
+        <a-plane width="0.86" height="0.86" src="#card2" transparent="true" alpha-test="0.5"></a-plane>
+        <a-text value="FRAME" position="0 -0.58 0" align="center" width="1.6" color="#cdf3ff"
+          font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
+      </a-entity>
+    </a-entity>
+
+    <!-- ============ CARD 3 : FRONT (frok) ============ -->
+    <a-entity class="ar-card" id="card-front" position="0.7 -0.32 0" scale="0.001 0.001 0.001" visible="false">
+      <a-entity class="connector" line="start: -0.7 0.32 0; end: -0.18 0.08 0; color: #ff003c; opacity: 0.6"></a-entity>
+      <a-entity animation="property: position; dir: alternate; dur: 1750; loop: true; to: 0 0.05 0; easing: easeInOutSine">
+        <a-plane width="0.98" height="0.98" color="#ff003c" opacity="0.22" material="shader:flat"
+          animation="property: material.opacity; dir: alternate; dur: 1300; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
+        <a-plane width="0.86" height="0.86" src="#card3" transparent="true" alpha-test="0.5"></a-plane>
+        <a-text value="FRONT PANEL" position="0 -0.58 0" align="center" width="1.6" color="#ffc9d4"
+          font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
+      </a-entity>
+    </a-entity>
+
+    <!-- ============ CARD 4 : LED SYSTEM ============ -->
+    <a-entity class="ar-card" id="card-led" position="-0.7 -0.32 0" scale="0.001 0.001 0.001" visible="false">
+      <a-entity class="connector" line="start: 0.7 0.32 0; end: 0.18 0.08 0; color: #b866ff; opacity: 0.6"></a-entity>
+      <a-entity animation="property: position; dir: alternate; dur: 2000; loop: true; to: 0 0.05 0; easing: easeInOutSine">
+        <a-plane width="0.98" height="0.98" color="#b866ff" opacity="0.22" material="shader:flat"
+          animation="property: material.opacity; dir: alternate; dur: 1250; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
+        <a-plane width="0.86" height="0.86" src="#card4" transparent="true" alpha-test="0.5"></a-plane>
+        <a-text value="LED SYSTEM" position="0 -0.58 0" align="center" width="1.6" color="#e6cbff"
+          font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
+      </a-entity>
+    </a-entity>
+
+    <!-- ============ CARD 5 : STYLING ============ -->
+    <a-entity class="ar-card" id="card-styling" position="0 0.85 0" scale="0.001 0.001 0.001" visible="false">
+      <a-entity class="connector" line="start: 0 -0.85 0; end: 0 -0.22 0; color: #39ffb0; opacity: 0.6"></a-entity>
+      <a-entity animation="property: position; dir: alternate; dur: 1850; loop: true; to: 0 0.05 0; easing: easeInOutSine">
+        <a-plane width="0.98" height="0.98" color="#39ffb0" opacity="0.22" material="shader:flat"
+          animation="property: material.opacity; dir: alternate; dur: 1450; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
+        <a-plane width="0.86" height="0.86" src="#card5" transparent="true" alpha-test="0.5"></a-plane>
+        <a-text value="STYLING" position="0 -0.58 0" align="center" width="1.6" color="#c8ffe9"
+          font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
+      </a-entity>
+    </a-entity>
+
   </a-entity>
 </a-scene>
 
 <script>
-    // මේකෙන් අර "Scanning Target" කියන එක ලස්සනට මැකිලා යන්න හදනවා
-    const scene = document.querySelector('a-scene');
-    scene.addEventListener("loaded", () => {
-        document.getElementById("scan-hint").style.display = "none";
+  const scene = document.querySelector('a-scene');
+  const target = document.querySelector('#target');
+  const scanHint = document.getElementById('scan-hint');
+  const foundBar = document.getElementById('found-bar');
+  const hudRing = document.getElementById('hud-ring');
+  const cards = Array.from(document.querySelectorAll('.ar-card'));
+
+  scene.addEventListener('loaded', () => {
+    // scene ready
+  });
+
+  function showCards() {
+    scanHint.style.opacity = '0';
+    foundBar.classList.add('show');
+    hudRing.setAttribute('visible', true);
+
+    cards.forEach((card, i) => {
+      card.setAttribute('visible', true);
+      // staggered pop-in with slight overshoot for a punchy, professional reveal
+      setTimeout(() => {
+        card.setAttribute('animation__pop', {
+          property: 'scale',
+          to: '0.42 0.42 0.42',
+          dur: 550,
+          easing: 'easeOutElastic'
+        });
+      }, i * 120);
     });
+  }
+
+  function hideCards() {
+    scanHint.style.opacity = '1';
+    foundBar.classList.remove('show');
+    hudRing.setAttribute('visible', false);
+
+    cards.forEach((card) => {
+      card.setAttribute('animation__pop', {
+        property: 'scale',
+        to: '0.001 0.001 0.001',
+        dur: 250,
+        easing: 'easeInQuad'
+      });
+      setTimeout(() => card.setAttribute('visible', false), 260);
+    });
+  }
+
+  target.addEventListener('targetFound', showCards);
+  target.addEventListener('targetLost', hideCards);
 </script>
+
 </body>
 </html>
