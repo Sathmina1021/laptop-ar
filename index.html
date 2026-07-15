@@ -175,7 +175,8 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
 <div id="scan-hint">Aim Camera at Scooter / Target</div>
 
-<a-scene id="ar-scene" mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; filterMinCF: 0.0001; filterBeta: 0.005; uiScanning: no;" 
+<!-- VERY IMPORTANT: Jittering Fix using filterMinCF and filterBeta -->
+<a-scene id="ar-scene" mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; filterMinCF: 0.01; filterBeta: 0.1; uiScanning: no;" 
          color-space="sRGB" 
          renderer="colorManagement: true, physicallyCorrectLights" 
          vr-mode-ui="enabled: false" 
@@ -207,11 +208,11 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         { "value": "118 KG", "label": "Kerb Weight" }
       ],
       "arSeparateCards": [
-        { "title": "FI ENGINE", "imgSrc": "#img-engine", "desc": "150CC FUEL INJECTED\nSMOOTH POWER DELIVERY" },
-        { "title": "AERO CHASSIS", "imgSrc": "#img-frame", "desc": "LIGHTWEIGHT FRAME\nSPORTY HANDLING" },
-        { "title": "CBS BRAKING", "imgSrc": "#img-frok", "desc": "FRONT DISC BRAKE\nCOMBI-BRAKE SYSTEM" },
-        { "title": "TWIN LED", "imgSrc": "#img-led", "desc": "DUAL LED HEADLAMPS\nAGGRESSIVE LOOK" },
-        { "title": "SPORT STYLING", "imgSrc": "#img-styling", "desc": "SHARP AERODYNAMICS\nPREMIUM SPORT SEAT" }
+        { "title": "FI ENGINE", "imgSrc": "#img-engine", "desc": "150CC FUEL INJECTED" },
+        { "title": "AERO CHASSIS", "imgSrc": "#img-frame", "desc": "LIGHTWEIGHT FRAME" },
+        { "title": "CBS BRAKING", "imgSrc": "#img-frok", "desc": "FRONT DISC BRAKE" },
+        { "title": "TWIN LED", "imgSrc": "#img-led", "desc": "DUAL LED HEADLAMPS" },
+        { "title": "SPORT STYLING", "imgSrc": "#img-styling", "desc": "SHARP AERODYNAMICS" }
       ]
     },
     { "targetIdx": 1, "useSameAs": 0 },
@@ -226,8 +227,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     const frame = document.createElement('a-entity');
     frame.setAttribute('visible', 'false');
     frame.setAttribute('gltf-model', '#frame-model');
-    // Reduced scale so the 3D HUD model doesn't overflow either
-    frame.setAttribute('scale', '0.6 0.6 0.6');
+    frame.setAttribute('scale', '0.5 0.5 0.5');
     frame.setAttribute('position', '0 0.05 -0.05'); 
     frame.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear');
 
@@ -255,57 +255,70 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  // --- ARTISTIC SPEC CARDS (Dimensions Strictly Scaled Down) ---
+  // --- PREMIUM ARCH LAYOUT WITH TELEMETRY LINES ---
   function buildCards(specsContainer, bikeData) {
     const cardsData = bikeData.arSeparateCards;
     const totalCards = cardsData.length;
     
-    // RADIUS REDUCED: Now 0.7 instead of 2.15 to hug the object tightly
-    const radius = 0.7; 
-    const startAngle = -Math.PI / 2;
+    // Create an arch (semi-circle) above the object
+    const radius = 0.65; 
+    const maxAngle = 75 * (Math.PI / 180); // Spread across 150 degrees
+    const startAngle = -maxAngle;
+    const angleStep = (maxAngle * 2) / (totalCards - 1);
     
-    // CARD SIZES REDUCED: Now 0.45 x 0.31 instead of 1.45 x 1.0
-    const cardW = 0.45, cardH = 0.31; 
+    const cardW = 0.40, cardH = 0.28; // Perfect small size for screen fitting
 
     cardsData.forEach((card, index) => {
-      const angle = startAngle + (index / totalCards) * Math.PI * 2;
-      const posX = Math.cos(angle) * radius;
-      const posY = Math.sin(angle) * radius * 0.7; // Kept proportional
+      const angle = startAngle + (index * angleStep);
+      
+      // X and Y calculated for an Arch layout (0 degree is Top Center)
+      const posX = Math.sin(angle) * radius;
+      const posY = Math.cos(angle) * radius - 0.15; // Shifted slightly down
       const accent = accentPalette[index % accentPalette.length];
 
-      const cardEntity = document.createElement('a-entity');
-      cardEntity.setAttribute('class', 'spec-card');
-      cardEntity.setAttribute('position', `${posX} ${posY} 0.1`);
-      cardEntity.setAttribute('look-at', '[camera]');
+      // 1. TELEMETRY LINE: Connects the center of the target to the card
+      const line = document.createElement('a-entity');
+      line.setAttribute('line', `start: 0 0.1 0; end: ${posX} ${posY - (cardH/2) + 0.05} 0.05; color: ${accent}; opacity: 0`);
+      line.setAttribute('class', 'telemetry-line'); // Class for animation triggering
+      specsContainer.appendChild(line);
 
-      // Floating animation adjusted for small scale
-      const floatY = posY + 0.03;
-      const floatDur = 2500 + (index * 300);
-      cardEntity.setAttribute('animation', `property: position; to: ${posX} ${floatY} 0.1; dir: alternate; dur: ${floatDur}; loop: true; easing: easeInOutSine`);
+      // 2. CARD WRAPPER: Handles position and pop-up animation
+      const cardWrapper = document.createElement('a-entity');
+      cardWrapper.setAttribute('class', 'spec-card-wrapper');
+      cardWrapper.setAttribute('position', `${posX} ${posY} 0.1`);
+      cardWrapper.setAttribute('scale', '0 0 0'); // Hidden initially for pop-up
+
+      // 3. CARD FACE: Handles look-at and floating
+      const cardFace = document.createElement('a-entity');
+      cardFace.setAttribute('look-at', '[camera]');
+      
+      // Smooth floating animation
+      const floatDur = 2000 + (index * 250);
+      cardFace.setAttribute('animation__float', `property: position; to: 0 0.03 0; dir: alternate; dur: ${floatDur}; loop: true; easing: easeInOutSine`);
 
       const haloPlate = document.createElement('a-plane');
       haloPlate.setAttribute('width', cardW + 0.06);
       haloPlate.setAttribute('height', cardH + 0.06);
       haloPlate.setAttribute('color', accent);
-      haloPlate.setAttribute('opacity', '0.08');
+      haloPlate.setAttribute('opacity', '0.1');
       haloPlate.setAttribute('position', '0 0 -0.01');
       haloPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
-      cardEntity.appendChild(haloPlate);
+      cardFace.appendChild(haloPlate);
 
       const framePlate = document.createElement('a-plane');
-      framePlate.setAttribute('width', cardW + 0.015);
-      framePlate.setAttribute('height', cardH + 0.015);
+      framePlate.setAttribute('width', cardW + 0.012);
+      framePlate.setAttribute('height', cardH + 0.012);
       framePlate.setAttribute('color', accent);
       framePlate.setAttribute('position', '0 0 -0.005');
-      framePlate.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.9');
-      cardEntity.appendChild(framePlate);
+      framePlate.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 0.8');
+      cardFace.appendChild(framePlate);
 
       const posterPlane = document.createElement('a-plane');
       posterPlane.setAttribute('width', cardW);
       posterPlane.setAttribute('height', cardH);
       posterPlane.setAttribute('position', '0 0 0.005');
       posterPlane.setAttribute('material', `shader: flat; side: double; src: ${card.imgSrc}`);
-      cardEntity.appendChild(posterPlane);
+      cardFace.appendChild(posterPlane);
 
       const scrimPlate = document.createElement('a-plane');
       scrimPlate.setAttribute('width', cardW);
@@ -314,7 +327,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       scrimPlate.setAttribute('opacity', '0.85');
       scrimPlate.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35) / 2} 0.01`);
       scrimPlate.setAttribute('material', 'shader: flat; side: double; transparent: true');
-      cardEntity.appendChild(scrimPlate);
+      cardFace.appendChild(scrimPlate);
 
       const accentLine = document.createElement('a-plane');
       accentLine.setAttribute('width', cardW);
@@ -322,23 +335,23 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       accentLine.setAttribute('color', accent);
       accentLine.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.35)} 0.012`);
       accentLine.setAttribute('material', 'shader: flat; transparent: true; opacity: 1');
-      cardEntity.appendChild(accentLine);
+      cardFace.appendChild(accentLine);
 
       const captionText = document.createElement('a-text');
       captionText.setAttribute('value', card.title.toUpperCase());
       captionText.setAttribute('align', 'center');
       captionText.setAttribute('font', 'kelsonsans');
       captionText.setAttribute('color', '#ffffff');
-      captionText.setAttribute('width', '1.0'); // Reduced text width
+      captionText.setAttribute('width', '1.1'); 
       captionText.setAttribute('letter-spacing', '2');
       captionText.setAttribute('position', `0 ${-cardH / 2 + (cardH * 0.18)} 0.015`);
-      cardEntity.appendChild(captionText);
+      cardFace.appendChild(captionText);
 
-      specsContainer.appendChild(cardEntity);
+      cardWrapper.appendChild(cardFace);
+      specsContainer.appendChild(cardWrapper);
     });
   }
 
-  // --- SCI-FI CANVAS BANNER ---
   function createTitleBannerTexture(modelName, systemTag, accent) {
     const SCALE = 2;
     const W = 1000 * SCALE, H = 260 * SCALE;
@@ -394,14 +407,15 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
   function buildBrandTitle(bikeData) {
     const brandTitleEntity = document.createElement('a-entity');
-    // Position brought down closer to object
-    brandTitleEntity.setAttribute('position', '0 0.65 0.02'); 
+    brandTitleEntity.setAttribute('class', 'brand-title-wrapper');
+    // Positioned nicely at the bottom center
+    brandTitleEntity.setAttribute('position', '0 -0.4 0.1'); 
+    brandTitleEntity.setAttribute('scale', '0 0 0'); // Hidden for pop-up
     brandTitleEntity.setAttribute('look-at', '[camera]');
 
     const brandPlane = document.createElement('a-plane');
-    // Width and height scaled down
-    brandPlane.setAttribute('width', '0.7'); 
-    brandPlane.setAttribute('height', '0.18');
+    brandPlane.setAttribute('width', '0.8'); 
+    brandPlane.setAttribute('height', '0.2');
     brandPlane.setAttribute('material', 'shader: flat; side: double; transparent: true; opacity: 1');
     brandPlane.setAttribute(
       'material',
@@ -409,7 +423,7 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       createTitleBannerTexture(bikeData.modelName, bikeData.systemTag, accentPalette[0])
     );
 
-    brandTitleEntity.setAttribute('animation', 'property: position; to: 0 0.68 0.02; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine');
+    brandTitleEntity.setAttribute('animation__float', 'property: position; to: 0 -0.38 0.1; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine');
 
     brandTitleEntity.appendChild(brandPlane);
     return brandTitleEntity;
@@ -453,14 +467,42 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
       const state = { specsContainer, frameEntity, tracked: false };
       anchorState[idx] = state;
 
+      // TRIGGER POP-UP ANIMATIONS ON TARGET FOUND
       anchor.addEventListener("targetFound", () => {
         state.tracked = true;
         frameEntity.setAttribute('visible', 'true');
         document.getElementById("scan-hint").style.display = "none";
+
+        // Animate Cards popping up with a slight delay for each
+        const cards = anchor.querySelectorAll('.spec-card-wrapper');
+        cards.forEach((card, i) => {
+          card.setAttribute('animation__scale', `property: scale; from: 0 0 0; to: 1 1 1; dur: 800; delay: ${i * 150}; easing: easeOutElastic`);
+        });
+
+        // Animate Telemetry Lines fading in
+        const lines = anchor.querySelectorAll('.telemetry-line');
+        lines.forEach((line, i) => {
+          line.setAttribute('animation__opacity', `property: line.opacity; from: 0; to: 0.6; dur: 500; delay: ${i * 150}; easing: linear`);
+        });
+
+        // Animate Main Title
+        brandTitle.setAttribute('animation__scale', `property: scale; from: 0 0 0; to: 1 1 1; dur: 1000; delay: 600; easing: easeOutElastic`);
       });
+
+      // RESET WHEN LOST
       anchor.addEventListener("targetLost", () => {
         state.tracked = false;
         frameEntity.setAttribute('visible', 'false');
+        
+        // Hide elements again so they can pop up next time
+        const cards = anchor.querySelectorAll('.spec-card-wrapper');
+        cards.forEach(card => card.setAttribute('scale', '0 0 0'));
+        
+        const lines = anchor.querySelectorAll('.telemetry-line');
+        lines.forEach(line => line.setAttribute('line', 'opacity: 0'));
+
+        brandTitle.setAttribute('scale', '0 0 0');
+
         if (!anchorState.some(s => s && s.tracked)) {
           document.getElementById("scan-hint").style.display = "block";
         }
