@@ -119,7 +119,7 @@
   <div class="sub">Tap a panel to inspect the component</div>
 </div>
 
-<a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, antialias: true" vr-mode-ui="enabled: false" embedded>
+<a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, antialias: true; alpha: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" loading-screen="enabled: false">
 
   <a-assets>
     <!-- පින්තූර ටික PNG (Transparent) විදියට දාගන්න, එතකොට පරණ සුදු box එක එන්නේ නෑ -->
@@ -146,12 +146,12 @@
     <a-entity class="ar-card" id="card-engine" position="0.62 0.42 0" scale="0.001 0.001 0.001" visible="false">
       <a-entity class="connector" line="start: -0.62 -0.42 0; end: -0.15 -0.1 0; color: #ffb020; opacity: 0.6"></a-entity>
       <a-entity animation="property: position; dir: alternate; dur: 1900; loop: true; to: 0 0.05 0; easing: easeInOutSine">
-        <a-plane width="0.98" height="0.98" color="#ffb020" opacity="0.22" material="shader:flat"
+        <a-plane width="0.84" height="1.08" color="#ffb020" opacity="0.22" material="shader:flat"
           animation="property: material.opacity; dir: alternate; dur: 1400; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
-        <a-plane width="0.86" height="0.86" src="#card1" transparent="true" alpha-test="0.5"></a-plane>
+        <a-plane width="0.72" height="0.94" src="#card1" transparent="true" alpha-test="0.05" sharp-texture></a-plane>
         <a-plane width="0.9" height="0.9" color="#ffb020" opacity="0.9" material="shader:flat" side="back"
           geometry="primitive: plane; width: 0.9; height: 0.02"></a-plane>
-        <a-text value="ENGINE" position="0 -0.58 0" align="center" width="1.6" color="#ffe9c2"
+        <a-text value="ENGINE" position="0 -0.66 0" align="center" width="1.6" color="#ffe9c2"
           font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
       </a-entity>
     </a-entity>
@@ -160,10 +160,10 @@
     <a-entity class="ar-card" id="card-frame" position="-0.62 0.42 0" scale="0.001 0.001 0.001" visible="false">
       <a-entity class="connector" line="start: 0.62 -0.42 0; end: 0.15 -0.1 0; color: #4dd6ff; opacity: 0.6"></a-entity>
       <a-entity animation="property: position; dir: alternate; dur: 2100; loop: true; to: 0 0.05 0; easing: easeInOutSine">
-        <a-plane width="0.98" height="0.98" color="#4dd6ff" opacity="0.22" material="shader:flat"
+        <a-plane width="0.84" height="1.08" color="#4dd6ff" opacity="0.22" material="shader:flat"
           animation="property: material.opacity; dir: alternate; dur: 1500; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
-        <a-plane width="0.86" height="0.86" src="#card2" transparent="true" alpha-test="0.5"></a-plane>
-        <a-text value="FRAME" position="0 -0.58 0" align="center" width="1.6" color="#cdf3ff"
+        <a-plane width="0.72" height="0.94" src="#card2" transparent="true" alpha-test="0.05" sharp-texture></a-plane>
+        <a-text value="FRAME" position="0 -0.66 0" align="center" width="1.6" color="#cdf3ff"
           font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
       </a-entity>
     </a-entity>
@@ -172,10 +172,10 @@
     <a-entity class="ar-card" id="card-front" position="0.7 -0.32 0" scale="0.001 0.001 0.001" visible="false">
       <a-entity class="connector" line="start: -0.7 0.32 0; end: -0.18 0.08 0; color: #ff003c; opacity: 0.6"></a-entity>
       <a-entity animation="property: position; dir: alternate; dur: 1750; loop: true; to: 0 0.05 0; easing: easeInOutSine">
-        <a-plane width="0.98" height="0.98" color="#ff003c" opacity="0.22" material="shader:flat"
+        <a-plane width="0.84" height="1.08" color="#ff003c" opacity="0.22" material="shader:flat"
           animation="property: material.opacity; dir: alternate; dur: 1300; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
-        <a-plane width="0.86" height="0.86" src="#card3" transparent="true" alpha-test="0.5"></a-plane>
-        <a-text value="FRONT PANEL" position="0 -0.58 0" align="center" width="1.6" color="#ffc9d4"
+        <a-plane width="0.72" height="0.94" src="#card3" transparent="true" alpha-test="0.05" sharp-texture></a-plane>
+        <a-text value="FRONT PANEL" position="0 -0.66 0" align="center" width="1.6" color="#ffc9d4"
           font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
       </a-entity>
     </a-entity>
@@ -184,10 +184,10 @@
     <a-entity class="ar-card" id="card-led" position="-0.7 -0.32 0" scale="0.001 0.001 0.001" visible="false">
       <a-entity class="connector" line="start: 0.7 0.32 0; end: 0.18 0.08 0; color: #b866ff; opacity: 0.6"></a-entity>
       <a-entity animation="property: position; dir: alternate; dur: 2000; loop: true; to: 0 0.05 0; easing: easeInOutSine">
-        <a-plane width="0.98" height="0.98" color="#b866ff" opacity="0.22" material="shader:flat"
+        <a-plane width="0.84" height="1.08" color="#b866ff" opacity="0.22" material="shader:flat"
           animation="property: material.opacity; dir: alternate; dur: 1250; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
-        <a-plane width="0.86" height="0.86" src="#card4" transparent="true" alpha-test="0.5"></a-plane>
-        <a-text value="LED SYSTEM" position="0 -0.58 0" align="center" width="1.6" color="#e6cbff"
+        <a-plane width="0.72" height="0.94" src="#card4" transparent="true" alpha-test="0.05" sharp-texture></a-plane>
+        <a-text value="LED SYSTEM" position="0 -0.66 0" align="center" width="1.6" color="#e6cbff"
           font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
       </a-entity>
     </a-entity>
@@ -196,10 +196,10 @@
     <a-entity class="ar-card" id="card-styling" position="0 0.85 0" scale="0.001 0.001 0.001" visible="false">
       <a-entity class="connector" line="start: 0 -0.85 0; end: 0 -0.22 0; color: #39ffb0; opacity: 0.6"></a-entity>
       <a-entity animation="property: position; dir: alternate; dur: 1850; loop: true; to: 0 0.05 0; easing: easeInOutSine">
-        <a-plane width="0.98" height="0.98" color="#39ffb0" opacity="0.22" material="shader:flat"
+        <a-plane width="0.84" height="1.08" color="#39ffb0" opacity="0.22" material="shader:flat"
           animation="property: material.opacity; dir: alternate; dur: 1450; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
-        <a-plane width="0.86" height="0.86" src="#card5" transparent="true" alpha-test="0.5"></a-plane>
-        <a-text value="STYLING" position="0 -0.58 0" align="center" width="1.6" color="#c8ffe9"
+        <a-plane width="0.72" height="0.94" src="#card5" transparent="true" alpha-test="0.05" sharp-texture></a-plane>
+        <a-text value="STYLING" position="0 -0.66 0" align="center" width="1.6" color="#c8ffe9"
           font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
       </a-entity>
     </a-entity>
@@ -208,6 +208,23 @@
 </a-scene>
 
 <script>
+  // Fixes textures rendering with torn/missing chunks: forces clean edge-clamping
+  // and proper mipmapping so PNG cards display fully and sharply, even on
+  // non-power-of-two image sizes.
+  AFRAME.registerComponent('sharp-texture', {
+    init: function () {
+      this.el.addEventListener('materialtextureloaded', () => {
+        const mesh = this.el.getObject3D('mesh');
+        if (!mesh || !mesh.material || !mesh.material.map) return;
+        const tex = mesh.material.map;
+        tex.wrapS = THREE.ClampToEdgeWrapping;
+        tex.wrapT = THREE.ClampToEdgeWrapping;
+        tex.anisotropy = this.el.sceneEl.renderer.capabilities.getMaxAnisotropy();
+        tex.needsUpdate = true;
+      });
+    }
+  });
+
   const scene = document.querySelector('a-scene');
   const target = document.querySelector('#target');
   const scanHint = document.getElementById('scan-hint');
@@ -217,6 +234,13 @@
 
   scene.addEventListener('loaded', () => {
     // scene ready
+  });
+
+  // Real camera / tracking status, so a failure shows a clear message
+  // instead of a plain black screen.
+  scene.addEventListener('arError', () => {
+    scanHint.querySelector('.msg').innerHTML =
+      'CAMERA UNAVAILABLE &mdash; CHECK PERMISSIONS';
   });
 
   function showCards() {
