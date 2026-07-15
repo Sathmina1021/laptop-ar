@@ -133,26 +133,32 @@
 
   /* ============ SPEC CARDS (floating AR image badges) ============ */
   .card {
-    position: fixed; z-index: 12; display: flex; align-items: center; justify-content: center;
-    width: 84px; height: 84px; border-radius: 18px;
-    background: linear-gradient(155deg, var(--glow) 0%, color-mix(in srgb, var(--glow) 72%, #000) 100%);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.18) inset;
-    opacity: 0; transform: scale(0.55) translateY(10px);
-    transition: opacity 0.45s ease, transform 0.45s cubic-bezier(.2,1.4,.4,1);
+    position: fixed; z-index: 12; width: 84px; height: 84px; border-radius: 18px;
+    overflow: hidden; background: #0a0e12;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 0 2px var(--glow), 0 0 14px color-mix(in srgb, var(--glow) 60%, transparent);
+    opacity: 0; transform: scale(0.5) translateY(10px) rotate(0deg); filter: blur(0px);
+    transition: opacity 0.45s ease, transform 0.45s cubic-bezier(.2,1.4,.4,1), filter 0.4s ease, box-shadow 0.4s ease;
     pointer-events: none;
   }
-  .card.show { opacity: 1; transform: scale(1) translateY(0); }
-
-  .card .icon {
-    width: 100%; height: 100%; border-radius: 18px;
-    background: rgba(255,255,255,0.92); padding: 10px;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.25) inset;
+  .card.show {
+    opacity: 1; transform: scale(1) translateY(0) rotate(0deg); filter: blur(0px);
+    animation: cardGlowPulse 2.6s ease-in-out infinite;
   }
-  .card .icon img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .card.lost {
+    opacity: 0; transform: scale(0.35) translateY(18px) rotate(14deg); filter: blur(7px);
+    transition: opacity 0.4s cubic-bezier(.4,0,1,1), transform 0.4s cubic-bezier(.4,0,1,1), filter 0.4s ease;
+    animation: none;
+  }
+  @keyframes cardGlowPulse {
+    0%, 100% { box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 0 2px var(--glow), 0 0 14px color-mix(in srgb, var(--glow) 60%, transparent); }
+    50%      { box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 0 2px var(--glow), 0 0 22px color-mix(in srgb, var(--glow) 85%, transparent); }
+  }
 
-  #card-engine  { --glow: #ffb020; top: 96px;  left: 50%; transform: translateX(-50%) scale(0.55); }
+  .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  #card-engine  { --glow: #ffb020; top: 96px;  left: 50%; transform: translateX(-50%) scale(0.5); }
   #card-engine.show { transform: translateX(-50%) scale(1); }
+  #card-engine.lost { transform: translateX(-50%) scale(0.35) translateY(18px) rotate(14deg); }
   #card-led     { --glow: #b866ff; top: 132px; left: 12px; }
   #card-frame   { --glow: #4dd6ff; bottom: 128px; left: 12px; }
   #card-front   { --glow: #ff003c; top: 132px; right: 12px; }
@@ -215,29 +221,19 @@
 </div>
 
 <div id="card-engine" class="card">
-  <div class="icon">
-    <img src="image/engine.png" alt="engine">
-  </div>
+  <img src="image/engine.png" alt="engine">
 </div>
 <div id="card-led" class="card">
-  <div class="icon">
-    <img src="image/led%20system.png" alt="led system">
-  </div>
+  <img src="image/led%20system.png" alt="led system">
 </div>
 <div id="card-frame" class="card">
-  <div class="icon">
-    <img src="image/frame.png" alt="frame">
-  </div>
+  <img src="image/frame.png" alt="frame">
 </div>
 <div id="card-front" class="card">
-  <div class="icon">
-    <img src="image/frok.png" alt="front fork">
-  </div>
+  <img src="image/frok.png" alt="front fork">
 </div>
 <div id="card-styling" class="card">
-  <div class="icon">
-    <img src="image/styling.png" alt="styling">
-  </div>
+  <img src="image/styling.png" alt="styling">
 </div>
 
 <div id="found-bar">
@@ -276,21 +272,77 @@
     }
   }
 
+  function lockOn() {
+    if (isLocked) return;
+    isLocked = true;
+    reticle.classList.add('locked');
+    if (chipText) chipText.textContent = 'LOCKED';
+    foundBar.classList.add('show');
+    cards.forEach((card, i) => {
+      card.classList.remove('lost');
+      setTimeout(() => card.classList.add('show'), i * 120);
+    });
+  }
+
+  function loseTracking() {
+    if (!isLocked) return;
+    isLocked = false;
+    reticle.classList.remove('locked');
+    if (chipText) chipText.textContent = 'TRACKING';
+    foundBar.classList.remove('show');
+    cards.forEach((card, i) => {
+      setTimeout(() => {
+        card.classList.remove('show');
+        card.classList.add('lost');
+      }, i * 55);
+    });
+  }
+
+  // Watches the phone's tilt: drifting away from the point where lock happened
+  // reads as "the camera moved off the vehicle", so the panels fly off. Settling
+  // back near that orientation reads as "re-aiming at it", so they snap back in.
+  let isLocked = false;
+  let baseBeta = null, baseGamma = null;
+  let outSince = null, inSince = null;
+  const LOSE_DEG = 16, REGAIN_DEG = 7, HOLD_MS = 260;
+
+  function handleOrientation(e) {
+    if (e.beta === null || e.gamma === null) return;
+    if (baseBeta === null) { baseBeta = e.beta; baseGamma = e.gamma; return; }
+    const drift = Math.hypot(e.beta - baseBeta, e.gamma - baseGamma);
+    const now = performance.now();
+    if (isLocked) {
+      if (drift > LOSE_DEG) {
+        if (outSince === null) outSince = now;
+        if (now - outSince > HOLD_MS) loseTracking();
+      } else { outSince = null; }
+    } else {
+      if (drift < REGAIN_DEG) {
+        if (inSince === null) inSince = now;
+        if (now - inSince > HOLD_MS) lockOn();
+      } else { inSince = null; }
+    }
+  }
+
+  function initMotionTracking() {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(state => { if (state === 'granted') window.addEventListener('deviceorientation', handleOrientation); })
+        .catch(() => {});
+    } else if (typeof DeviceOrientationEvent !== 'undefined') {
+      window.addEventListener('deviceorientation', handleOrientation);
+    }
+  }
+
   function onCameraReady() {
     loading.classList.remove('show');
     header.classList.add('show');
     reticle.classList.add('show');
+    initMotionTracking();
 
     // Simulated lock-on sequence: gives the "scanning" moment a real feel
     // before revealing the spec panels, exactly like a genuine detection pass.
-    setTimeout(() => {
-      reticle.classList.add('locked');
-      if (chipText) chipText.textContent = 'LOCKED';
-      foundBar.classList.add('show');
-      cards.forEach((card, i) => {
-        setTimeout(() => card.classList.add('show'), i * 140);
-      });
-    }, 1800);
+    setTimeout(lockOn, 1800);
   }
 
   startBtn.addEventListener('click', startCamera);
