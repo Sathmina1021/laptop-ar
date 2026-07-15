@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>AR Reality Tech</title>
+<title>XQOM AR</title>
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,7 +12,6 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; }
 
-  /* ---------- Top brand bar ---------- */
   #brand-bar {
     position: fixed; top: 0; left: 0; width: 100%;
     display: flex; align-items: center; justify-content: center;
@@ -21,31 +20,18 @@
     z-index: 20; pointer-events: none;
   }
   #brand-bar .logo {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900;
-    font-size: 15px;
-    letter-spacing: 3px;
-    color: #eafcff;
-    text-shadow: 0 0 8px #00f0ff, 0 0 18px rgba(0,240,255,0.6);
+    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 15px; letter-spacing: 3px;
+    color: #eafcff; text-shadow: 0 0 8px #00f0ff, 0 0 18px rgba(0,240,255,0.6);
   }
   #brand-bar .logo span { color: #00f0ff; }
 
-  /* ---------- Scanning overlay ---------- */
   #scan-hint {
     position: fixed; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    z-index: 15; pointer-events: none;
-    transition: opacity 0.5s ease;
+    z-index: 15; pointer-events: none; transition: opacity 0.5s ease;
   }
-  .scan-frame {
-    position: relative;
-    width: 62vw; max-width: 320px; aspect-ratio: 1/1;
-  }
-  .scan-frame .corner {
-    position: absolute; width: 34px; height: 34px;
-    border: 3px solid #00f0ff;
-    filter: drop-shadow(0 0 6px #00f0ff);
-  }
+  .scan-frame { position: relative; width: 62vw; max-width: 320px; aspect-ratio: 1/1; }
+  .scan-frame .corner { position: absolute; width: 34px; height: 34px; border: 3px solid #00f0ff; filter: drop-shadow(0 0 6px #00f0ff); }
   .scan-frame .tl { top: 0; left: 0; border-right: none; border-bottom: none; }
   .scan-frame .tr { top: 0; right: 0; border-left: none; border-bottom: none; }
   .scan-frame .bl { bottom: 0; left: 0; border-right: none; border-top: none; }
@@ -53,31 +39,18 @@
   .scan-line {
     position: absolute; left: 4%; width: 92%; height: 2px;
     background: linear-gradient(90deg, transparent, #00f0ff, transparent);
-    box-shadow: 0 0 8px #00f0ff;
-    animation: scanmove 2.2s ease-in-out infinite;
+    box-shadow: 0 0 8px #00f0ff; animation: scanmove 2.2s ease-in-out infinite;
   }
-  @keyframes scanmove {
-    0% { top: 6%; opacity: 0.2; }
-    50% { top: 94%; opacity: 1; }
-    100% { top: 6%; opacity: 0.2; }
-  }
+  @keyframes scanmove { 0% { top: 6%; opacity: 0.2; } 50% { top: 94%; opacity: 1; } 100% { top: 6%; opacity: 0.2; } }
   #scan-hint .msg {
-    margin-top: 26px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
-    letter-spacing: 2px;
-    color: #9df9ff;
-    text-shadow: 0 0 6px rgba(0,240,255,0.7);
+    margin-top: 26px; font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 2px;
+    color: #9df9ff; text-shadow: 0 0 6px rgba(0,240,255,0.7);
   }
-  #scan-hint .msg .dots span {
-    animation: blink 1.4s infinite;
-    opacity: 0;
-  }
+  #scan-hint .msg .dots span { animation: blink 1.4s infinite; opacity: 0; }
   #scan-hint .msg .dots span:nth-child(2) { animation-delay: 0.2s; }
   #scan-hint .msg .dots span:nth-child(3) { animation-delay: 0.4s; }
   @keyframes blink { 0%,100%{opacity:0;} 50%{opacity:1;} }
 
-  /* ---------- Bottom info bar (shown when target found) ---------- */
   #found-bar {
     position: fixed; bottom: 0; left: 0; width: 100%;
     padding: 16px 20px 22px;
@@ -88,129 +61,62 @@
     pointer-events: none;
   }
   #found-bar.show { opacity: 1; transform: translateY(0); }
-  #found-bar .title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 13px; letter-spacing: 2px; color: #fff;
-  }
+  #found-bar .title { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 2px; color: #fff; }
   #found-bar .title span { color: #00f0ff; text-shadow: 0 0 8px #00f0ff; }
-  #found-bar .sub {
-    margin-top: 4px; font-size: 12px; letter-spacing: 1px;
-    color: rgba(255,255,255,0.55);
-  }
+  #found-bar .sub { margin-top: 4px; font-size: 12px; letter-spacing: 1px; color: rgba(255,255,255,0.55); }
 </style>
 </head>
 <body>
 
-<div id="brand-bar"><div class="logo">AR REALITY <span>TECH</span></div></div>
+<div id="brand-bar"><div class="logo">XQOM <span>AR</span></div></div>
 
 <div id="scan-hint">
   <div class="scan-frame">
-    <div class="corner tl"></div>
-    <div class="corner tr"></div>
-    <div class="corner bl"></div>
-    <div class="corner br"></div>
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
     <div class="scan-line"></div>
   </div>
-  <div class="msg">SCANNING TARGET<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
+  <div class="msg">SCANNING VEHICLE<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
 </div>
 
 <div id="found-bar">
   <div class="title">TARGET LOCKED <span>&mdash; SPEC DATA ONLINE</span></div>
-  <div class="sub">Tap a panel to inspect the component</div>
+  <div class="sub">Rotating spec panels &mdash; tap to inspect</div>
 </div>
 
-<a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, antialias: true; alpha: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" loading-screen="enabled: false">
+<a-scene
+  mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001; missTolerance: 30;"
+  color-space="sRGB"
+  renderer="colorManagement: true, antialias: true; alpha: true"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+  loading-screen="enabled: false">
 
   <a-assets>
-    <!-- පින්තූර ටික PNG (Transparent) විදියට දාගන්න, එතකොට පරණ සුදු box එක එන්නේ නෑ -->
-    <img id="card1" src="image/engine.png">
-    <img id="card2" src="image/frame.png">
-    <img id="card3" src="image/frok.png">
-    <img id="card4" src="image/led%20system.png">
-    <img id="card5" src="image/styling.png">
+    <!-- පින්තූර PNG-24, Transparent Background විදියට export කරන්න (Photoshop -> Save for Web -> PNG-24) -->
+    <img id="card1" src="image/engine.png" crossorigin="anonymous">
+    <img id="card2" src="image/frame.png" crossorigin="anonymous">
+    <img id="card3" src="image/frok.png" crossorigin="anonymous">
+    <img id="card4" src="image/led%20system.png" crossorigin="anonymous">
+    <img id="card5" src="image/styling.png" crossorigin="anonymous">
   </a-assets>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
   <a-entity id="target" mindar-image-target="targetIndex: 0">
 
-    <!-- Thin scan-grid under the target, purely decorative HUD element -->
-    <a-entity id="hud-ring" position="0 0 -0.01" rotation="0 0 0" visible="false">
-      <a-ring radius-inner="0.62" radius-outer="0.64" color="#00f0ff" opacity="0.5" material="shader:flat"
-        animation="property: rotation; to: 0 0 360; loop: true; dur: 12000; easing: linear"></a-ring>
-      <a-ring radius-inner="0.72" radius-outer="0.73" color="#00f0ff" opacity="0.25" material="shader:flat"
-        animation="property: rotation; to: 0 0 -360; loop: true; dur: 18000; easing: linear"></a-ring>
+    <!-- Orbit guide ring -- the signature HUD element the cards travel along -->
+    <a-entity id="orbit-ring" visible="false">
+      <a-ring radius-inner="0.615" radius-outer="0.63" color="#00f0ff" opacity="0.35" material="shader:flat" segments-theta="64"></a-ring>
+      <a-ring radius-inner="0.0" radius-outer="0.01" color="#00f0ff" opacity="0.9" material="shader:flat"></a-ring>
     </a-entity>
 
-    <!-- ============ CARD 1 : ENGINE ============ -->
-    <a-entity class="ar-card" id="card-engine" position="0.62 0.42 0" scale="0.001 0.001 0.001" visible="false">
-      <a-entity class="connector" line="start: -0.62 -0.42 0; end: -0.15 -0.1 0; color: #ffb020; opacity: 0.6"></a-entity>
-      <a-entity animation="property: position; dir: alternate; dur: 1900; loop: true; to: 0 0.05 0; easing: easeInOutSine">
-        <a-plane width="0.84" height="1.08" color="#ffb020" opacity="0.22" material="shader:flat"
-          animation="property: material.opacity; dir: alternate; dur: 1400; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
-        <a-plane width="0.72" height="0.94" src="#card1" transparent="true" alpha-test="0.05" sharp-texture></a-plane>
-        <a-plane width="0.9" height="0.9" color="#ffb020" opacity="0.9" material="shader:flat" side="back"
-          geometry="primitive: plane; width: 0.9; height: 0.02"></a-plane>
-        <a-text value="ENGINE" position="0 -0.66 0" align="center" width="1.6" color="#ffe9c2"
-          font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
-      </a-entity>
-    </a-entity>
-
-    <!-- ============ CARD 2 : FRAME ============ -->
-    <a-entity class="ar-card" id="card-frame" position="-0.62 0.42 0" scale="0.001 0.001 0.001" visible="false">
-      <a-entity class="connector" line="start: 0.62 -0.42 0; end: 0.15 -0.1 0; color: #4dd6ff; opacity: 0.6"></a-entity>
-      <a-entity animation="property: position; dir: alternate; dur: 2100; loop: true; to: 0 0.05 0; easing: easeInOutSine">
-        <a-plane width="0.84" height="1.08" color="#4dd6ff" opacity="0.22" material="shader:flat"
-          animation="property: material.opacity; dir: alternate; dur: 1500; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
-        <a-plane width="0.72" height="0.94" src="#card2" transparent="true" alpha-test="0.05" sharp-texture></a-plane>
-        <a-text value="FRAME" position="0 -0.66 0" align="center" width="1.6" color="#cdf3ff"
-          font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
-      </a-entity>
-    </a-entity>
-
-    <!-- ============ CARD 3 : FRONT (frok) ============ -->
-    <a-entity class="ar-card" id="card-front" position="0.7 -0.32 0" scale="0.001 0.001 0.001" visible="false">
-      <a-entity class="connector" line="start: -0.7 0.32 0; end: -0.18 0.08 0; color: #ff003c; opacity: 0.6"></a-entity>
-      <a-entity animation="property: position; dir: alternate; dur: 1750; loop: true; to: 0 0.05 0; easing: easeInOutSine">
-        <a-plane width="0.84" height="1.08" color="#ff003c" opacity="0.22" material="shader:flat"
-          animation="property: material.opacity; dir: alternate; dur: 1300; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
-        <a-plane width="0.72" height="0.94" src="#card3" transparent="true" alpha-test="0.05" sharp-texture></a-plane>
-        <a-text value="FRONT PANEL" position="0 -0.66 0" align="center" width="1.6" color="#ffc9d4"
-          font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
-      </a-entity>
-    </a-entity>
-
-    <!-- ============ CARD 4 : LED SYSTEM ============ -->
-    <a-entity class="ar-card" id="card-led" position="-0.7 -0.32 0" scale="0.001 0.001 0.001" visible="false">
-      <a-entity class="connector" line="start: 0.7 0.32 0; end: 0.18 0.08 0; color: #b866ff; opacity: 0.6"></a-entity>
-      <a-entity animation="property: position; dir: alternate; dur: 2000; loop: true; to: 0 0.05 0; easing: easeInOutSine">
-        <a-plane width="0.84" height="1.08" color="#b866ff" opacity="0.22" material="shader:flat"
-          animation="property: material.opacity; dir: alternate; dur: 1250; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
-        <a-plane width="0.72" height="0.94" src="#card4" transparent="true" alpha-test="0.05" sharp-texture></a-plane>
-        <a-text value="LED SYSTEM" position="0 -0.66 0" align="center" width="1.6" color="#e6cbff"
-          font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
-      </a-entity>
-    </a-entity>
-
-    <!-- ============ CARD 5 : STYLING ============ -->
-    <a-entity class="ar-card" id="card-styling" position="0 0.85 0" scale="0.001 0.001 0.001" visible="false">
-      <a-entity class="connector" line="start: 0 -0.85 0; end: 0 -0.22 0; color: #39ffb0; opacity: 0.6"></a-entity>
-      <a-entity animation="property: position; dir: alternate; dur: 1850; loop: true; to: 0 0.05 0; easing: easeInOutSine">
-        <a-plane width="0.84" height="1.08" color="#39ffb0" opacity="0.22" material="shader:flat"
-          animation="property: material.opacity; dir: alternate; dur: 1450; loop: true; to: 0.42; easing: easeInOutSine"></a-plane>
-        <a-plane width="0.72" height="0.94" src="#card5" transparent="true" alpha-test="0.05" sharp-texture></a-plane>
-        <a-text value="STYLING" position="0 -0.66 0" align="center" width="1.6" color="#c8ffe9"
-          font="https://cdn.aframe.io/fonts/DejaVu-sdf.fnt"></a-text>
-      </a-entity>
-    </a-entity>
-
+    <a-entity id="cards-container"></a-entity>
   </a-entity>
 </a-scene>
 
 <script>
-  // Fixes textures rendering with torn/missing chunks: forces clean edge-clamping
-  // and proper mipmapping so PNG cards display fully and sharply, even on
-  // non-power-of-two image sizes.
+  /* ---------- crisp, whole textures (no torn / clipped edges) ---------- */
   AFRAME.registerComponent('sharp-texture', {
     init: function () {
       this.el.addEventListener('materialtextureloaded', () => {
@@ -225,39 +131,92 @@
     }
   });
 
+  /* ---------- orbit motion: cards travel around the ring, always upright & facing camera ---------- */
+  AFRAME.registerComponent('orbit', {
+    schema: { radius: { default: 0.62 }, speed: { default: 0.09 }, offset: { default: 0 }, bob: { default: 0.03 } },
+    tick: function (time) {
+      const t = (time * 0.001 * this.data.speed) + this.data.offset;
+      const x = Math.cos(t) * this.data.radius;
+      const y = Math.sin(t) * this.data.radius;
+      const bob = Math.sin(time * 0.0016 + this.data.offset * 3) * this.data.bob;
+      this.el.setAttribute('position', { x: x, y: y, z: bob });
+    }
+  });
+
+  const CARD_DEFS = [
+    { img: '#card1', label: 'ENGINE',      color: '#ffb020' },
+    { img: '#card2', label: 'FRAME',       color: '#4dd6ff' },
+    { img: '#card3', label: 'FRONT PANEL', color: '#ff003c' },
+    { img: '#card4', label: 'LED SYSTEM',  color: '#b866ff' },
+    { img: '#card5', label: 'STYLING',     color: '#39ffb0' }
+  ];
+
   const scene = document.querySelector('a-scene');
   const target = document.querySelector('#target');
+  const container = document.querySelector('#cards-container');
+  const orbitRing = document.querySelector('#orbit-ring');
   const scanHint = document.getElementById('scan-hint');
   const foundBar = document.getElementById('found-bar');
-  const hudRing = document.getElementById('hud-ring');
-  const cards = Array.from(document.querySelectorAll('.ar-card'));
 
-  scene.addEventListener('loaded', () => {
-    // scene ready
-  });
+  const RADIUS = 0.62;      // කාර් එකේ ලොකුකමට අනුව 0.5 - 1.0 අතර වෙනස් කරන්න
+  const CARD_W = 0.34;      // base width, height auto-calculated per image's real aspect ratio
+  let cardEls = [];
 
-  // Real camera / tracking status, so a failure shows a clear message
-  // instead of a plain black screen.
-  scene.addEventListener('arError', () => {
-    scanHint.querySelector('.msg').innerHTML =
-      'CAMERA UNAVAILABLE &mdash; CHECK PERMISSIONS';
-  });
+  function buildCards() {
+    CARD_DEFS.forEach((def, i) => {
+      const angle = (i / CARD_DEFS.length) * Math.PI * 2;
+      const imgEl = document.querySelector(def.img);
+      const ratio = (imgEl && imgEl.naturalWidth) ? (imgEl.naturalHeight / imgEl.naturalWidth) : 1.3;
+      const w = CARD_W;
+      const h = CARD_W * ratio;
+
+      const wrap = document.createElement('a-entity');
+      wrap.setAttribute('orbit', `radius: ${RADIUS}; speed: 0.12; offset: ${angle}; bob: 0.025`);
+      wrap.setAttribute('scale', '0.001 0.001 0.001');
+      wrap.setAttribute('visible', 'false');
+      wrap.classList.add('ar-card');
+
+      const glow = document.createElement('a-plane');
+      glow.setAttribute('width', w + 0.1);
+      glow.setAttribute('height', h + 0.1);
+      glow.setAttribute('color', def.color);
+      glow.setAttribute('opacity', '0.22');
+      glow.setAttribute('material', 'shader: flat');
+      glow.setAttribute('animation', `property: material.opacity; dir: alternate; dur: ${1200 + i * 120}; loop: true; to: 0.45; easing: easeInOutSine`);
+      wrap.appendChild(glow);
+
+      const img = document.createElement('a-plane');
+      img.setAttribute('width', w);
+      img.setAttribute('height', h);
+      img.setAttribute('src', def.img);
+      img.setAttribute('transparent', 'true');
+      img.setAttribute('alpha-test', '0.05');
+      img.setAttribute('sharp-texture', '');
+      wrap.appendChild(img);
+
+      const label = document.createElement('a-text');
+      label.setAttribute('value', def.label);
+      label.setAttribute('position', `0 ${-(h / 2) - 0.09} 0`);
+      label.setAttribute('align', 'center');
+      label.setAttribute('width', '1.5');
+      label.setAttribute('color', '#ffffff');
+      label.setAttribute('font', 'https://cdn.aframe.io/fonts/DejaVu-sdf.fnt');
+      wrap.appendChild(label);
+
+      container.appendChild(wrap);
+      cardEls.push(wrap);
+    });
+  }
 
   function showCards() {
     scanHint.style.opacity = '0';
     foundBar.classList.add('show');
-    hudRing.setAttribute('visible', true);
+    orbitRing.setAttribute('visible', true);
 
-    cards.forEach((card, i) => {
+    cardEls.forEach((card, i) => {
       card.setAttribute('visible', true);
-      // staggered pop-in with slight overshoot for a punchy, professional reveal
       setTimeout(() => {
-        card.setAttribute('animation__pop', {
-          property: 'scale',
-          to: '0.42 0.42 0.42',
-          dur: 550,
-          easing: 'easeOutElastic'
-        });
+        card.setAttribute('animation__pop', { property: 'scale', to: '0.42 0.42 0.42', dur: 550, easing: 'easeOutElastic' });
       }, i * 120);
     });
   }
@@ -265,21 +224,21 @@
   function hideCards() {
     scanHint.style.opacity = '1';
     foundBar.classList.remove('show');
-    hudRing.setAttribute('visible', false);
+    orbitRing.setAttribute('visible', false);
 
-    cards.forEach((card) => {
-      card.setAttribute('animation__pop', {
-        property: 'scale',
-        to: '0.001 0.001 0.001',
-        dur: 250,
-        easing: 'easeInQuad'
-      });
+    cardEls.forEach((card) => {
+      card.setAttribute('animation__pop', { property: 'scale', to: '0.001 0.001 0.001', dur: 250, easing: 'easeInQuad' });
       setTimeout(() => card.setAttribute('visible', false), 260);
     });
   }
 
+  scene.addEventListener('loaded', buildCards);
   target.addEventListener('targetFound', showCards);
   target.addEventListener('targetLost', hideCards);
+
+  scene.addEventListener('arError', () => {
+    scanHint.querySelector('.msg').innerHTML = 'CAMERA UNAVAILABLE &mdash; CHECK PERMISSIONS';
+  });
 </script>
 
 </body>
