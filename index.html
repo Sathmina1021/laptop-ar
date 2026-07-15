@@ -13,7 +13,6 @@
 :root{
   --carbon:#0a0a0c;
   --carbon-2:#141416;
-  /* Updated to Cyber-Red Theme to match the scooter */
   --pulsar-orange:#ff003c; 
   --pulsar-amber:#ff4a4a;
   --telemetry-cyan:#00f0ff;
@@ -48,7 +47,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 }
 #start-overlay:hover .hero-photo-wrap img { transform: scale(1.08); }
 
-/* Sci-Fi Scanline overlay on image */
 .hero-photo-wrap::before {
   content: "";
   position: absolute;
@@ -98,7 +96,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
   -webkit-text-fill-color: transparent;
 }
 
-/* Glassmorphism Stat Strip */
 .stat-strip{
   display:grid;grid-template-columns:repeat(3, 1fr);gap:15px;
   width:100%;max-width:680px;margin:32px 0;
@@ -198,7 +195,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 </a-scene>
 
 <script>
-  // Scooter specific data applied
   const bikeDatabase = [
     {
       "targetIdx": 0,
@@ -218,14 +214,12 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
         { "title": "SPORT STYLING", "imgSrc": "#img-styling", "desc": "SHARP AERODYNAMICS\nPREMIUM SPORT SEAT" }
       ]
     },
-    // Linking the other 3 angles (left, right, back) to the same UI above
     { "targetIdx": 1, "useSameAs": 0 },
     { "targetIdx": 2, "useSameAs": 0 },
     { "targetIdx": 3, "useSameAs": 0 }
   ];
 
   const anchorState = []; 
-  // Futuristic Palette updated for the Red Scooter
   const accentPalette = ['#ff003c', '#00f0ff', '#ff003c', '#ff4a4a', '#d900ff'];
 
   function buildGlbFrame(color) {
@@ -234,8 +228,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     frame.setAttribute('gltf-model', '#frame-model');
     frame.setAttribute('scale', '1.35 1.35 1.35');
     frame.setAttribute('position', '0 0.05 -0.05'); 
-    
-    // Rotation animation
     frame.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear');
 
     frame.addEventListener('model-loaded', () => {
@@ -262,7 +254,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  // --- ARTISTIC SPEC CARDS ---
   function buildCards(specsContainer, bikeData) {
     const cardsData = bikeData.arSeparateCards;
     const totalCards = cardsData.length;
@@ -340,7 +331,6 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
     });
   }
 
-  // --- SCI-FI CANVAS BANNER ---
   function createTitleBannerTexture(modelName, systemTag, accent) {
     const SCALE = 2;
     const W = 1000 * SCALE, H = 260 * SCALE;
@@ -439,15 +429,27 @@ a-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 
       const accent = accentPalette[idx % accentPalette.length];
       const frameEntity = buildGlbFrame(accent);
-      const brandTitle = buildBrandTitle(actualData);
+      
+      // ==========================================
+      // NEW: UI WRAPPER TO SCALE DOWN EVERYTHING
+      // ==========================================
+      const uiWrapper = document.createElement('a-entity');
+      // Scale down everything to 50% so it fits well inside the screen
+      uiWrapper.setAttribute('scale', '0.5 0.5 0.5'); 
+      uiWrapper.setAttribute('position', '0 0 0');
 
+      const brandTitle = buildBrandTitle(actualData);
+      
       const specsContainer = document.createElement('a-entity');
       specsContainer.setAttribute('position', '0 0 0');
       buildCards(specsContainer, actualData);
 
+      // Attach title and cards to the wrapper instead of directly to anchor
+      uiWrapper.appendChild(brandTitle);
+      uiWrapper.appendChild(specsContainer);
+
       anchor.appendChild(frameEntity);
-      anchor.appendChild(brandTitle);
-      anchor.appendChild(specsContainer);
+      anchor.appendChild(uiWrapper); // Attach scaled wrapper to anchor
       arScene.appendChild(anchor);
 
       const state = { specsContainer, frameEntity, tracked: false };
