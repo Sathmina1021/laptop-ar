@@ -252,30 +252,35 @@
      Portrait spacing overflows a short landscape viewport, so cards get pulled in tighter
      and shrunk slightly, keeping the same orbit shape/animations, just scaled to fit. */
   @media (orientation: landscape) {
-    #header { padding: 10px 16px 14px; }
-    #header .h1 { font-size: 22px; letter-spacing: 3px; }
+    #header { padding: 8px 16px 10px; }
+    #header .h1 { font-size: 20px; letter-spacing: 3px; }
     #header .h2 { font-size: 9px; }
 
-    #reticle { top: 44%; width: 46vw; max-width: 220px; }
+    #reticle { top: 44%; width: 40vw; max-width: 200px; }
 
-    .card { width: 76px; height: 76px; margin: -38px 0 0 -38px; }
+    .card { width: 72px; height: 72px; margin: -36px 0 0 -36px; }
 
-    #card-engine  { --tx: 0px;    --ty: -92px;  --tz: 40px; }
-    #card-led     { --tx: -168px; --ty: -8px;   --tz: -15px; }
-    #card-frame   { --tx: -156px; --ty: 92px;   --tz: 55px; }
-    #card-front   { --tx: 168px;  --ty: -8px;   --tz: -15px; }
-    #card-styling { --tx: 156px;  --ty: 92px;   --tz: 55px; }
+    #card-engine  { --tx: 0px;    --ty: -86px;  --tz: 40px; }
+    #card-led     { --tx: -158px; --ty: -6px;   --tz: -15px; }
+    #card-frame   { --tx: -146px; --ty: 86px;   --tz: 55px; }
+    #card-front   { --tx: 158px;  --ty: -6px;   --tz: -15px; }
+    #card-styling { --tx: 146px;  --ty: 86px;   --tz: 55px; }
 
-    #found-bar { padding: 10px 20px 16px; }
-    #found-bar .title { font-size: 12px; }
-    #found-bar .sub { font-size: 10px; }
+    #found-bar { padding: 8px 20px 12px; }
+    #found-bar .title { font-size: 11px; }
+    #found-bar .sub { font-size: 9px; }
   }
 
   @media (orientation: landscape) and (max-height: 420px) {
-    #card-engine  { --ty: -78px; }
-    #card-frame, #card-styling { --ty: 78px; }
-    .card { width: 66px; height: 66px; margin: -33px 0 0 -33px; }
+    #card-engine  { --ty: -68px; }
+    #card-frame, #card-styling { --ty: 68px; }
+    .card { width: 60px; height: 60px; margin: -30px 0 0 -30px; }
+    #reticle { width: 34vw; max-width: 170px; }
   }
+
+  /* Make sure the clipped card face area never shows any transparent/see-through gap
+     in its middle — background stays fully opaque behind the image at every size */
+  .card-face { background-color: #0a121a; }
 </style>
 </head>
 <body>
