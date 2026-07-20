@@ -210,7 +210,7 @@
 
   /* 4. LAYER FOUR: Holographic Sheen Layer (Moves reactively to device orientation) */
   .card-sheen {
-    position: absolute; inset: -50%; z-index: 4; pointer-events: none;
+    position: absolute; inset: -50%; z-index: 1; pointer-events: none; /* was z-index:4 — was rendering ABOVE the image and sweeping across it, hiding parts of the picture */
     background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.18) 45%, rgba(0, 240, 255, 0.12) 50%, transparent 60%);
     transform: translateZ(2px);
     animation: sheenCycle 6s linear infinite;
