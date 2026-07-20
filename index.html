@@ -186,9 +186,8 @@
     position: absolute; inset: 0; z-index: 2;
     background: linear-gradient(135deg, rgba(20, 32, 43, 0.75) 0%, rgba(5, 10, 15, 0.9) 100%);
     border-radius: 18px; overflow: hidden;
-    transform-style: preserve-3d;
-    /* Safari/WebKit fails to clip overflow:hidden+border-radius inside a preserve-3d/rotated
-       ancestor — this mask forces proper rounded clipping so rotated cards don't tear/spill */
+    transform-style: flat; /* was preserve-3d — combined with a rotated ancestor this broke Safari's
+       overflow/border-radius clip, letting raw unclipped image content spill out as a torn shard */
     -webkit-mask-image: -webkit-radial-gradient(circle, #fff 100%, #000 100%);
     mask-image: radial-gradient(circle, #fff 100%, #000 100%);
     
