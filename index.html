@@ -119,20 +119,21 @@
     top: 45%; left: 50%; margin: -46px 0 0 -46px; /* shared pivot = same center as the scan reticle */
     opacity: 0;
     transform-style: preserve-3d;
-    /* Cinematic 3D fly-in from deep Z-space, converging from the object's core out to its orbit slot */
-    transform: translate3d(0px, 0px, -600px) scale(0.2) rotateX(45deg) rotateY(30deg);
-    transition: opacity 0.9s cubic-bezier(0.19, 1, 0.22, 1), transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Idle/hidden state: card waits directly above its landing slot, ready to drop in */
+    transform: translate3d(var(--tx), calc(var(--ty) - 240px), calc(var(--tz) - 90px)) scale(0.55) rotateX(-32deg) rotateY(var(--ry));
+    transition: opacity 0.5s ease, transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1); /* bounce-on-landing easing */
   }
 
-  /* Entrance: each card flies out to its own orbit point in true 3D space (x/y/z + facing angle) */
+  /* Entrance: card DROPS down into its orbit slot with a soft gravity bounce, only when locked on */
   .card.show {
     opacity: 1;
     transform: translate3d(var(--tx), var(--ty), var(--tz)) rotateY(var(--ry)) rotateX(var(--rx)) scale(1);
   }
+  /* Exit: card drops away out of view and fades, only when tracking is lost */
   .card.lost {
     opacity: 0;
-    transform: translate3d(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3), -420px) rotateY(-50deg) scale(0.35) !important;
-    transition-duration: 0.5s;
+    transform: translate3d(var(--tx), calc(var(--ty) + 200px), calc(var(--tz) - 70px)) scale(0.4) rotateX(38deg) rotateY(var(--ry)) !important;
+    transition: opacity 0.45s ease-in, transform 0.55s cubic-bezier(0.55, 0, 0.85, 0.35);
   }
 
   /* Orbit anchor coordinates — arranged as a floating ring around the scanned object, at varying depth */
@@ -421,9 +422,11 @@
     chipText.textContent = 'SCANNING';
     foundBar.classList.remove('show');
     
-    cards.forEach(card => {
-      card.classList.remove('show');
-      card.classList.add('lost');
+    cards.forEach((card, i) => {
+      setTimeout(() => {
+        card.classList.remove('show');
+        card.classList.add('lost');
+      }, i * 70);
     });
   }
 
