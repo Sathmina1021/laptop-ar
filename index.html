@@ -112,6 +112,8 @@
     pointer-events: none;
     perspective: 1200px; /* High depth perspective */
     transform-style: preserve-3d;
+    transition: transform 0.18s ease-out; /* smooths out raw gyro jitter so cards stay steady near the object */
+    will-change: transform;
   }
 
   .card {
@@ -365,6 +367,8 @@
   let isScanningActive = false;
   let isLocked = false;
   let baseBeta = null, baseGamma = null;
+  let smoothBeta = 0, smoothGamma = 0; // low-pass filtered values, keeps the panels steady near the object
+  const SMOOTHING = 0.15; // lower = steadier/less jittery, higher = snappier
   const LOSE_THRESHOLD = 18;
   const REGAIN_THRESHOLD = 5;
 
@@ -440,9 +444,15 @@
       return;
     }
 
-    const deltaBeta = e.beta - baseBeta;
-    const deltaGamma = e.gamma - baseGamma;
-    const driftAngle = Math.hypot(deltaBeta, deltaGamma);
+    const rawDeltaBeta = e.beta - baseBeta;
+    const rawDeltaGamma = e.gamma - baseGamma;
+
+    // Low-pass filter: blends new reading with the previous smoothed value so small
+    // sensor noise doesn't make the cards jitter — they stay locked steady near the object
+    smoothBeta += (rawDeltaBeta - smoothBeta) * SMOOTHING;
+    smoothGamma += (rawDeltaGamma - smoothGamma) * SMOOTHING;
+
+    const driftAngle = Math.hypot(smoothBeta, smoothGamma);
 
     if (isLocked) {
       if (driftAngle > LOSE_THRESHOLD) {
@@ -451,8 +461,8 @@
       }
 
       // Smooth structural matrix shift inside the 3D domain
-      const rotY = deltaGamma * 0.45; 
-      const rotX = deltaBeta * -0.45; 
+      const rotY = smoothGamma * 0.45; 
+      const rotX = smoothBeta * -0.45; 
       
       arScene.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
       
