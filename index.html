@@ -248,6 +248,34 @@
   #found-bar .title { font-family: 'Orbitron', sans-serif; font-size: 14px; letter-spacing: 2px; color: #fff; }
   #found-bar .title span { color: #00f0ff; text-shadow: 0 0 8px #00f0ff; }
   #found-bar .sub { margin-top: 4px; font-size: 12px; letter-spacing: 1px; color: rgba(255,255,255,0.6); }
+  /* ============ LANDSCAPE FIT ============
+     Portrait spacing overflows a short landscape viewport, so cards get pulled in tighter
+     and shrunk slightly, keeping the same orbit shape/animations, just scaled to fit. */
+  @media (orientation: landscape) {
+    #header { padding: 10px 16px 14px; }
+    #header .h1 { font-size: 22px; letter-spacing: 3px; }
+    #header .h2 { font-size: 9px; }
+
+    #reticle { top: 44%; width: 46vw; max-width: 220px; }
+
+    .card { width: 76px; height: 76px; margin: -38px 0 0 -38px; }
+
+    #card-engine  { --tx: 0px;    --ty: -92px;  --tz: 40px; }
+    #card-led     { --tx: -168px; --ty: -8px;   --tz: -15px; }
+    #card-frame   { --tx: -156px; --ty: 92px;   --tz: 55px; }
+    #card-front   { --tx: 168px;  --ty: -8px;   --tz: -15px; }
+    #card-styling { --tx: 156px;  --ty: 92px;   --tz: 55px; }
+
+    #found-bar { padding: 10px 20px 16px; }
+    #found-bar .title { font-size: 12px; }
+    #found-bar .sub { font-size: 10px; }
+  }
+
+  @media (orientation: landscape) and (max-height: 420px) {
+    #card-engine  { --ty: -78px; }
+    #card-frame, #card-styling { --ty: 78px; }
+    .card { width: 66px; height: 66px; margin: -33px 0 0 -33px; }
+  }
 </style>
 </head>
 <body>
