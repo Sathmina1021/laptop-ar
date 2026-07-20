@@ -3,29 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>XQOM AR - Hyper-Realistic 3D HUD</title>
+<title>XQOM AR - Realistic Vehicle HUD</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; color: #fff; }
 
-  /* ============ LIVE CAMERA ============ */
+  /* ============ LIVE CAMERA / BACKGROUND IMAGE ============ */
   #camera-feed {
     position: fixed; inset: 0; width: 100%; height: 100%;
-    object-fit: cover; z-index: 1; background: #000;
+    object-fit: cover; z-index: 1;
+    /* Bug Fix: In case camera fails or isn't available, we show the image from image_1f7160.jpg as the background for testing */
+    background: url('image_1f7160.jpg') no-repeat center center;
+    background-size: cover;
   }
 
-  /* ============ SPLASH (tap to start) ============ */
+  /* ============ SPLASH (Tap to start) ============ */
   #splash {
     position: fixed; inset: 0; z-index: 100;
     background: radial-gradient(ellipse at center, #071018 0%, #000 78%);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; padding: 24px;
+    cursor: pointer; /* Makes it clear the whole screen is tappable */
   }
-  #splash .logo { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 26px; letter-spacing: 5px; color: #eafcff; text-shadow: 0 0 10px #00f0ff, 0 0 26px rgba(0,240,255,0.65); }
+  #splash .logo { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 32px; letter-spacing: 5px; color: #eafcff; text-shadow: 0 0 10px #00f0ff, 0 0 26px rgba(0,240,255,0.65); }
   #splash .logo span { color: #00f0ff; }
-  #splash .tagline { margin-top: 10px; font-size: 13px; letter-spacing: 2px; color: rgba(255,255,255,0.5); }
+  #splash .tagline { margin-top: 10px; font-size: 14px; letter-spacing: 2px; color: rgba(255,255,255,0.5); }
   #start-btn {
     margin-top: 44px; width: 92px; height: 92px; border-radius: 50%;
     border: 2px solid #00f0ff; background: rgba(0,240,255,0.08);
@@ -38,7 +42,7 @@
     0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(0,240,255,0.5), inset 0 0 14px rgba(0,240,255,0.25); }
     50% { transform: scale(1.06); box-shadow: 0 0 30px rgba(0,240,255,0.75), inset 0 0 18px rgba(0,240,255,0.35); }
   }
-  #splash .hint { margin-top: 22px; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px; color: #9df9ff; }
+  #splash .hint { margin-top: 22px; font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 2px; color: #9df9ff; }
   #splash .fineprint { position: absolute; bottom: 26px; left: 0; width: 100%; text-align: center; font-size: 11px; letter-spacing: 1px; color: rgba(255,255,255,0.35); }
 
   /* ============ LOADING ============ */
@@ -65,17 +69,17 @@
   }
   #header.show { opacity: 1; }
   #header .h1 {
-    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 30px; letter-spacing: 4px;
+    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 34px; letter-spacing: 4px;
     color: #ff2d55; text-shadow: 0 0 10px #ff2d55, 0 0 26px rgba(255,45,85,0.7);
   }
   #header .h2 {
-    margin-top: 4px; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 3px;
+    margin-top: 4px; font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 3px;
     color: #00f0ff; text-shadow: 0 0 8px rgba(0,240,255,0.8);
   }
 
   /* ============ SCAN RETICLE ============ */
   #reticle {
-    position: fixed; left: 50%; top: 46%; width: 62vw; max-width: 310px; aspect-ratio: 1.35/1;
+    position: fixed; left: 50%; top: 48%; width: 62vw; max-width: 310px; aspect-ratio: 1.35/1;
     transform: translate(-50%, -50%); z-index: 10; pointer-events: none;
     opacity: 0; transition: opacity 0.5s ease;
   }
@@ -84,7 +88,7 @@
     position: absolute; top: -34px; left: 50%; transform: translateX(-50%);
     display: flex; align-items: center; gap: 6px; padding: 5px 12px 5px 8px;
     background: rgba(4,10,14,0.72); border: 1px solid rgba(0,240,255,0.6); border-radius: 20px;
-    font-family: 'Orbitron', sans-serif; font-size: 9.5px; letter-spacing: 1.5px; color: #9df9ff;
+    font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 1.5px; color: #9df9ff;
   }
   #reticle .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: #00f0ff; animation: dotPulse 1s ease-in-out infinite; }
   @keyframes dotPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -106,47 +110,57 @@
   #reticle.locked .scanline { display: none; }
   @keyframes scanMove { 0% { top: 10%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: 90%; opacity: 0; } }
 
-  /* ============ HYPER-REALISTIC 3D SCENE ============ */
+  /* ============ VOLUMETRIC AR SCENE HUB ============ */
   #ar-scene {
     position: fixed; inset: 0; z-index: 12;
     pointer-events: none;
-    perspective: 1200px; /* High depth perspective */
+    perspective: 1200px;
     transform-style: preserve-3d;
-    transition: transform 0.18s ease-out; /* smooths out raw gyro jitter so cards stay steady near the object */
+    transition: transform 0.18s ease-out;
     will-change: transform;
   }
 
+  /* Shared pivot is the scan reticle's center (top:48%) */
   .card {
     position: absolute; width: 92px; height: 92px;
-    top: 45%; left: 50%; margin: -46px 0 0 -46px; /* shared pivot = same center as the scan reticle */
+    top: 48%; left: 50%; margin: -46px 0 0 -46px; 
     opacity: 0;
     transform-style: preserve-3d;
-    /* Idle/hidden state: card waits directly above its landing slot, ready to drop in */
+    /* Entrance animation will take over from here */
     transform: translate3d(var(--tx), calc(var(--ty) - 240px), calc(var(--tz) - 90px)) scale(0.55) rotateX(-32deg) rotateY(var(--ry));
-    transition: opacity 0.5s ease, transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1); /* bounce-on-landing easing */
+    transition: opacity 0.5s ease, transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* Entrance: card DROPS down into its orbit slot with a soft gravity bounce, only when locked on */
   .card.show {
     opacity: 1;
     transform: translate3d(var(--tx), var(--ty), var(--tz)) rotateY(var(--ry)) rotateX(var(--rx)) scale(1);
   }
-  /* Exit: card drops away out of view and fades, only when tracking is lost */
   .card.lost {
     opacity: 0;
     transform: translate3d(var(--tx), calc(var(--ty) + 200px), calc(var(--tz) - 70px)) scale(0.4) rotateX(38deg) rotateY(var(--ry)) !important;
     transition: opacity 0.45s ease-in, transform 0.55s cubic-bezier(0.55, 0, 0.85, 0.35);
   }
 
-  /* Orbit anchor coordinates — arranged as a floating ring around the scanned object, at varying depth */
-  #card-engine  { --tx: 0px;    --ty: -186px; --tz: 55px;  --ry: 0deg;   --rx: 5deg;  animation-delay: 0s; }
-  #card-led     { --tx: -132px; --ty: -34px;  --tz: -20px; --ry: -10deg; --rx: -3deg; animation-delay: -1.1s; }
-  #card-frame   { --tx: -120px; --ty: 122px;  --tz: 75px;  --ry: -8deg;  --rx: 7deg;  animation-delay: -2.3s; }
-  #card-front   { --tx: 132px;  --ty: -34px;  --tz: -20px; --ry: 10deg;  --rx: -3deg; animation-delay: -3.4s; }
-  #card-styling { --tx: 120px;  --ty: 122px;  --tz: 75px;  --ry: 8deg;   --rx: 7deg;  animation-delay: -0.6s; }
+  /* ============ CARD LAYOUT (MATCHING IMAGE_1F7160.JPG) ============
+     Layout logic: 
+     1. Engine at top center
+     2. LED and Frame on left (LED above Frame)
+     3. Fork and Styling on right (Fork above Styling)
+  */
 
-  /* Floating panel wrapper — adds an independent bob/drift on top of the card's fixed orbit slot,
-     so every panel hovers in space like a physical object rather than a flat pinned HUD element */
+  /* Top center */
+  #card-engine  { --tx: 0px;    --ty: -210px; --tz: 55px;  --ry: 0deg;   --rx: 5deg;  animation-delay: 0s; }
+
+  /* Left column */
+  #card-led     { --tx: -130px; --ty: -36px;  --tz: -20px; --ry: -10deg; --rx: -3deg; animation-delay: -1.1s; }
+  #card-frame   { --tx: -130px; --ty: 130px;  --tz: 75px;  --ry: -8deg;  --rx: 7deg;  animation-delay: -2.3s; }
+
+  /* Right column */
+  #card-front   { --tx: 130px;  --ty: -36px;  --tz: -20px; --ry: 10deg;  --rx: -3deg; animation-delay: -3.4s; }
+  #card-styling { --tx: 130px;  --ty: 130px;  --tz: 75px;  --ry: 8deg;   --rx: 7deg;  animation-delay: -0.6s; }
+
+
+  /* Floating effect for each panel */
   .card-visual {
     position: absolute; inset: 0;
     transform-style: preserve-3d;
@@ -167,17 +181,17 @@
     position: absolute; inset: -15px; z-index: 0;
     background: radial-gradient(circle, color-mix(in srgb, var(--glow) 35%, transparent) 0%, transparent 70%);
     border-radius: 50%; filter: blur(8px);
-    transform: translateZ(-25px); /* Placed far back */
+    transform: translateZ(-25px);
     opacity: 0.7;
   }
 
-  /* 2. LAYER TWO: Realistic Extruded 3D Thickness (The Glass Slab Side) */
+  /* 2. LAYER TWO: Realistic Extruded 3D Thickness */
   .card-extrusion {
     position: absolute; inset: 0; z-index: 1;
     background: rgba(10, 18, 26, 0.85);
     border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    transform: translateZ(-8px); /* Gives it an 8px physical depth profile */
+    transform: translateZ(-8px);
     box-shadow: inset 0 0 15px rgba(0,0,0,0.9), 0 12px 30px rgba(0, 0, 0, 0.65);
   }
 
@@ -186,30 +200,24 @@
     position: absolute; inset: 0; z-index: 2;
     background: linear-gradient(135deg, rgba(20, 32, 43, 0.75) 0%, rgba(5, 10, 15, 0.9) 100%);
     border-radius: 18px; overflow: hidden;
-    transform-style: flat; /* was preserve-3d — combined with a rotated ancestor this broke Safari's
-       overflow/border-radius clip, letting raw unclipped image content spill out as a torn shard */
+    /* Safari clip fix */
     -webkit-mask-image: -webkit-radial-gradient(circle, #fff 100%, #000 100%);
     mask-image: radial-gradient(circle, #fff 100%, #000 100%);
-    
-    /* Real glass reflection backdrop filter */
-    /* backdrop-filter removed here — combined with mask-image + rotateY on a preserve-3d
-       ancestor, this was the real trigger for Safari's clip/tear rendering bug on the
-       higher-angle cards. Background is already solid/opaque so the glass look still holds. */
-    /* Dual layered border to simulate 3D Chamfered Rim edges */
     border: 1.5px solid color-mix(in srgb, var(--glow) 65%, transparent);
     box-shadow: inset 0 2px 4px rgba(255,255,255,0.15), 0 0 20px color-mix(in srgb, var(--glow) 25%, transparent);
+    background-color: #0a121a; /* Opaque backup */
   }
 
-  /* Cyber Grid Background Matrix embedded inside the glass plate */
+  /* Cyber Grid Background Matrix */
   .card-face::before {
     content: ''; position: absolute; inset: 0; z-index: 1; opacity: 0.15;
     background-size: 8px 8px;
     background-image: linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px);
   }
 
-  /* 4. LAYER FOUR: Holographic Sheen Layer (Moves reactively to device orientation) */
+  /* 4. LAYER FOUR: Holographic Sheen Layer */
   .card-sheen {
-    position: absolute; inset: -50%; z-index: 1; pointer-events: none; /* was z-index:4 — was rendering ABOVE the image and sweeping across it, hiding parts of the picture */
+    position: absolute; inset: -50%; z-index: 1; pointer-events: none;
     background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.18) 45%, rgba(0, 240, 255, 0.12) 50%, transparent 60%);
     transform: translateZ(2px);
     animation: sheenCycle 6s linear infinite;
@@ -219,14 +227,13 @@
     100% { transform: translateZ(2px) translateX(60%) translateY(60%); }
   }
 
-  /* 5. LAYER FIVE: Floating 3D Image Layer (Pops out of the frame!) */
+  /* 5. LAYER FIVE: Floating 3D Image Layer */
   .card-image-wrap {
     position: absolute; inset: 6px; z-index: 3;
     border-radius: 14px; overflow: hidden;
-    /* Same Safari clip fix as .card-face — keeps the image contained within its rounded corners */
+    /* Safari clip fix */
     -webkit-mask-image: -webkit-radial-gradient(circle, #fff 100%, #000 100%);
     mask-image: radial-gradient(circle, #fff 100%, #000 100%);
-    /* Pops the object image 12px directly OUT of the glass plate front */
     transform: translateZ(14px) scale(0.92);
     filter: drop-shadow(0 8px 10px rgba(0,0,0,0.5));
     transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -245,42 +252,31 @@
     transition: opacity 0.5s ease, transform 0.5s ease; pointer-events: none;
   }
   #found-bar.show { opacity: 1; transform: translateY(0); }
-  #found-bar .title { font-family: 'Orbitron', sans-serif; font-size: 14px; letter-spacing: 2px; color: #fff; }
+  #found-bar .title { font-family: 'Orbitron', sans-serif; font-size: 15px; letter-spacing: 2px; color: #fff; }
   #found-bar .title span { color: #00f0ff; text-shadow: 0 0 8px #00f0ff; }
   #found-bar .sub { margin-top: 4px; font-size: 12px; letter-spacing: 1px; color: rgba(255,255,255,0.6); }
-  /* ============ LANDSCAPE FIT ============
-     Portrait spacing overflows a short landscape viewport, so cards get pulled in tighter
-     and shrunk slightly, keeping the same orbit shape/animations, just scaled to fit. */
+
+  /* ============ LANDSCAPE FIT ============ */
   @media (orientation: landscape) {
     #header { padding: 8px 16px 10px; }
-    #header .h1 { font-size: 20px; letter-spacing: 3px; }
-    #header .h2 { font-size: 9px; }
+    #header .h1 { font-size: 24px; letter-spacing: 3px; }
+    #header .h2 { font-size: 10px; }
 
-    #reticle { top: 44%; width: 40vw; max-width: 200px; }
+    #reticle { top: 46%; width: 40vw; max-width: 200px; }
 
-    .card { width: 72px; height: 72px; margin: -36px 0 0 -36px; }
+    .card { width: 72px; height: 72px; margin: -36px 0 0 -36px; top: 46%; }
 
-    #card-engine  { --tx: 0px;    --ty: -86px;  --tz: 40px; }
-    #card-led     { --tx: -158px; --ty: -6px;   --tz: -15px; }
-    #card-frame   { --tx: -146px; --ty: 86px;   --tz: 55px; }
-    #card-front   { --tx: 158px;  --ty: -6px;   --tz: -15px; }
-    #card-styling { --tx: 146px;  --ty: 86px;   --tz: 55px; }
+    #card-engine  { --ty: -110px; --tz: 40px; }
+    #card-led     { --tx: -160px; --ty: -20px;   --tz: -15px; }
+    #card-frame   { --tx: -160px; --ty: 70px;   --tz: 55px; }
+    #card-front   { --tx: 160px;  --ty: -20px;   --tz: -15px; }
+    #card-styling { --tx: 160px;  --ty: 70px;   --tz: 55px; }
 
     #found-bar { padding: 8px 20px 12px; }
-    #found-bar .title { font-size: 11px; }
-    #found-bar .sub { font-size: 9px; }
+    #found-bar .title { font-size: 12px; }
+    #found-bar .sub { font-size: 10px; }
   }
 
-  @media (orientation: landscape) and (max-height: 420px) {
-    #card-engine  { --ty: -68px; }
-    #card-frame, #card-styling { --ty: 68px; }
-    .card { width: 60px; height: 60px; margin: -30px 0 0 -30px; }
-    #reticle { width: 34vw; max-width: 170px; }
-  }
-
-  /* Make sure the clipped card face area never shows any transparent/see-through gap
-     in its middle — background stays fully opaque behind the image at every size */
-  .card-face { background-color: #0a121a; }
 </style>
 </head>
 <body>
@@ -296,17 +292,17 @@
       <circle cx="12" cy="12" r="3.4" stroke="#00f0ff" stroke-width="2"/>
     </svg>
   </div>
-  <div class="hint">TAP TO START</div>
-  <div class="fineprint">Camera access is required to scan the vehicle</div>
+  <div class="hint">TAP ANYWHERE TO START</div>
+  <div class="fineprint">Camera and motion access are required to scan the vehicle</div>
 </div>
 
 <div id="loading">
   <div class="spinner"><div class="ring"></div><div class="ring r2"></div></div>
-  <div class="txt">INITIALIZING CAMERA<span>...</span></div>
+  <div class="txt">INITIALIZING SYSTEM<span>...</span></div>
 </div>
 
 <div id="cam-error">
-  <div class="msg">CAMERA UNAVAILABLE<br>Please allow camera access in your<br>browser settings, then retry.</div>
+  <div class="msg">CAMERA UNAVAILABLE<br>Please check browser permissions and reload.</div>
   <button id="retry-btn">RETRY</button>
 </div>
 
@@ -324,7 +320,6 @@
   <div class="scanline"></div>
 </div>
 
-<!-- VOLUMETRIC AR SCENE HUB -->
 <div id="ar-scene">
   
   <div id="card-engine" class="card" style="--glow:#ffb020;">
@@ -386,7 +381,7 @@
 
 <div id="found-bar">
   <div class="title">TARGET LOCKED <span>&mdash; SPEC DATA ONLINE</span></div>
-  <div class="sub">Interacting with 3D panels streams active data</div>
+  <div class="sub">Holographic panels streaming active data</div>
 </div>
 
 <script>
@@ -406,16 +401,20 @@
   let isScanningActive = false;
   let isLocked = false;
   let baseBeta = null, baseGamma = null;
-  let smoothBeta = 0, smoothGamma = 0; // low-pass filtered values, keeps the panels steady near the object
-  const SMOOTHING = 0.15; // lower = steadier/less jittery, higher = snappier
-  const LOSE_THRESHOLD = 18;
-  const REGAIN_THRESHOLD = 5;
+  let smoothBeta = 0, smoothGamma = 0; 
+  const SMOOTHING = 0.15; 
+  const LOSE_THRESHOLD = 20; // Increased tolerance slightly
+  const REGAIN_THRESHOLD = 6;
 
-  async function startCamera() {
+  async function startSequence() {
     splash.style.display = 'none';
     loading.classList.add('show');
     camError.classList.remove('show');
     
+    // Bug Fix: Wait for both camera and permission (especially on iOS)
+    let cameraStarted = false;
+    let trackingStarted = false;
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } },
@@ -423,20 +422,33 @@
       });
       video.srcObject = stream;
       await video.play();
-      onCameraReady();
+      cameraStarted = true;
     } catch (err) {
+      console.warn("Camera failed, using background image.", err);
+      // We don't fail here, we let the background image from CSS show.
+      cameraStarted = true;
+    }
+
+    try {
+      trackingStarted = await initializeMotionTracking();
+    } catch (err) {
+      console.error("Tracking permission denied.", err);
+    }
+
+    if (cameraStarted && trackingStarted) {
+      onSystemReady();
+    } else {
       loading.classList.remove('show');
       camError.classList.add('show');
     }
   }
 
-  function onCameraReady() {
+  function onSystemReady() {
     loading.classList.remove('show');
     header.classList.add('show');
     reticle.classList.add('show');
     isScanningActive = true;
     
-    initializeMotionTracking();
     setTimeout(lockOnTarget, 2200);
   }
 
@@ -473,7 +485,6 @@
     });
   }
 
-  // Reactive Parallax tracking system matching realistic spatial position
   function handleOrientation(e) {
     if (!isScanningActive || e.beta === null || e.gamma === null) return;
 
@@ -486,8 +497,6 @@
     const rawDeltaBeta = e.beta - baseBeta;
     const rawDeltaGamma = e.gamma - baseGamma;
 
-    // Low-pass filter: blends new reading with the previous smoothed value so small
-    // sensor noise doesn't make the cards jitter — they stay locked steady near the object
     smoothBeta += (rawDeltaBeta - smoothBeta) * SMOOTHING;
     smoothGamma += (rawDeltaGamma - smoothGamma) * SMOOTHING;
 
@@ -499,7 +508,6 @@
         return;
       }
 
-      // Smooth structural matrix shift inside the 3D domain
       const rotY = smoothGamma * 0.45; 
       const rotX = smoothBeta * -0.45; 
       
@@ -512,24 +520,38 @@
     }
   }
 
+  // Bug Fix: iOS 13+ requires user permission for DeviceOrientation. This function must be triggered by a user gesture.
   function initializeMotionTracking() {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission()
-        .then(response => {
-          if (response === 'granted') {
-            window.addEventListener('deviceorientation', handleOrientation);
-          } else {
-            setTimeout(lockOnTarget, 1000); 
-          }
-        })
-        .catch(console.error);
-    } else {
-      window.addEventListener('deviceorientation', handleOrientation);
-    }
+    return new Promise((resolve) => {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then(response => {
+            if (response === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+              resolve(true);
+            } else {
+              // Permission denied. Still resolve true so system starts, but tracking won't work.
+              console.warn("Motion permission denied by user.");
+              resolve(true); 
+            }
+          })
+          .catch(err => {
+            console.error("Error requesting motion permission:", err);
+            resolve(true); 
+          });
+      } else {
+        // Non-iOS or older device, permission is implicit.
+        window.addEventListener('deviceorientation', handleOrientation);
+        resolve(true);
+      }
+    });
   }
 
-  startBtn.addEventListener('click', startCamera);
-  retryBtn.addEventListener('click', startCamera);
+  // Bug Fix: Any tap on splash screen should start the experience.
+  splash.addEventListener('click', startSequence);
+  // Still keep startBtn listener just in case user taps the circle.
+  startBtn.addEventListener('click', startSequence);
+  retryBtn.addEventListener('click', startSequence);
 </script>
 
 </body>
