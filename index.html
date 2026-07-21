@@ -8,13 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #c2c0b5; font-family: 'Rajdhani', sans-serif; color: #fff; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; color: #fff; }
 
   /* ============ LIVE CAMERA / BACKGROUND IMAGE ============ */
   #camera-feed {
     position: fixed; inset: 0; width: 100%; height: 100%;
     object-fit: cover; z-index: 1;
-    background: #b5b3a8; /* Fallback matching the image background */
+    background: url('image_1f7160.jpg') no-repeat center center;
+    background-size: cover;
   }
 
   /* ============ SPLASH (Tap to start) ============ */
@@ -22,8 +23,7 @@
     position: fixed; inset: 0; z-index: 100;
     background: radial-gradient(ellipse at center, #071018 0%, #000 78%);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 24px;
-    cursor: pointer;
+    text-align: center; padding: 24px; cursor: pointer;
   }
   #splash .logo { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 32px; letter-spacing: 5px; color: #eafcff; text-shadow: 0 0 10px #00f0ff, 0 0 26px rgba(0,240,255,0.65); }
   #splash .logo span { color: #00f0ff; }
@@ -58,135 +58,132 @@
   #cam-error .msg { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 1.5px; color: #ff5c7a; line-height: 1.8; }
   #cam-error button { margin-top: 26px; padding: 12px 28px; background: transparent; border: 1px solid #00f0ff; color: #00f0ff; font-family: 'Orbitron', sans-serif; letter-spacing: 2px; font-size: 12px; border-radius: 4px; }
 
+  /* ============ HEADER ============ */
+  #header {
+    position: fixed; top: 0; left: 0; width: 100%; z-index: 20; pointer-events: none;
+    padding: 18px 16px 26px; text-align: center;
+    background: linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0) 100%);
+    opacity: 0; transition: opacity 0.6s ease;
+  }
+  #header.show { opacity: 1; }
+  #header .h1 {
+    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 34px; letter-spacing: 4px;
+    color: #ff2d55; text-shadow: 0 0 10px #ff2d55, 0 0 26px rgba(255,45,85,0.7);
+  }
+  #header .h2 {
+    margin-top: 4px; font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 3px;
+    color: #00f0ff; text-shadow: 0 0 8px rgba(0,240,255,0.8);
+  }
+
   /* ============ SCAN RETICLE ============ */
   #reticle {
-    position: fixed; left: 50%; top: 50%; width: 50vw; max-width: 250px; aspect-ratio: 1/1;
+    position: fixed; left: 50%; top: 48%; width: 62vw; max-width: 310px; aspect-ratio: 1.35/1;
     transform: translate(-50%, -50%); z-index: 10; pointer-events: none;
     opacity: 0; transition: opacity 0.5s ease;
   }
   #reticle.show { opacity: 1; }
-  #reticle.locked { display: none; } /* Hide reticle when locked to show clean UI like the image */
+  #reticle .chip {
+    position: absolute; top: -34px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 6px; padding: 5px 12px 5px 8px;
+    background: rgba(4,10,14,0.72); border: 1px solid rgba(0,240,255,0.6); border-radius: 20px;
+    font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 1.5px; color: #9df9ff;
+  }
+  #reticle .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: #00f0ff; animation: dotPulse 1s ease-in-out infinite; }
+  @keyframes dotPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  #reticle.locked .chip { border-color: rgba(57,255,176,0.7); color: #b6ffe4; }
+  #reticle.locked .chip .dot { background: #39ffb0; animation: none; }
+
   .r-corner { position: absolute; width: 26px; height: 26px; border: 3px solid #00f0ff; filter: drop-shadow(0 0 4px #00f0ff); }
   .r-corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
   .r-corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
   .r-corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
   .r-corner.br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+  #reticle.locked .r-corner { border-color: #39ffb0; filter: drop-shadow(0 0 4px #39ffb0); }
 
   #reticle .scanline {
     position: absolute; left: 5%; right: 5%; top: 10%; height: 2px;
     background: linear-gradient(90deg, transparent, #00f0ff, transparent);
     box-shadow: 0 0 8px #00f0ff; animation: scanMove 2s linear infinite;
   }
+  #reticle.locked .scanline { display: none; }
   @keyframes scanMove { 0% { top: 10%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: 90%; opacity: 0; } }
 
-  /* ============ AR SCENE & NEW UI (Matching Image) ============ */
+  /* ============ NEW HUD SCENE ============ */
   #ar-scene {
-    position: fixed; inset: 0; z-index: 12; pointer-events: none;
-    opacity: 0; transition: opacity 0.8s ease;
+    position: fixed; inset: 0; z-index: 12;
+    pointer-events: none;
+    perspective: 1200px;
+    transform-style: preserve-3d;
+    transition: transform 0.18s ease-out;
   }
-  #ar-scene.show { opacity: 1; }
 
-  /* SVG Connector Lines */
-  #connector-lines {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+  /* --- Connecting Lines --- */
+  .spec-line {
+    stroke-dasharray: 800;
+    stroke-dashoffset: 800;
+    opacity: 0;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease;
   }
-  .conn-line {
-    stroke: rgba(255, 255, 255, 0.8);
-    stroke-width: 1.2px;
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-  }
-  #ar-scene.show .conn-line {
-    animation: drawLine 1s ease forwards;
-  }
-  @keyframes drawLine { to { stroke-dashoffset: 0; } }
+  .active-tracking .spec-line { stroke-dashoffset: 0; opacity: 1; }
 
-  /* Target Nodes (Blue dots on the car) */
-  .target-node {
-    position: absolute; width: 30px; height: 30px;
-    transform: translate(-50%, -50%); z-index: 2;
-    display: flex; align-items: center; justify-content: center;
+  /* --- Target Markers on Car --- */
+  .target {
+    position: absolute;
+    width: 32px; height: 32px;
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-  .target-dot {
-    width: 8px; height: 8px; background: #fff;
-    border-radius: 50%; box-shadow: 0 0 10px #4da6ff, 0 0 20px #4da6ff;
+  .active-tracking .target { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  
+  .target .dot {
+    position: absolute; top: 50%; left: 50%;
+    width: 6px; height: 6px; background: #fff; border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 12px rgba(255,255,255,0.9);
   }
-  .target-arcs {
-    position: absolute; width: 100%; height: 100%;
-    border: 2px solid rgba(77, 166, 255, 0.8); border-radius: 50%;
+  .target .arcs {
+    position: absolute; inset: 0;
+    border: 2px solid rgba(255,255,255,0.9); border-radius: 50%;
     border-top-color: transparent; border-bottom-color: transparent;
-    animation: spinArcs 4s linear infinite;
+    animation: spinTarget 3s linear infinite;
   }
-  @keyframes spinArcs { to { transform: rotate(360deg); } }
+  @keyframes spinTarget { 100% { transform: rotate(360deg); } }
 
-  /* Spec Containers (The UI Cards) */
-  .spec-container {
-    position: absolute; display: flex; flex-direction: column; align-items: flex-start;
-    transform: translate(-50%, -50%) scale(0.8); opacity: 0;
-    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 3;
-  }
-  #ar-scene.show .spec-container { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-  
-  /* Staggered entrance */
-  #ar-scene.show .spec-container:nth-child(2) { transition-delay: 0.1s; }
-  #ar-scene.show .spec-container:nth-child(3) { transition-delay: 0.2s; }
-  #ar-scene.show .spec-container:nth-child(4) { transition-delay: 0.3s; }
-  #ar-scene.show .spec-container:nth-child(5) { transition-delay: 0.4s; }
-
-  .spec-box {
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    background: rgba(50, 45, 110, 0.5); /* Purpleish transparent tint */
-    width: 80px; height: 80px;
+  /* --- Spec Info Cards --- */
+  .spec-card {
+    position: absolute;
     display: flex; flex-direction: column;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    width: 130px;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
-  .spec-header {
-    background: rgba(60, 55, 130, 0.9);
-    color: #fff; font-size: 10px; padding: 4px 6px;
-    font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-    border-bottom: 1px solid rgba(255,255,255,0.4);
-    width: 100%;
-  }
-  .spec-icon {
-    flex: 1; display: flex; align-items: center; justify-content: center;
-  }
-  .spec-icon svg { width: 35px; height: 35px; fill: none; stroke: #fff; stroke-width: 1.5px; }
+  .active-tracking .spec-card { opacity: 1; transform: translateY(0); }
   
-  .spec-text {
-    margin-top: 8px; font-size: 11px; line-height: 1.3;
-    color: #fff; text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
-    white-space: nowrap; font-weight: 500;
+  /* Staggered entrance animations */
+  .active-tracking .card-delay-1 { transition-delay: 0.1s; }
+  .active-tracking .card-delay-2 { transition-delay: 0.2s; }
+  .active-tracking .card-delay-3 { transition-delay: 0.3s; }
+  
+  .spec-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px; font-weight: 700; color: #fff;
+    margin-bottom: 4px; letter-spacing: 1px;
   }
-
-  /* Color Picker Icon (Top Right) */
-  .color-picker {
-    position: absolute; top: 8%; right: 8%; z-index: 15;
-    width: 36px; height: 36px; border-radius: 50%;
-    background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.5); border: 2px solid #fff;
-    opacity: 0; transition: opacity 0.5s ease;
+  .spec-icon-box {
+    width: 54px; height: 54px;
+    background: linear-gradient(135deg, rgba(82, 73, 160, 0.85) 0%, rgba(35, 30, 90, 0.9) 100%);
+    border: 1px solid rgba(255,255,255,0.7);
+    display: flex; justify-content: center; align-items: center;
+    margin-bottom: 6px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
   }
-  #ar-scene.show .color-picker { opacity: 1; transition-delay: 0.5s; }
-  .color-picker svg { width: 18px; height: 18px; fill: #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); }
-
-  /* Positions for elements (approximated based on image) */
-  /* WHEELS - Top Left */
-  #spec-wheels { left: 25%; top: 30%; }
-  #target-wheels { left: 45%; top: 42%; }
-
-  /* ENGINE - Bottom Left */
-  #spec-engine { left: 25%; top: 75%; }
-  #target-engine { left: 52%; top: 75%; }
-
-  /* STEERING - Top Right */
-  #spec-steering { left: 75%; top: 35%; }
-  #target-steering { left: 60%; top: 52%; }
-
-  /* HEADLIGHT - Bottom Right */
-  #spec-headlight { left: 75%; top: 70%; }
-  #target-headlight { left: 65%; top: 73%; }
+  .spec-icon-box svg { width: 30px; height: 30px; }
+  .spec-desc {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px; font-weight: 600; color: #d4d4d4; line-height: 1.3;
+  }
 
   /* ============ BOTTOM STATUS ============ */
   #found-bar {
@@ -198,7 +195,17 @@
   #found-bar.show { opacity: 1; transform: translateY(0); }
   #found-bar .title { font-family: 'Orbitron', sans-serif; font-size: 15px; letter-spacing: 2px; color: #fff; }
   #found-bar .title span { color: #00f0ff; text-shadow: 0 0 8px #00f0ff; }
-  
+  #found-bar .sub { margin-top: 4px; font-size: 12px; letter-spacing: 1px; color: rgba(255,255,255,0.6); }
+
+  @media (orientation: landscape) {
+    #header { padding: 8px 16px 10px; }
+    #header .h1 { font-size: 24px; letter-spacing: 3px; }
+    #header .h2 { font-size: 10px; }
+    #reticle { top: 46%; width: 40vw; max-width: 200px; }
+    #found-bar { padding: 8px 20px 12px; }
+    #found-bar .title { font-size: 12px; }
+    #found-bar .sub { font-size: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -215,6 +222,7 @@
     </svg>
   </div>
   <div class="hint">TAP ANYWHERE TO START</div>
+  <div class="fineprint">Camera and motion access are required to scan the vehicle</div>
 </div>
 
 <div id="loading">
@@ -227,78 +235,89 @@
   <button id="retry-btn">RETRY</button>
 </div>
 
+<div id="header">
+  <div class="h1">SPORT</div>
+  <div class="h2">[ HOLOGRAPHIC TELEMETRY ]</div>
+</div>
+
 <div id="reticle">
-  <div class="r-corner tl"></div><div class="r-corner tr"></div>
-  <div class="r-corner bl"></div><div class="r-corner br"></div>
+  <div class="chip"><span class="dot"></span><span class="chip-text">SCANNING</span></div>
+  <div class="r-corner tl"></div>
+  <div class="r-corner tr"></div>
+  <div class="r-corner bl"></div>
+  <div class="r-corner br"></div>
   <div class="scanline"></div>
 </div>
 
-<!-- NEW 2D UI AR SCENE -->
 <div id="ar-scene">
   
-  <!-- Connector Lines -->
-  <svg id="connector-lines">
-    <line class="conn-line" x1="25%" y1="30%" x2="45%" y2="42%" />
-    <line class="conn-line" x1="25%" y1="75%" x2="52%" y2="75%" />
-    <line class="conn-line" x1="75%" y1="35%" x2="60%" y2="52%" />
-    <line class="conn-line" x1="75%" y1="70%" x2="65%" y2="73%" />
+  <!-- Dynamic SVG Lines Linking Cards to Targets -->
+  <svg id="ar-lines" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;">
+    <!-- x1/y1 starts at Card Icon Center | x2/y2 ends at Target Object -->
+    <line x1="26%" y1="31%" x2="42%" y2="45%" stroke="rgba(255,255,255,0.75)" stroke-width="1.5" class="spec-line"/>
+    <line x1="26%" y1="68%" x2="48%" y2="65%" stroke="rgba(255,255,255,0.75)" stroke-width="1.5" class="spec-line card-delay-1"/>
+    <line x1="72%" y1="34%" x2="58%" y2="40%" stroke="rgba(255,255,255,0.75)" stroke-width="1.5" class="spec-line card-delay-2"/>
+    <line x1="72%" y1="68%" x2="62%" y2="65%" stroke="rgba(255,255,255,0.75)" stroke-width="1.5" class="spec-line card-delay-3"/>
   </svg>
 
-  <!-- Targets on Vehicle -->
-  <div class="target-node" id="target-wheels"><div class="target-arcs"></div><div class="target-dot"></div></div>
-  <div class="target-node" id="target-engine"><div class="target-arcs"></div><div class="target-dot"></div></div>
-  <div class="target-node" id="target-steering"><div class="target-arcs"></div><div class="target-dot"></div></div>
-  <div class="target-node" id="target-headlight"><div class="target-arcs"></div><div class="target-dot"></div></div>
+  <!-- Tracked Target Points on the Vehicle -->
+  <div class="target" style="left: 42%; top: 45%;"><div class="dot"></div><div class="arcs"></div></div>
+  <div class="target card-delay-1" style="left: 48%; top: 65%;"><div class="dot"></div><div class="arcs"></div></div>
+  <div class="target card-delay-2" style="left: 58%; top: 40%;"><div class="dot"></div><div class="arcs"></div></div>
+  <div class="target card-delay-3" style="left: 62%; top: 65%;"><div class="dot"></div><div class="arcs"></div></div>
 
-  <!-- Spec Cards -->
-  <div class="spec-container" id="spec-wheels">
-    <div class="spec-box">
-      <div class="spec-header">WHEELS</div>
-      <div class="spec-icon">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16M6.3 6.3l11.4 11.4M6.3 17.7l11.4-11.4"/></svg>
-      </div>
+  <!-- WHEELS SPEC -->
+  <div class="spec-card" style="left: 20%; top: 25%;">
+    <div class="spec-title">WHEELS</div>
+    <div class="spec-icon-box">
+      <svg viewBox="0 0 24 24" stroke="white" fill="none" stroke-width="1.5">
+        <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>
+        <path d="M12 3v6M12 15v6M3 12h6M15 12h6M5.6 5.6l4.2 4.2M14.2 14.2l4.2 4.2M18.4 5.6l-4.2 4.2M9.8 14.2l-4.2 4.2"/>
+      </svg>
     </div>
-    <div class="spec-text">20-inch Panamera<br>Turbo wheels</div>
+    <div class="spec-desc">20-inch Panamera<br>Turbo wheels</div>
   </div>
 
-  <div class="spec-container" id="spec-engine">
-    <div class="spec-box">
-      <div class="spec-header">ENGINE</div>
-      <div class="spec-icon">
-        <svg viewBox="0 0 24 24"><path d="M5 8h14v8H5zM8 5v3M16 5v3M5 12H3M21 12h-2M8 16v3M16 16v3"/></svg>
-      </div>
+  <!-- ENGINE SPEC -->
+  <div class="spec-card card-delay-1" style="left: 20%; top: 62%;">
+    <div class="spec-title">ENGINE</div>
+    <div class="spec-icon-box">
+      <svg viewBox="0 0 24 24" stroke="white" fill="none" stroke-width="1.5">
+        <path d="M4 8h16v10H4z"/><path d="M7 8V5a1 1 0 011-1h8a1 1 0 011 1v3"/>
+        <path d="M10 13l-1.5 3h3l-1 3"/><path d="M2 10h2M2 14h2M20 10h2M20 14h2"/>
+      </svg>
     </div>
-    <div class="spec-text">4.0 liter twin-turbo<br>V8 engine</div>
+    <div class="spec-desc">4.0 liter twin-turbo<br>V8 engine</div>
   </div>
 
-  <div class="spec-container" id="spec-steering">
-    <div class="spec-box">
-      <div class="spec-header">STEERING</div>
-      <div class="spec-icon">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 14v7M7.5 9l-4.5-2.5M16.5 9l4.5-2.5"/></svg>
-      </div>
+  <!-- STEERING SPEC -->
+  <div class="spec-card card-delay-2" style="left: 66%; top: 28%;">
+    <div class="spec-title">STEERING</div>
+    <div class="spec-icon-box">
+      <svg viewBox="0 0 24 24" stroke="white" fill="none" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+        <path d="M12 15v7M9.5 10.5L3 8M14.5 10.5L21 8"/>
+      </svg>
     </div>
-    <div class="spec-text">Adaptive Cruise<br>(ACC)</div>
+    <div class="spec-desc">Adaptive Cruise Control<br>(ACC)</div>
   </div>
 
-  <div class="spec-container" id="spec-headlight">
-    <div class="spec-box">
-      <div class="spec-header">HEADLIGHTS</div>
-      <div class="spec-icon">
-        <svg viewBox="0 0 24 24"><path d="M9 18a5 5 0 0 1 0-10l4-2v14l-4-2zM21 12h-4M19 7l-3 3M19 17l-3-3"/></svg>
-      </div>
+  <!-- HEADLIGHTS SPEC -->
+  <div class="spec-card card-delay-3" style="left: 66%; top: 62%;">
+    <div class="spec-title">HEADLIGHTS</div>
+    <div class="spec-icon-box">
+      <svg viewBox="0 0 24 24" stroke="white" fill="none" stroke-width="1.5">
+        <path d="M10 5a7 7 0 100 14V5zM14 6h5M15 10h6M15 14h6M14 18h5"/>
+      </svg>
     </div>
-    <div class="spec-text">LED Matrix System</div>
+    <div class="spec-desc">LED Matrix<br>Main Headlights</div>
   </div>
 
-  <!-- Color Picker Tool (Top Right) -->
-  <div class="color-picker">
-    <svg viewBox="0 0 24 24"><path d="M19 3l2 2-7 7v3l-3 3-2-2 3-3h3l7-7zm-9 9l-5 5c-1 1-1 3 0 4s3 1 4 0l5-5"/></svg>
-  </div>
 </div>
 
 <div id="found-bar">
   <div class="title">TARGET LOCKED <span>&mdash; SPEC DATA ONLINE</span></div>
+  <div class="sub">Live telemetry links established</div>
 </div>
 
 <script>
@@ -308,12 +327,19 @@
   const loading    = document.getElementById('loading');
   const camError   = document.getElementById('cam-error');
   const retryBtn   = document.getElementById('retry-btn');
+  const header     = document.getElementById('header');
   const reticle    = document.getElementById('reticle');
+  const chipText   = document.querySelector('#reticle .chip-text');
   const foundBar   = document.getElementById('found-bar');
   const arScene    = document.getElementById('ar-scene');
 
   let isScanningActive = false;
   let isLocked = false;
+  let baseBeta = null, baseGamma = null;
+  let smoothBeta = 0, smoothGamma = 0; 
+  const SMOOTHING = 0.15; 
+  const LOSE_THRESHOLD = 20; 
+  const REGAIN_THRESHOLD = 6;
 
   async function startSequence() {
     splash.style.display = 'none';
@@ -321,20 +347,29 @@
     camError.classList.remove('show');
     
     let cameraStarted = false;
+    let trackingStarted = false;
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } }, audio: false
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } },
+        audio: false
       });
       video.srcObject = stream;
       await video.play();
       cameraStarted = true;
     } catch (err) {
-      console.warn("Camera failed. Using background color.");
-      cameraStarted = true; // Proceed anyway for testing UI
+      console.warn("Camera failed, using background image.", err);
+      cameraStarted = true;
     }
 
-    if (cameraStarted) {
-      setTimeout(onSystemReady, 1000); // Fake initialization time
+    try {
+      trackingStarted = await initializeMotionTracking();
+    } catch (err) {
+      console.error("Tracking permission denied.", err);
+    }
+
+    if (cameraStarted && trackingStarted) {
+      onSystemReady();
     } else {
       loading.classList.remove('show');
       camError.classList.add('show');
@@ -343,20 +378,94 @@
 
   function onSystemReady() {
     loading.classList.remove('show');
+    header.classList.add('show');
     reticle.classList.add('show');
     isScanningActive = true;
     
-    // Simulate auto-lock after scanning
-    setTimeout(lockOnTarget, 2500);
+    setTimeout(lockOnTarget, 2200);
   }
 
   function lockOnTarget() {
     if (isLocked || !isScanningActive) return;
     isLocked = true;
     
-    reticle.classList.add('locked'); // Hide scanning reticle
+    reticle.classList.add('locked');
+    chipText.textContent = 'LOCKED';
     foundBar.classList.add('show');
-    arScene.classList.add('show');   // Reveal the AR HUD UI
+    
+    // Applying the class reveals the lines, targets, and spec cards cleanly
+    arScene.classList.add('active-tracking');
+  }
+
+  function loseTargetTracking() {
+    if (!isLocked) return;
+    isLocked = false;
+    
+    reticle.classList.remove('locked');
+    chipText.textContent = 'SCANNING';
+    foundBar.classList.remove('show');
+    
+    // Removing the class cleanly fades everything out
+    arScene.classList.remove('active-tracking');
+  }
+
+  function handleOrientation(e) {
+    if (!isScanningActive || e.beta === null || e.gamma === null) return;
+
+    if (baseBeta === null) {
+      baseBeta = e.beta;
+      baseGamma = e.gamma;
+      return;
+    }
+
+    const rawDeltaBeta = e.beta - baseBeta;
+    const rawDeltaGamma = e.gamma - baseGamma;
+
+    smoothBeta += (rawDeltaBeta - smoothBeta) * SMOOTHING;
+    smoothGamma += (rawDeltaGamma - smoothGamma) * SMOOTHING;
+
+    const driftAngle = Math.hypot(smoothBeta, smoothGamma);
+
+    if (isLocked) {
+      if (driftAngle > LOSE_THRESHOLD) {
+        loseTargetTracking();
+        return;
+      }
+      
+      // Keep subtle 3D rotation based on gyro
+      const rotY = smoothGamma * 0.45; 
+      const rotX = smoothBeta * -0.45; 
+      arScene.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+      
+    } else {
+      if (driftAngle < REGAIN_THRESHOLD) {
+        lockOnTarget();
+      }
+    }
+  }
+
+  function initializeMotionTracking() {
+    return new Promise((resolve) => {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then(response => {
+            if (response === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+              resolve(true);
+            } else {
+              console.warn("Motion permission denied by user.");
+              resolve(true); 
+            }
+          })
+          .catch(err => {
+            console.error("Error requesting motion permission:", err);
+            resolve(true); 
+          });
+      } else {
+        window.addEventListener('deviceorientation', handleOrientation);
+        resolve(true);
+      }
+    });
   }
 
   splash.addEventListener('click', startSequence);
