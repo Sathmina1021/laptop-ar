@@ -14,8 +14,7 @@
   #camera-feed {
     position: fixed; inset: 0; width: 100%; height: 100%;
     object-fit: cover; z-index: 1;
-    background: url('image_1f7160.jpg') no-repeat center center;
-    background-size: cover;
+    background: #000;
   }
 
   /* ============ SPLASH (Tap to start) ============ */
@@ -133,7 +132,7 @@
   /* Image Spec Cards */
   .spec-card {
     position: absolute;
-    width: 170px; /* Adjust size based on preference */
+    width: 170px;
     transform: translateY(30px) scale(0.9);
     opacity: 0;
     transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -158,7 +157,6 @@
     overflow: hidden;
   }
   
-  /* Cybertech corners */
   .spec-image-box::before {
     content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
     background: linear-gradient(90deg, transparent, #ff2d55, transparent);
@@ -195,7 +193,7 @@
 
 <div id="splash">
   <div class="logo">XQOM <span>AR</span></div>
-  <div class="tagline">NS200 SPEC SCANNER</div>
+  <div class="tagline">VEHICLE SPEC SCANNER</div>
   <div id="start-btn">
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M20 8V6a2 2 0 0 0-2-2h-2M20 16v2a2 2 0 0 1-2 2h-2" stroke="#ff2d55" stroke-width="2" stroke-linecap="round"/>
@@ -212,8 +210,8 @@
 </div>
 
 <div id="header">
-  <div class="h1">NS200</div>
-  <div class="h2">[ LIVE TELEMETRY & SPECS ]</div>
+  <div class="h1">VEHICLE SPECS</div>
+  <div class="h2">[ LIVE TELEMETRY ]</div>
 </div>
 
 <div id="reticle">
@@ -229,15 +227,10 @@
   
   <!-- Dynamic SVG Lines Linking Image Cards to Targets -->
   <svg id="ar-lines" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;">
-    <!-- Line 1: LED System -->
     <line x1="22%" y1="20%" x2="42%" y2="40%" stroke="rgba(255,45,85,0.75)" stroke-width="1.5" class="spec-line"/>
-    <!-- Line 2: Engine -->
     <line x1="22%" y1="65%" x2="48%" y2="60%" stroke="rgba(255,45,85,0.75)" stroke-width="1.5" class="spec-line card-delay-1"/>
-    <!-- Line 3: Fork -->
     <line x1="78%" y1="20%" x2="58%" y2="45%" stroke="rgba(255,45,85,0.75)" stroke-width="1.5" class="spec-line card-delay-2"/>
-    <!-- Line 4: Styling -->
     <line x1="78%" y1="50%" x2="55%" y2="50%" stroke="rgba(255,45,85,0.75)" stroke-width="1.5" class="spec-line card-delay-3"/>
-    <!-- Line 5: Frame -->
     <line x1="78%" y1="80%" x2="62%" y2="65%" stroke="rgba(255,45,85,0.75)" stroke-width="1.5" class="spec-line card-delay-4"/>
   </svg>
 
@@ -248,38 +241,38 @@
   <div class="target card-delay-3" style="left: 55%; top: 50%;"><div class="dot"></div><div class="arcs"></div></div>
   <div class="target card-delay-4" style="left: 62%; top: 65%;"><div class="dot"></div><div class="arcs"></div></div>
 
-  <!-- CARD 1: LED SYSTEM -->
+  <!-- CARD 1: LED LIGHTING SYSTEM -->
   <div class="spec-card" style="left: 8%; top: 12%;">
     <div class="spec-image-box">
-      <img src="led-system.png" alt="LED System">
+      <img src="image/led-system.png" alt="LED System">
     </div>
   </div>
 
   <!-- CARD 2: ENGINE -->
   <div class="spec-card card-delay-1" style="left: 8%; top: 55%;">
     <div class="spec-image-box">
-      <img src="engine.jpg" alt="Engine Brute Power">
+      <img src="image/engine.png" alt="Engine">
     </div>
   </div>
 
-  <!-- CARD 3: FORK -->
+  <!-- CARD 3: FROK / FRONT FORK -->
   <div class="spec-card card-delay-2" style="left: 70%; top: 12%;">
     <div class="spec-image-box">
-      <img src="frok.png" alt="Upside Down Front Fork">
+      <img src="image/frok.png" alt="Front Fork">
     </div>
   </div>
 
   <!-- CARD 4: STYLING -->
   <div class="spec-card card-delay-3" style="left: 70%; top: 42%;">
     <div class="spec-image-box">
-      <img src="styling.png" alt="Aggressive Muscular Styling">
+      <img src="image/styling.png" alt="Styling">
     </div>
   </div>
 
-  <!-- CARD 5: FRAME -->
+  <!-- CARD 5: PERIMETER FRAME -->
   <div class="spec-card card-delay-4" style="left: 70%; top: 72%;">
     <div class="spec-image-box">
-      <img src="frame.png" alt="Perimeter Frame">
+      <img src="image/frame.png" alt="Perimeter Frame">
     </div>
   </div>
 
@@ -313,7 +306,6 @@
     splash.style.display = 'none';
     loading.classList.add('show');
     
-    // Attempt camera
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: 'environment' } }, audio: false
@@ -321,10 +313,9 @@
       video.srcObject = stream;
       await video.play();
     } catch (err) {
-      console.warn("Camera failed, using background image.");
+      console.warn("Camera failed or unavailable.");
     }
 
-    // Attempt motion tracking
     try {
       if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         const response = await DeviceOrientationEvent.requestPermission();
@@ -343,8 +334,7 @@
     reticle.classList.add('show');
     isScanningActive = true;
     
-    // Auto lock simulation for demo
-    setTimeout(lockOnTarget, 2500);
+    setTimeout(lockOnTarget, 2200);
   }
 
   function lockOnTarget() {
@@ -355,7 +345,6 @@
     chipText.textContent = 'LOCKED';
     foundBar.classList.add('show');
     
-    // Applying the class reveals the image cards smoothly
     arScene.classList.add('active-tracking');
   }
 
