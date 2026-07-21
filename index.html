@@ -493,10 +493,15 @@
         loseTargetTracking();
         return;
       }
-      // Parallax effect
-      const rotY = smoothGamma * 0.5; 
-      const rotX = smoothBeta * -0.5; 
-      arScene.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+      // Parallax effect — clamped 2D shift instead of 3D rotate.
+      // (rotateX/rotateY combined with perspective was skewing edge cards
+      // into distorted parallelograms and pushing them off-screen when the
+      // phone tilted. A small clamped translate gives the same "reactive"
+      // feel while keeping every card flat and fully visible.)
+      const MAX_SHIFT = 14; // px
+      const shiftX = Math.max(-MAX_SHIFT, Math.min(MAX_SHIFT, smoothGamma * 0.9));
+      const shiftY = Math.max(-MAX_SHIFT, Math.min(MAX_SHIFT, smoothBeta * -0.9));
+      arScene.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
     } 
     // If not locked and held steady, regain tracking (show images)
     else {
