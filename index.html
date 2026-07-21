@@ -192,7 +192,7 @@
   }
 
   /* Fallback shown automatically if the real photo fails to load,
-     so the card never appears blank/broken */
+     so the card never collapses to an invisible sliver */
   .spec-image-box .fallback-icon {
     display: none; width: 100%; aspect-ratio: 4/3; align-items: center; justify-content: center;
     border-radius: 3px; background: rgba(255,255,255,0.03);
@@ -353,7 +353,6 @@
       const boxCenterX = boxRect.left + boxRect.width / 2 - sceneRect.left;
       const boxCenterY = boxRect.top + boxRect.height / 2 - sceneRect.top;
 
-      // anchor on the card edge that faces the target, not the card center
       const startX = targetX > boxCenterX ? boxRect.right - sceneRect.left : boxRect.left - sceneRect.left;
       const startY = boxCenterY;
 
