@@ -13,18 +13,7 @@
 
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: transparent; font-family: 'Rajdhani', sans-serif; color: #fff; }
-
-  /* ============ FIX CAMERA BLACK SCREEN / CANVAS STYLING ============ */
-  .a-canvas {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    z-index: 0 !important;
-    object-fit: cover !important;
-  }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; color: #fff; }
 
   /* ============ UI OVERLAY LAYER ============ */
   #ui-layer {
@@ -56,8 +45,8 @@
   #splash .hint { margin-top: 25px; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px; color: #9df9ff; }
 
   /* ============ LOADING ============ */
-  #loading { position: absolute; inset: 0; z-index: 900; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; opacity: 0; transition: opacity 0.6s ease; }
-  #loading.show { opacity: 1; }
+  #loading { position: absolute; inset: 0; z-index: 900; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+  #loading.show { display: flex; }
   .spinner { position: relative; width: 65px; height: 65px; }
   .spinner .ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid transparent; border-top-color: #00f0ff; border-right-color: #00f0ff; animation: spin 1s linear infinite; }
   .spinner .ring.r2 { inset: 10px; border-top-color: transparent; border-right-color: transparent; border-bottom-color: #ff2d55; border-left-color: #ff2d55; animation-duration: 1.5s; animation-direction: reverse; }
@@ -113,14 +102,6 @@
   .r-corner.br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
   #reticle.locked .r-corner { border-color: #39ffb0; filter: drop-shadow(0 0 6px #39ffb0); width: 14px; height: 14px; }
 
-  #reticle .scanline {
-    position: absolute; left: 5%; right: 5%; top: 10%; height: 1px;
-    background: linear-gradient(90deg, transparent, #00f0ff, transparent);
-    box-shadow: 0 0 8px #00f0ff; animation: scanMove 1.5s linear infinite;
-  }
-  #reticle.locked .scanline { display: none; opacity: 0; }
-  @keyframes scanMove { 0% { top: 10%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: 90%; opacity: 0; } }
-
   /* ============ AR SCENE & CREATIVE IMAGE CARDS ============ */
   #ar-scene {
     position: absolute; inset: 0; 
@@ -157,7 +138,7 @@
   /* --- The Compact & Creative Image Cards --- */
   .spec-card {
     position: absolute;
-    width: 140px; 
+    width: 120px; 
     opacity: 0;
     transform: translateY(30px) scale(0.7) translateZ(-40px) rotateX(-10deg);
     transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
@@ -169,6 +150,7 @@
     transform: translateY(0) scale(1) translateZ(0) rotateX(0deg); 
   }
   
+  /* Staggered load animation */
   .active-tracking .card-delay-1 { transition-delay: 0.1s; }
   .active-tracking .card-delay-2 { transition-delay: 0.2s; }
   .active-tracking .card-delay-3 { transition-delay: 0.3s; }
@@ -185,68 +167,30 @@
     background: #00f0ff; border-radius: 50%; box-shadow: 0 0 6px #00f0ff;
   }
 
-  /* --- Creative image-based spec card --- */
   .spec-image-box {
     width: 100%;
     border: 1px solid rgba(0, 240, 255, 0.5);
-    background: linear-gradient(160deg, rgba(6,16,22,0.92) 0%, rgba(3,8,12,0.92) 100%);
+    background: rgba(5, 10, 15, 0.75);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border-radius: 8px;
-    padding: 5px;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2), inset 0 0 12px rgba(0, 240, 255, 0.08);
+    border-radius: 6px;
+    padding: 4px;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2), inset 0 0 10px rgba(0, 240, 255, 0.15);
     position: relative;
     overflow: hidden;
   }
-
-  .spec-image-box::before {
-    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background:
-      linear-gradient(90deg, rgba(0,240,255,0.5) 1px, transparent 1px) 0 0/14px 14px,
-      linear-gradient(0deg, rgba(0,240,255,0.5) 1px, transparent 1px) 0 0/14px 14px;
-    opacity: 0.06; pointer-events: none; z-index: 2;
-  }
-
+  
   .spec-image-box::after {
     content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 2px;
     background: rgba(0, 240, 255, 0.9);
     box-shadow: 0 0 8px #00f0ff;
-    animation: techScan 3.5s ease-in-out infinite; z-index: 3;
+    animation: techScan 3.5s ease-in-out infinite; z-index: 2;
   }
   @keyframes techScan { 0%, 100% { top: -10px; opacity: 0; } 50% { top: 110%; opacity: 1; } }
 
-  .spec-photo {
-    width: 100%;
-    min-height: 70px;
-    display: block;
-    border-radius: 5px;
-    position: relative;
-    z-index: 1;
-    opacity: 0;
-    transform: scale(0.96);
-    transition: opacity 0.45s ease, transform 0.45s ease;
-    background: linear-gradient(135deg, rgba(0,240,255,0.06), rgba(0,240,255,0.02));
+  .spec-image-box img {
+    width: 100%; height: auto; display: block; border-radius: 3px;
   }
-  .spec-photo.loaded {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  /* Fallback shown only if an image fails to load, so a card never looks empty */
-  .spec-fallback {
-    display: none;
-    padding: 22px 6px;
-    text-align: center;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 8.5px;
-    letter-spacing: 1px;
-    color: #00f0ff;
-    text-shadow: 0 0 6px rgba(0,240,255,0.6);
-    position: relative;
-    z-index: 1;
-  }
-  .spec-image-box.img-error .spec-photo { display: none; }
-  .spec-image-box.img-error .spec-fallback { display: block; }
 
   /* ============ BOTTOM STATUS ============ */
   #found-bar {
@@ -259,6 +203,7 @@
   #found-bar .title { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 2px; color: #fff; }
   #found-bar .title span { color: #39ffb0; text-shadow: 0 0 8px rgba(57,255,176,0.8); }
   #found-bar .sub { margin-top: 4px; font-size: 10px; letter-spacing: 1.5px; color: rgba(255,255,255,0.5); }
+
 </style>
 </head>
 <body>
@@ -297,7 +242,6 @@
     <div class="r-corner tr"></div>
     <div class="r-corner bl"></div>
     <div class="r-corner br"></div>
-    <div class="scanline"></div>
   </div>
 
   <!-- HUD Animation Wrapper -->
@@ -319,42 +263,27 @@
 
     <div class="spec-card" style="left: 10%; top: 20%;">
       <div class="spec-label">SYS.01 // OPTICS</div>
-      <div class="spec-image-box">
-        <img class="spec-photo" src="image/led-system.png" alt="LED Lighting System" loading="eager" onload="this.classList.add('loaded')" onerror="this.parentElement.classList.add('img-error')">
-        <div class="spec-fallback">LED LIGHTING SYSTEM</div>
-      </div>
+      <div class="spec-image-box"><img src="image/led-system.png" alt="LED System"></div>
     </div>
 
     <div class="spec-card card-delay-1" style="left: 10%; top: 58%;">
       <div class="spec-label">SYS.02 // POWER</div>
-      <div class="spec-image-box">
-        <img class="spec-photo" src="image/engine.png" alt="Brute Power Engine" loading="eager" onload="this.classList.add('loaded')" onerror="this.parentElement.classList.add('img-error')">
-        <div class="spec-fallback">BRUTE POWER ENGINE</div>
-      </div>
+      <div class="spec-image-box"><img src="image/engine.png" alt="Engine"></div>
     </div>
 
     <div class="spec-card card-delay-2" style="left: 65%; top: 20%;">
       <div class="spec-label">SYS.03 // SUSPENSION</div>
-      <div class="spec-image-box">
-        <img class="spec-photo" src="image/frok.png" alt="Upside Down Front Fork" loading="eager" onload="this.classList.add('loaded')" onerror="this.parentElement.classList.add('img-error')">
-        <div class="spec-fallback">UPSIDE-DOWN FRONT FORK</div>
-      </div>
+      <div class="spec-image-box"><img src="image/frok.png" alt="Front Fork"></div>
     </div>
 
     <div class="spec-card card-delay-3" style="left: 65%; top: 45%;">
       <div class="spec-label">SYS.04 // AERO</div>
-      <div class="spec-image-box">
-        <img class="spec-photo" src="image/styling.png" alt="Aggressive Muscular Styling" loading="eager" onload="this.classList.add('loaded')" onerror="this.parentElement.classList.add('img-error')">
-        <div class="spec-fallback">AGGRESSIVE MUSCULAR STYLING</div>
-      </div>
+      <div class="spec-image-box"><img src="image/styling.png" alt="Styling"></div>
     </div>
 
     <div class="spec-card card-delay-4" style="left: 65%; top: 70%;">
       <div class="spec-label">SYS.05 // CHASSIS</div>
-      <div class="spec-image-box">
-        <img class="spec-photo" src="image/frame.png" alt="Perimeter Frame" loading="eager" onload="this.classList.add('loaded')" onerror="this.parentElement.classList.add('img-error')">
-        <div class="spec-fallback">PERIMETER FRAME</div>
-      </div>
+      <div class="spec-image-box"><img src="image/frame.png" alt="Perimeter Frame"></div>
     </div>
 
   </div>
@@ -366,7 +295,7 @@
 
 </div>
 
-<!-- MIND AR SCENE -->
+<!-- MIND AR SCENE - Tracks the real object -->
 <a-scene mindar-image="imageTargetSrc: targets.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
   <a-entity id="tracking-target" mindar-image-target="targetIndex: 0"></a-entity>
@@ -389,42 +318,6 @@
   let baseBeta = null, baseGamma = null;
   let smoothBeta = 0, smoothGamma = 0; 
   const SMOOTHING = 0.12; 
-
-  // ============ SMOOTH LOADING: preload spec images so cards never pop in broken/late ============
-  const SPEC_IMAGES = [
-    'image/led-system.png',
-    'image/engine.png',
-    'image/frok.png',
-    'image/styling.png',
-    'image/frame.png'
-  ];
-
-  let imagesPreloaded = false;
-  let cameraReady = false;
-
-  function revealUI() {
-    // Only reveal the HUD once BOTH the camera is ready AND images have had a chance to load.
-    if (!cameraReady) return;
-    loading.classList.remove('show');
-    header.classList.add('show');
-    reticle.classList.add('show');
-    radarSweep.classList.add('show');
-  }
-
-  Promise.all(
-    SPEC_IMAGES.map(src => new Promise(resolve => {
-      const img = new Image();
-      img.onload = () => resolve();
-      img.onerror = () => {
-        console.warn('[XQOM AR] Failed to preload image:', src, '- check the file name/case and path relative to index.html');
-        resolve(); // never block the UI even if one image fails
-      };
-      img.src = src;
-    }))
-  ).then(() => { imagesPreloaded = true; });
-
-  // Safety net: if images take too long, don't hold the whole experience hostage
-  setTimeout(() => { imagesPreloaded = true; }, 4000);
 
   // 1. Click to Start AR Engine
   splash.addEventListener('click', async () => {
@@ -449,43 +342,47 @@
     sceneEl.systems["mindar-image-system"].start();
   });
 
-  // 2. Camera Ready -> Show UI (waits a beat for images so the reveal feels smooth, not jumpy)
+  // 2. Camera Ready -> Show UI
   sceneEl.addEventListener("arReady", () => {
-    cameraReady = true;
-    if (imagesPreloaded) {
-      revealUI();
-    } else {
-      // Give preloading a brief moment to finish so the first paint of the HUD is smooth
-      const waitForImages = setInterval(() => {
-        if (imagesPreloaded) {
-          clearInterval(waitForImages);
-          revealUI();
-        }
-      }, 100);
-      // Hard cap so we never wait more than ~1.2s extra
-      setTimeout(() => { clearInterval(waitForImages); revealUI(); }, 1200);
-    }
+    loading.classList.remove('show');
+    header.classList.add('show');
+    reticle.classList.add('show');
+    radarSweep.classList.add('show'); // Start visual radar
   });
 
-  // 3. ACTUAL TRACKING - Target Found
+  // 3. ACTUAL TRACKING - Target Found (Real Object detected via targets.mind)
   trackingTarget.addEventListener("targetFound", () => {
+    // Stop scanning visuals
     radarSweep.classList.remove('show');
+    
+    // Lock reticle
     reticle.classList.add('locked');
     chipText.textContent = 'LOCKED';
+    
+    // Show Status Bar
     foundBar.classList.add('show');
+    
+    // Animate specs UI in
     arScene.classList.add('active-tracking');
   });
 
-  // 4. ACTUAL TRACKING - Target Lost
+  // 4. ACTUAL TRACKING - Target Lost (Object moved away)
   trackingTarget.addEventListener("targetLost", () => {
+    // Resume scanning visuals
     radarSweep.classList.add('show');
+    
+    // Unlock reticle
     reticle.classList.remove('locked');
     chipText.textContent = 'SCANNING';
+    
+    // Hide Status Bar
     foundBar.classList.remove('show');
+    
+    // Animate specs UI out
     arScene.classList.remove('active-tracking');
   });
 
-  // 5. Gyro Parallax Effect
+  // 5. Gyro Parallax Effect ONLY (Does not trigger locking anymore)
   function handleOrientation(e) {
     if (e.beta === null || e.gamma === null) return;
 
@@ -494,6 +391,7 @@
     smoothBeta += ((e.beta - baseBeta) - smoothBeta) * SMOOTHING;
     smoothGamma += ((e.gamma - baseGamma) - smoothGamma) * SMOOTHING;
 
+    // Apply parallax 3D effect purely for aesthetics
     const rotY = smoothGamma * 0.4; 
     const rotX = smoothBeta * -0.4; 
     arScene.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
