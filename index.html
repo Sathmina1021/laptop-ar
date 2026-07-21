@@ -14,7 +14,7 @@
   #camera-feed {
     position: fixed; inset: 0; width: 100%; height: 100%;
     object-fit: cover; z-index: 1;
-    background: #000;
+    background: #050505;
   }
 
   /* ============ SPLASH SCREEN ============ */
@@ -24,75 +24,77 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; padding: 24px; cursor: pointer;
   }
-  #splash .logo { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 32px; letter-spacing: 5px; color: #ff2d55; text-shadow: 0 0 10px #ff2d55, 0 0 26px rgba(255,45,85,0.65); }
+  #splash .logo { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 32px; letter-spacing: 5px; color: #00f0ff; text-shadow: 0 0 10px #00f0ff, 0 0 26px rgba(0,240,255,0.65); }
   #splash .logo span { color: #fff; }
   #splash .tagline { margin-top: 10px; font-size: 14px; letter-spacing: 2px; color: rgba(255,255,255,0.6); }
   #start-btn {
-    margin-top: 44px; width: 92px; height: 92px; border-radius: 50%;
-    border: 2px solid #ff2d55; background: rgba(255,45,85,0.08);
+    margin-top: 44px; width: 80px; height: 80px; border-radius: 50%;
+    border: 2px solid #00f0ff; background: rgba(0,240,255,0.08);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 18px rgba(255,45,85,0.5), inset 0 0 14px rgba(255,45,85,0.25);
+    box-shadow: 0 0 18px rgba(0,240,255,0.5), inset 0 0 14px rgba(0,240,255,0.25);
     animation: pulseBtn 1.8s ease-in-out infinite;
   }
-  #start-btn svg { width: 34px; height: 34px; }
+  #start-btn svg { width: 30px; height: 30px; }
   @keyframes pulseBtn {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(255,45,85,0.5), inset 0 0 14px rgba(255,45,85,0.25); }
-    50% { transform: scale(1.06); box-shadow: 0 0 30px rgba(255,45,85,0.75), inset 0 0 18px rgba(255,45,85,0.35); }
+    0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(0,240,255,0.5), inset 0 0 14px rgba(0,240,255,0.25); }
+    50% { transform: scale(1.06); box-shadow: 0 0 30px rgba(0,240,255,0.75), inset 0 0 18px rgba(0,240,255,0.35); }
   }
-  #splash .hint { margin-top: 22px; font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 2px; color: #ff8ca3; }
+  #splash .hint { margin-top: 22px; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px; color: #9df9ff; }
 
   /* ============ LOADING ============ */
   #loading { position: fixed; inset: 0; z-index: 90; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; }
   #loading.show { display: flex; }
-  .spinner { position: relative; width: 78px; height: 78px; }
-  .spinner .ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid transparent; border-top-color: #ff2d55; border-right-color: #ff2d55; animation: spin 1.1s linear infinite; }
-  .spinner .ring.r2 { inset: 12px; border-top-color: transparent; border-right-color: transparent; border-bottom-color: #00f0ff; border-left-color: #00f0ff; animation-duration: 1.6s; animation-direction: reverse; }
+  .spinner { position: relative; width: 60px; height: 60px; }
+  .spinner .ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid transparent; border-top-color: #00f0ff; border-right-color: #00f0ff; animation: spin 1.1s linear infinite; }
+  .spinner .ring.r2 { inset: 10px; border-top-color: transparent; border-right-color: transparent; border-bottom-color: #ff2d55; border-left-color: #ff2d55; animation-duration: 1.6s; animation-direction: reverse; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  #loading .txt { margin-top: 24px; font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 2px; color: #ff8ca3; text-shadow: 0 0 6px rgba(255,45,85,0.7); }
+  #loading .txt { margin-top: 20px; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px; color: #9df9ff; text-shadow: 0 0 6px rgba(0,240,255,0.7); }
 
   /* ============ HEADER ============ */
   #header {
     position: fixed; top: 0; left: 0; width: 100%; z-index: 20; pointer-events: none;
-    padding: 18px 16px 26px; text-align: center;
-    background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%);
+    padding: 15px 16px 20px; text-align: center;
+    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0) 100%);
     opacity: 0; transition: opacity 0.6s ease;
   }
   #header.show { opacity: 1; }
-  #header .h1 { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 4px; color: #ff2d55; text-shadow: 0 0 10px rgba(255,45,85,0.8); }
-  #header .h2 { margin-top: 2px; font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 3px; color: #00f0ff; }
+  #header .h1 { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 24px; letter-spacing: 4px; color: #00f0ff; text-shadow: 0 0 10px rgba(0,240,255,0.6); }
+  #header .h2 { margin-top: 2px; font-family: 'Orbitron', sans-serif; font-size: 9px; letter-spacing: 3px; color: #fff; }
 
   /* ============ SCAN RETICLE ============ */
   #reticle {
-    position: fixed; left: 50%; top: 48%; width: 55vw; max-width: 280px; aspect-ratio: 1.35/1;
+    position: fixed; left: 50%; top: 48%; width: 50vw; max-width: 260px; aspect-ratio: 1.35/1;
     transform: translate(-50%, -50%); z-index: 10; pointer-events: none;
     opacity: 0; transition: opacity 0.5s ease;
   }
   #reticle.show { opacity: 1; }
   #reticle .chip {
-    position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+    position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
     display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 6px;
-    background: rgba(4,10,14,0.8); border: 1px solid rgba(0,240,255,0.6); border-radius: 20px;
+    background: rgba(4,10,14,0.8); border: 1px solid rgba(0,240,255,0.5); border-radius: 20px;
     font-family: 'Orbitron', sans-serif; font-size: 9px; letter-spacing: 1.5px; color: #9df9ff;
+    transition: all 0.4s ease;
   }
   #reticle .chip .dot { width: 5px; height: 5px; border-radius: 50%; background: #00f0ff; animation: dotPulse 1s ease-in-out infinite; }
-  @keyframes dotPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  @keyframes dotPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
   
-  #reticle.locked .chip { border-color: rgba(255,45,85,0.8); color: #fff; background: rgba(255,45,85,0.2); }
-  #reticle.locked .chip .dot { background: #ff2d55; animation: none; box-shadow: 0 0 8px #ff2d55; }
+  #reticle.locked .chip { border-color: #39ffb0; color: #fff; background: rgba(57,255,176,0.2); }
+  #reticle.locked .chip .dot { background: #39ffb0; animation: none; box-shadow: 0 0 8px #39ffb0; }
 
-  .r-corner { position: absolute; width: 20px; height: 20px; border: 2px solid #00f0ff; filter: drop-shadow(0 0 4px #00f0ff); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .r-corner { position: absolute; width: 18px; height: 18px; border: 2px solid #00f0ff; filter: drop-shadow(0 0 4px #00f0ff); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   .r-corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 6px 0 0 0; }
   .r-corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 6px 0 0; }
   .r-corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 6px; }
   .r-corner.br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 6px 0; }
-  #reticle.locked .r-corner { border-color: #ff2d55; filter: drop-shadow(0 0 6px #ff2d55); width: 12px; height: 12px; }
+  
+  #reticle.locked .r-corner { border-color: #39ffb0; filter: drop-shadow(0 0 5px #39ffb0); width: 12px; height: 12px; }
 
   #reticle .scanline {
     position: absolute; left: 5%; right: 5%; top: 10%; height: 1px;
     background: linear-gradient(90deg, transparent, #00f0ff, transparent);
     box-shadow: 0 0 8px #00f0ff; animation: scanMove 1.5s linear infinite;
   }
-  #reticle.locked .scanline { display: none; }
+  #reticle.locked .scanline { display: none; opacity: 0; }
   @keyframes scanMove { 0% { top: 10%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: 90%; opacity: 0; } }
 
   /* ============ AR SCENE & CREATIVE IMAGE CARDS ============ */
@@ -102,87 +104,90 @@
     transform-style: preserve-3d; transition: transform 0.1s ease-out;
   }
 
-  /* Connecting Lines */
+  /* --- Connecting SVG Lines --- */
   .spec-line {
     stroke-dasharray: 1000; stroke-dashoffset: 1000; opacity: 0;
-    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
+    transition: stroke-dashoffset 0.9s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
   }
   .active-tracking .spec-line { stroke-dashoffset: 0; opacity: 1; }
 
-  /* Target Markers */
+  /* --- Target Markers on the Object --- */
   .target {
-    position: absolute; width: 24px; height: 24px;
-    transform: translate(-50%, -50%) scale(0.1); opacity: 0;
-    transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: absolute; width: 20px; height: 20px;
+    transform: translate(-50%, -50%) scale(0); opacity: 0;
+    transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   .active-tracking .target { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   
   .target .dot {
     position: absolute; top: 50%; left: 50%;
     width: 4px; height: 4px; background: #fff; border-radius: 50%;
-    transform: translate(-50%, -50%); box-shadow: 0 0 10px #fff;
+    transform: translate(-50%, -50%); box-shadow: 0 0 8px #fff;
   }
   .target .arcs {
-    position: absolute; inset: 0; border: 1.5px solid rgba(255,45,85,0.9); border-radius: 50%;
+    position: absolute; inset: 0; border: 1.5px solid rgba(0,240,255,0.8); border-radius: 50%;
     border-top-color: transparent; border-bottom-color: transparent;
-    animation: spinTarget 2s linear infinite;
+    animation: spinTarget 2.5s linear infinite;
   }
+  @keyframes spinTarget { 100% { transform: rotate(360deg); } }
 
-  /* --- The New Compact & Creative Image Cards --- */
+  /* --- The Compact & Fixed Image Cards --- */
   .spec-card {
     position: absolute;
-    width: 120px; /* Perfectly sized small cards */
-    /* Hide state */
+    width: 110px; /* Reduced width for a neat, compact look */
+    /* Hidden State (When Not Tracked) */
     opacity: 0;
-    transform: translateY(20px) scale(0.7) translateZ(-40px) rotateX(-15deg);
-    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.9));
+    transform: translateY(30px) scale(0.6) translateZ(-50px);
+    transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8)) blur(3px);
   }
   
-  /* Show state (When target is locked) */
+  /* Show State (When Tracked / Locked) */
   .active-tracking .spec-card { 
     opacity: 1; 
-    transform: translateY(0) scale(1) translateZ(0) rotateX(0deg); 
+    transform: translateY(0) scale(1) translateZ(0); 
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.9)) blur(0px);
   }
   
-  /* Delay for a cascading reveal effect */
+  /* Cascade Delays for entrance/exit */
   .active-tracking .card-delay-1 { transition-delay: 0.1s; }
   .active-tracking .card-delay-2 { transition-delay: 0.2s; }
   .active-tracking .card-delay-3 { transition-delay: 0.3s; }
   .active-tracking .card-delay-4 { transition-delay: 0.4s; }
 
-  /* Techy Label above image */
+  /* Cyber Tech Label */
   .spec-label {
-    font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 700;
-    color: #ff2d55; letter-spacing: 1px; margin-bottom: 4px;
-    text-shadow: 0 0 5px rgba(255,45,85,0.6);
+    font-family: 'Orbitron', sans-serif; font-size: 7.5px; font-weight: 700;
+    color: #00f0ff; letter-spacing: 1px; margin-bottom: 4px;
+    text-shadow: 0 0 5px rgba(0,240,255,0.5);
     display: flex; align-items: center; gap: 4px;
+    text-transform: uppercase;
   }
   .spec-label::before {
     content: ''; display: inline-block; width: 4px; height: 4px;
-    background: #ff2d55; border-radius: 50%;
+    background: #00f0ff; border-radius: 50%; box-shadow: 0 0 4px #00f0ff;
   }
 
   /* Glassmorphism Image Container */
   .spec-image-box {
     width: 100%;
-    border: 1px solid rgba(255, 45, 85, 0.5);
-    background: rgba(5, 5, 10, 0.6);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(0, 240, 255, 0.4);
+    background: rgba(4, 10, 16, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border-radius: 6px;
-    padding: 4px;
-    box-shadow: 0 0 12px rgba(255, 45, 85, 0.2), inset 0 0 8px rgba(255, 45, 85, 0.15);
+    padding: 3px;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.1);
     position: relative;
     overflow: hidden;
   }
   
-  /* Cyber scanning line inside image box */
+  /* Scanning line inside image box */
   .spec-image-box::after {
-    content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 2px;
-    background: rgba(255, 45, 85, 0.8);
-    box-shadow: 0 0 8px #ff2d55;
-    animation: techScan 4s ease-in-out infinite; z-index: 2;
+    content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 1.5px;
+    background: rgba(0, 240, 255, 0.8);
+    box-shadow: 0 0 6px #00f0ff;
+    animation: techScan 3.5s ease-in-out infinite; z-index: 2;
   }
   @keyframes techScan { 0%, 100% { top: -10px; opacity: 0; } 50% { top: 110%; opacity: 1; } }
 
@@ -190,17 +195,17 @@
     width: 100%; height: auto; display: block; border-radius: 3px;
   }
 
-  /* ============ BOTTOM STATUS ============ */
+  /* ============ BOTTOM STATUS BAR ============ */
   #found-bar {
-    position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px 20px 25px; z-index: 20;
-    background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
-    text-align: center; opacity: 0; transform: translateY(15px);
+    position: fixed; bottom: 0; left: 0; width: 100%; padding: 12px 20px 20px; z-index: 20;
+    background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
+    text-align: center; opacity: 0; transform: translateY(20px);
     transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none;
   }
   #found-bar.show { opacity: 1; transform: translateY(0); }
-  #found-bar .title { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 2px; color: #fff; }
-  #found-bar .title span { color: #ff2d55; text-shadow: 0 0 8px #ff2d55; }
-  #found-bar .sub { margin-top: 4px; font-size: 10px; letter-spacing: 1px; color: rgba(255,255,255,0.5); }
+  #found-bar .title { font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 2px; color: #fff; }
+  #found-bar .title span { color: #39ffb0; text-shadow: 0 0 6px rgba(57,255,176,0.6); }
+  #found-bar .sub { margin-top: 3px; font-size: 9px; letter-spacing: 1px; color: rgba(255,255,255,0.5); }
 
 </style>
 </head>
@@ -213,8 +218,8 @@
   <div class="tagline">VEHICLE SPEC SCANNER</div>
   <div id="start-btn">
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M20 8V6a2 2 0 0 0-2-2h-2M20 16v2a2 2 0 0 1-2 2h-2" stroke="#ff2d55" stroke-width="2" stroke-linecap="round"/>
-      <circle cx="12" cy="12" r="3.4" stroke="#ff2d55" stroke-width="2"/>
+      <path d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M20 8V6a2 2 0 0 0-2-2h-2M20 16v2a2 2 0 0 1-2 2h-2" stroke="#00f0ff" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="12" cy="12" r="3.4" stroke="#00f0ff" stroke-width="2"/>
     </svg>
   </div>
   <div class="hint">TAP ANYWHERE TO START</div>
@@ -239,27 +244,28 @@
   <div class="scanline"></div>
 </div>
 
+<!-- Main AR Scene containing precise fixed elements -->
 <div id="ar-scene">
   
   <!-- Dynamic SVG Lines Linking Image Cards to Targets -->
   <svg id="ar-lines" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;">
-    <!-- Coordinates adjusted to match the new small card placements -->
-    <line x1="25%" y1="25%" x2="42%" y2="40%" stroke="rgba(255,45,85,0.6)" stroke-width="1.5" class="spec-line"/>
-    <line x1="25%" y1="65%" x2="48%" y2="60%" stroke="rgba(255,45,85,0.6)" stroke-width="1.5" class="spec-line card-delay-1"/>
-    <line x1="75%" y1="25%" x2="58%" y2="45%" stroke="rgba(255,45,85,0.6)" stroke-width="1.5" class="spec-line card-delay-2"/>
-    <line x1="75%" y1="50%" x2="55%" y2="50%" stroke="rgba(255,45,85,0.6)" stroke-width="1.5" class="spec-line card-delay-3"/>
-    <line x1="75%" y1="75%" x2="62%" y2="65%" stroke="rgba(255,45,85,0.6)" stroke-width="1.5" class="spec-line card-delay-4"/>
+    <!-- Fixed perfect coordinates to match cards and markers -->
+    <line x1="28%" y1="28%" x2="42%" y2="40%" stroke="rgba(0,240,255,0.6)" stroke-width="1.2" class="spec-line"/>
+    <line x1="28%" y1="65%" x2="46%" y2="60%" stroke="rgba(0,240,255,0.6)" stroke-width="1.2" class="spec-line card-delay-1"/>
+    <line x1="72%" y1="28%" x2="58%" y2="45%" stroke="rgba(0,240,255,0.6)" stroke-width="1.2" class="spec-line card-delay-2"/>
+    <line x1="72%" y1="52%" x2="55%" y2="52%" stroke="rgba(0,240,255,0.6)" stroke-width="1.2" class="spec-line card-delay-3"/>
+    <line x1="72%" y1="75%" x2="60%" y2="66%" stroke="rgba(0,240,255,0.6)" stroke-width="1.2" class="spec-line card-delay-4"/>
   </svg>
 
   <!-- Tracked Target Points on the Vehicle -->
   <div class="target" style="left: 42%; top: 40%;"><div class="dot"></div><div class="arcs"></div></div>
-  <div class="target card-delay-1" style="left: 48%; top: 60%;"><div class="dot"></div><div class="arcs"></div></div>
+  <div class="target card-delay-1" style="left: 46%; top: 60%;"><div class="dot"></div><div class="arcs"></div></div>
   <div class="target card-delay-2" style="left: 58%; top: 45%;"><div class="dot"></div><div class="arcs"></div></div>
-  <div class="target card-delay-3" style="left: 55%; top: 50%;"><div class="dot"></div><div class="arcs"></div></div>
-  <div class="target card-delay-4" style="left: 62%; top: 65%;"><div class="dot"></div><div class="arcs"></div></div>
+  <div class="target card-delay-3" style="left: 55%; top: 52%;"><div class="dot"></div><div class="arcs"></div></div>
+  <div class="target card-delay-4" style="left: 60%; top: 66%;"><div class="dot"></div><div class="arcs"></div></div>
 
   <!-- CARD 1: LED LIGHTING SYSTEM -->
-  <div class="spec-card" style="left: 8%; top: 18%;">
+  <div class="spec-card" style="left: 10%; top: 20%;">
     <div class="spec-label">SYS.01 // OPTICS</div>
     <div class="spec-image-box">
       <img src="image/led-system.png" alt="LED System">
@@ -267,7 +273,7 @@
   </div>
 
   <!-- CARD 2: ENGINE -->
-  <div class="spec-card card-delay-1" style="left: 8%; top: 58%;">
+  <div class="spec-card card-delay-1" style="left: 10%; top: 58%;">
     <div class="spec-label">SYS.02 // POWER</div>
     <div class="spec-image-box">
       <img src="image/engine.png" alt="Engine">
@@ -275,7 +281,7 @@
   </div>
 
   <!-- CARD 3: FROK / FRONT FORK -->
-  <div class="spec-card card-delay-2" style="left: 65%; top: 18%;">
+  <div class="spec-card card-delay-2" style="left: 65%; top: 20%;">
     <div class="spec-label">SYS.03 // SUSPENSION</div>
     <div class="spec-image-box">
       <img src="image/frok.png" alt="Front Fork">
@@ -283,7 +289,7 @@
   </div>
 
   <!-- CARD 4: STYLING -->
-  <div class="spec-card card-delay-3" style="left: 65%; top: 43%;">
+  <div class="spec-card card-delay-3" style="left: 65%; top: 45%;">
     <div class="spec-label">SYS.04 // AERO</div>
     <div class="spec-image-box">
       <img src="image/styling.png" alt="Styling">
@@ -291,7 +297,7 @@
   </div>
 
   <!-- CARD 5: PERIMETER FRAME -->
-  <div class="spec-card card-delay-4" style="left: 65%; top: 68%;">
+  <div class="spec-card card-delay-4" style="left: 65%; top: 70%;">
     <div class="spec-label">SYS.05 // CHASSIS</div>
     <div class="spec-image-box">
       <img src="image/frame.png" alt="Perimeter Frame">
@@ -317,17 +323,19 @@
 
   let isScanningActive = false;
   let isLocked = false;
+  
+  // Motion smoothing variables
   let baseBeta = null, baseGamma = null;
   let smoothBeta = 0, smoothGamma = 0; 
   const SMOOTHING = 0.12; 
-  const LOSE_THRESHOLD = 25; // How far device can move before tracking drops
-  const REGAIN_THRESHOLD = 8;
+  const LOSE_THRESHOLD = 25; // Tolerance before losing track
+  const REGAIN_THRESHOLD = 8; // Tolerance to regain track
 
   async function startSequence() {
     splash.style.display = 'none';
     loading.classList.add('show');
     
-    // 1. Setup Camera
+    // Setup Camera
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: 'environment' } }, audio: false
@@ -335,10 +343,10 @@
       video.srcObject = stream;
       await video.play();
     } catch (err) {
-      console.warn("Camera unavailable. Using fallback background.");
+      console.warn("Camera unavailable. Proceeding with fallback.");
     }
 
-    // 2. Setup Motion Tracking
+    // Setup Motion Tracking (Parallax)
     try {
       if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         const response = await DeviceOrientationEvent.requestPermission();
@@ -349,17 +357,17 @@
         window.addEventListener('deviceorientation', handleOrientation);
       }
     } catch (err) {
-      console.error("Motion tracking permission denied.");
+      console.warn("Motion tracking not available.");
     }
 
-    // Start UI
+    // Initialize UI
     loading.classList.remove('show');
     header.classList.add('show');
     reticle.classList.add('show');
     isScanningActive = true;
     
-    // Simulate finding the target after a few seconds
-    setTimeout(lockOnTarget, 2000);
+    // Simulate detecting target after 2.5s (Demo logic)
+    setTimeout(lockOnTarget, 2500);
   }
 
   // --- Show Images when Tracking is Locked ---
@@ -371,7 +379,7 @@
     chipText.textContent = 'LOCKED';
     foundBar.classList.add('show');
     
-    // Adding this class triggers all the CSS appearance animations
+    // Adding this class reveals lines, targets, and cards beautifully!
     arScene.classList.add('active-tracking');
   }
 
@@ -384,11 +392,11 @@
     chipText.textContent = 'SCANNING';
     foundBar.classList.remove('show');
     
-    // Removing this class seamlessly triggers the CSS disappearance animations
+    // Removing this class hides everything smoothly!
     arScene.classList.remove('active-tracking');
   }
 
-  // --- Gyroscope Logic (Simulates losing/gaining tracking) ---
+  // --- Device Motion Logic (Simulates losing/gaining track) ---
   function handleOrientation(e) {
     if (!isScanningActive || e.beta === null || e.gamma === null) return;
 
@@ -399,18 +407,18 @@
 
     const driftAngle = Math.hypot(smoothBeta, smoothGamma);
 
-    // If locked and moved too much, lose tracking (hide images)
+    // Lose tracking if device moves away too much
     if (isLocked) {
       if (driftAngle > LOSE_THRESHOLD) {
         loseTargetTracking();
         return;
       }
-      // Parallax effect
-      const rotY = smoothGamma * 0.5; 
-      const rotX = smoothBeta * -0.5; 
+      // Parallax effect keeping the elements floating slightly
+      const rotY = smoothGamma * 0.4; 
+      const rotX = smoothBeta * -0.4; 
       arScene.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
     } 
-    // If not locked and held steady, regain tracking (show images)
+    // Regain tracking if device is held steady
     else {
       if (driftAngle < REGAIN_THRESHOLD) { 
         lockOnTarget(); 
@@ -418,7 +426,6 @@
     }
   }
 
-  // Start on click anywhere
   splash.addEventListener('click', startSequence);
 </script>
 
