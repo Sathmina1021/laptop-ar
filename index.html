@@ -8,15 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; color: #fff; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #c2c0b5; font-family: 'Rajdhani', sans-serif; color: #fff; }
 
   /* ============ LIVE CAMERA / BACKGROUND IMAGE ============ */
   #camera-feed {
     position: fixed; inset: 0; width: 100%; height: 100%;
     object-fit: cover; z-index: 1;
-    /* Bug Fix: In case camera fails or isn't available, we show the image from image_1f7160.jpg as the background for testing */
-    background: url('image_1f7160.jpg') no-repeat center center;
-    background-size: cover;
+    background: #b5b3a8; /* Fallback matching the image background */
   }
 
   /* ============ SPLASH (Tap to start) ============ */
@@ -25,7 +23,7 @@
     background: radial-gradient(ellipse at center, #071018 0%, #000 78%);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; padding: 24px;
-    cursor: pointer; /* Makes it clear the whole screen is tappable */
+    cursor: pointer;
   }
   #splash .logo { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 32px; letter-spacing: 5px; color: #eafcff; text-shadow: 0 0 10px #00f0ff, 0 0 26px rgba(0,240,255,0.65); }
   #splash .logo span { color: #00f0ff; }
@@ -60,189 +58,135 @@
   #cam-error .msg { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 1.5px; color: #ff5c7a; line-height: 1.8; }
   #cam-error button { margin-top: 26px; padding: 12px 28px; background: transparent; border: 1px solid #00f0ff; color: #00f0ff; font-family: 'Orbitron', sans-serif; letter-spacing: 2px; font-size: 12px; border-radius: 4px; }
 
-  /* ============ HEADER ============ */
-  #header {
-    position: fixed; top: 0; left: 0; width: 100%; z-index: 20; pointer-events: none;
-    padding: 18px 16px 26px; text-align: center;
-    background: linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0) 100%);
-    opacity: 0; transition: opacity 0.6s ease;
-  }
-  #header.show { opacity: 1; }
-  #header .h1 {
-    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 34px; letter-spacing: 4px;
-    color: #ff2d55; text-shadow: 0 0 10px #ff2d55, 0 0 26px rgba(255,45,85,0.7);
-  }
-  #header .h2 {
-    margin-top: 4px; font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 3px;
-    color: #00f0ff; text-shadow: 0 0 8px rgba(0,240,255,0.8);
-  }
-
   /* ============ SCAN RETICLE ============ */
   #reticle {
-    position: fixed; left: 50%; top: 48%; width: 62vw; max-width: 310px; aspect-ratio: 1.35/1;
+    position: fixed; left: 50%; top: 50%; width: 50vw; max-width: 250px; aspect-ratio: 1/1;
     transform: translate(-50%, -50%); z-index: 10; pointer-events: none;
     opacity: 0; transition: opacity 0.5s ease;
   }
   #reticle.show { opacity: 1; }
-  #reticle .chip {
-    position: absolute; top: -34px; left: 50%; transform: translateX(-50%);
-    display: flex; align-items: center; gap: 6px; padding: 5px 12px 5px 8px;
-    background: rgba(4,10,14,0.72); border: 1px solid rgba(0,240,255,0.6); border-radius: 20px;
-    font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 1.5px; color: #9df9ff;
-  }
-  #reticle .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: #00f0ff; animation: dotPulse 1s ease-in-out infinite; }
-  @keyframes dotPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-  #reticle.locked .chip { border-color: rgba(57,255,176,0.7); color: #b6ffe4; }
-  #reticle.locked .chip .dot { background: #39ffb0; animation: none; }
-
+  #reticle.locked { display: none; } /* Hide reticle when locked to show clean UI like the image */
   .r-corner { position: absolute; width: 26px; height: 26px; border: 3px solid #00f0ff; filter: drop-shadow(0 0 4px #00f0ff); }
   .r-corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
   .r-corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
   .r-corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
   .r-corner.br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
-  #reticle.locked .r-corner { border-color: #39ffb0; filter: drop-shadow(0 0 4px #39ffb0); }
 
   #reticle .scanline {
     position: absolute; left: 5%; right: 5%; top: 10%; height: 2px;
     background: linear-gradient(90deg, transparent, #00f0ff, transparent);
     box-shadow: 0 0 8px #00f0ff; animation: scanMove 2s linear infinite;
   }
-  #reticle.locked .scanline { display: none; }
   @keyframes scanMove { 0% { top: 10%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: 90%; opacity: 0; } }
 
-  /* ============ VOLUMETRIC AR SCENE HUB ============ */
+  /* ============ AR SCENE & NEW UI (Matching Image) ============ */
   #ar-scene {
-    position: fixed; inset: 0; z-index: 12;
-    pointer-events: none;
-    perspective: 1200px;
-    transform-style: preserve-3d;
-    transition: transform 0.18s ease-out;
-    will-change: transform;
+    position: fixed; inset: 0; z-index: 12; pointer-events: none;
+    opacity: 0; transition: opacity 0.8s ease;
   }
+  #ar-scene.show { opacity: 1; }
 
-  /* Shared pivot is the scan reticle's center (top:48%) */
-  .card {
-    position: absolute; width: 92px; height: 92px;
-    top: 48%; left: 50%; margin: -46px 0 0 -46px; 
-    opacity: 0;
-    transform-style: preserve-3d;
-    /* Entrance animation will take over from here */
-    transform: translate3d(var(--tx), calc(var(--ty) - 240px), calc(var(--tz) - 90px)) scale(0.55) rotateX(-32deg) rotateY(var(--ry));
-    transition: opacity 0.5s ease, transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* SVG Connector Lines */
+  #connector-lines {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
   }
-
-  .card.show {
-    opacity: 1;
-    transform: translate3d(var(--tx), var(--ty), var(--tz)) rotateY(var(--ry)) rotateX(var(--rx)) scale(1);
+  .conn-line {
+    stroke: rgba(255, 255, 255, 0.8);
+    stroke-width: 1.2px;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
   }
-  .card.lost {
-    opacity: 0;
-    transform: translate3d(var(--tx), calc(var(--ty) + 200px), calc(var(--tz) - 70px)) scale(0.4) rotateX(38deg) rotateY(var(--ry)) !important;
-    transition: opacity 0.45s ease-in, transform 0.55s cubic-bezier(0.55, 0, 0.85, 0.35);
+  #ar-scene.show .conn-line {
+    animation: drawLine 1s ease forwards;
   }
+  @keyframes drawLine { to { stroke-dashoffset: 0; } }
 
-  /* ============ CARD LAYOUT (MATCHING IMAGE_1F7160.JPG) ============
-     Layout logic: 
-     1. Engine at top center
-     2. LED and Frame on left (LED above Frame)
-     3. Fork and Styling on right (Fork above Styling)
-  */
-
-  /* Top center */
-  #card-engine  { --tx: 0px;    --ty: -210px; --tz: 55px;  --ry: 0deg;   --rx: 5deg;  animation-delay: 0s; }
-
-  /* Left column */
-  #card-led     { --tx: -130px; --ty: -36px;  --tz: -20px; --ry: -10deg; --rx: -3deg; animation-delay: -1.1s; }
-  #card-frame   { --tx: -130px; --ty: 130px;  --tz: 75px;  --ry: -8deg;  --rx: 7deg;  animation-delay: -2.3s; }
-
-  /* Right column */
-  #card-front   { --tx: 130px;  --ty: -36px;  --tz: -20px; --ry: 10deg;  --rx: -3deg; animation-delay: -3.4s; }
-  #card-styling { --tx: 130px;  --ty: 130px;  --tz: 75px;  --ry: 8deg;   --rx: 7deg;  animation-delay: -0.6s; }
-
-
-  /* Floating effect for each panel */
-  .card-visual {
-    position: absolute; inset: 0;
-    transform-style: preserve-3d;
-    animation: floatingPan 5.5s ease-in-out infinite;
-    animation-delay: inherit;
+  /* Target Nodes (Blue dots on the car) */
+  .target-node {
+    position: absolute; width: 30px; height: 30px;
+    transform: translate(-50%, -50%); z-index: 2;
+    display: flex; align-items: center; justify-content: center;
   }
+  .target-dot {
+    width: 8px; height: 8px; background: #fff;
+    border-radius: 50%; box-shadow: 0 0 10px #4da6ff, 0 0 20px #4da6ff;
+  }
+  .target-arcs {
+    position: absolute; width: 100%; height: 100%;
+    border: 2px solid rgba(77, 166, 255, 0.8); border-radius: 50%;
+    border-top-color: transparent; border-bottom-color: transparent;
+    animation: spinArcs 4s linear infinite;
+  }
+  @keyframes spinArcs { to { transform: rotate(360deg); } }
 
-  @keyframes floatingPan {
-    0%   { transform: translate3d(0px, 0px, 0px) rotateY(0deg) rotateX(1deg); }
-    25%  { transform: translate3d(4px, -8px, 16px) rotateY(6deg) rotateX(-3deg); }
-    50%  { transform: translate3d(-3px, -14px, 28px) rotateY(-4deg) rotateX(-6deg); }
-    75%  { transform: translate3d(-5px, -6px, 14px) rotateY(-7deg) rotateX(-2deg); }
-    100% { transform: translate3d(0px, 0px, 0px) rotateY(0deg) rotateX(1deg); }
+  /* Spec Containers (The UI Cards) */
+  .spec-container {
+    position: absolute; display: flex; flex-direction: column; align-items: flex-start;
+    transform: translate(-50%, -50%) scale(0.8); opacity: 0;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 3;
   }
-
-  /* 1. LAYER ONE: Volumetric Backlight Glow */
-  .card-backlight {
-    position: absolute; inset: -15px; z-index: 0;
-    background: radial-gradient(circle, color-mix(in srgb, var(--glow) 35%, transparent) 0%, transparent 70%);
-    border-radius: 50%; filter: blur(8px);
-    transform: translateZ(-25px);
-    opacity: 0.7;
-  }
-
-  /* 2. LAYER TWO: Realistic Extruded 3D Thickness */
-  .card-extrusion {
-    position: absolute; inset: 0; z-index: 1;
-    background: rgba(10, 18, 26, 0.85);
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transform: translateZ(-8px);
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.9), 0 12px 30px rgba(0, 0, 0, 0.65);
-  }
-
-  /* 3. LAYER THREE: Glassmorphic Front Panel Face */
-  .card-face {
-    position: absolute; inset: 0; z-index: 2;
-    background: linear-gradient(135deg, rgba(20, 32, 43, 0.75) 0%, rgba(5, 10, 15, 0.9) 100%);
-    border-radius: 18px; overflow: hidden;
-    /* Safari clip fix */
-    -webkit-mask-image: -webkit-radial-gradient(circle, #fff 100%, #000 100%);
-    mask-image: radial-gradient(circle, #fff 100%, #000 100%);
-    border: 1.5px solid color-mix(in srgb, var(--glow) 65%, transparent);
-    box-shadow: inset 0 2px 4px rgba(255,255,255,0.15), 0 0 20px color-mix(in srgb, var(--glow) 25%, transparent);
-    background-color: #0a121a; /* Opaque backup */
-  }
-
-  /* Cyber Grid Background Matrix */
-  .card-face::before {
-    content: ''; position: absolute; inset: 0; z-index: 1; opacity: 0.15;
-    background-size: 8px 8px;
-    background-image: linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px);
-  }
-
-  /* 4. LAYER FOUR: Holographic Sheen Layer */
-  .card-sheen {
-    position: absolute; inset: -50%; z-index: 1; pointer-events: none;
-    background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.18) 45%, rgba(0, 240, 255, 0.12) 50%, transparent 60%);
-    transform: translateZ(2px);
-    animation: sheenCycle 6s linear infinite;
-  }
-  @keyframes sheenCycle {
-    0% { transform: translateZ(2px) translateX(-60%) translateY(-60%); }
-    100% { transform: translateZ(2px) translateX(60%) translateY(60%); }
-  }
-
-  /* 5. LAYER FIVE: Floating 3D Image Layer */
-  .card-image-wrap {
-    position: absolute; inset: 6px; z-index: 3;
-    border-radius: 14px; overflow: hidden;
-    /* Safari clip fix */
-    -webkit-mask-image: -webkit-radial-gradient(circle, #fff 100%, #000 100%);
-    mask-image: radial-gradient(circle, #fff 100%, #000 100%);
-    transform: translateZ(14px) scale(0.92);
-    filter: drop-shadow(0 8px 10px rgba(0,0,0,0.5));
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
+  #ar-scene.show .spec-container { transform: translate(-50%, -50%) scale(1); opacity: 1; }
   
-  .card-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Staggered entrance */
+  #ar-scene.show .spec-container:nth-child(2) { transition-delay: 0.1s; }
+  #ar-scene.show .spec-container:nth-child(3) { transition-delay: 0.2s; }
+  #ar-scene.show .spec-container:nth-child(4) { transition-delay: 0.3s; }
+  #ar-scene.show .spec-container:nth-child(5) { transition-delay: 0.4s; }
 
-  /* Interactivity: Slight expansion on click focus look */
-  .card:active .card-image-wrap { transform: translateZ(24px) scale(0.98); }
+  .spec-box {
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    background: rgba(50, 45, 110, 0.5); /* Purpleish transparent tint */
+    width: 80px; height: 80px;
+    display: flex; flex-direction: column;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  .spec-header {
+    background: rgba(60, 55, 130, 0.9);
+    color: #fff; font-size: 10px; padding: 4px 6px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255,255,255,0.4);
+    width: 100%;
+  }
+  .spec-icon {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+  }
+  .spec-icon svg { width: 35px; height: 35px; fill: none; stroke: #fff; stroke-width: 1.5px; }
+  
+  .spec-text {
+    margin-top: 8px; font-size: 11px; line-height: 1.3;
+    color: #fff; text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+    white-space: nowrap; font-weight: 500;
+  }
+
+  /* Color Picker Icon (Top Right) */
+  .color-picker {
+    position: absolute; top: 8%; right: 8%; z-index: 15;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5); border: 2px solid #fff;
+    opacity: 0; transition: opacity 0.5s ease;
+  }
+  #ar-scene.show .color-picker { opacity: 1; transition-delay: 0.5s; }
+  .color-picker svg { width: 18px; height: 18px; fill: #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); }
+
+  /* Positions for elements (approximated based on image) */
+  /* WHEELS - Top Left */
+  #spec-wheels { left: 25%; top: 30%; }
+  #target-wheels { left: 45%; top: 42%; }
+
+  /* ENGINE - Bottom Left */
+  #spec-engine { left: 25%; top: 75%; }
+  #target-engine { left: 52%; top: 75%; }
+
+  /* STEERING - Top Right */
+  #spec-steering { left: 75%; top: 35%; }
+  #target-steering { left: 60%; top: 52%; }
+
+  /* HEADLIGHT - Bottom Right */
+  #spec-headlight { left: 75%; top: 70%; }
+  #target-headlight { left: 65%; top: 73%; }
 
   /* ============ BOTTOM STATUS ============ */
   #found-bar {
@@ -254,29 +198,7 @@
   #found-bar.show { opacity: 1; transform: translateY(0); }
   #found-bar .title { font-family: 'Orbitron', sans-serif; font-size: 15px; letter-spacing: 2px; color: #fff; }
   #found-bar .title span { color: #00f0ff; text-shadow: 0 0 8px #00f0ff; }
-  #found-bar .sub { margin-top: 4px; font-size: 12px; letter-spacing: 1px; color: rgba(255,255,255,0.6); }
-
-  /* ============ LANDSCAPE FIT ============ */
-  @media (orientation: landscape) {
-    #header { padding: 8px 16px 10px; }
-    #header .h1 { font-size: 24px; letter-spacing: 3px; }
-    #header .h2 { font-size: 10px; }
-
-    #reticle { top: 46%; width: 40vw; max-width: 200px; }
-
-    .card { width: 72px; height: 72px; margin: -36px 0 0 -36px; top: 46%; }
-
-    #card-engine  { --ty: -110px; --tz: 40px; }
-    #card-led     { --tx: -160px; --ty: -20px;   --tz: -15px; }
-    #card-frame   { --tx: -160px; --ty: 70px;   --tz: 55px; }
-    #card-front   { --tx: 160px;  --ty: -20px;   --tz: -15px; }
-    #card-styling { --tx: 160px;  --ty: 70px;   --tz: 55px; }
-
-    #found-bar { padding: 8px 20px 12px; }
-    #found-bar .title { font-size: 12px; }
-    #found-bar .sub { font-size: 10px; }
-  }
-
+  
 </style>
 </head>
 <body>
@@ -293,7 +215,6 @@
     </svg>
   </div>
   <div class="hint">TAP ANYWHERE TO START</div>
-  <div class="fineprint">Camera and motion access are required to scan the vehicle</div>
 </div>
 
 <div id="loading">
@@ -306,82 +227,78 @@
   <button id="retry-btn">RETRY</button>
 </div>
 
-<div id="header">
-  <div class="h1">SPORT</div>
-  <div class="h2">[ HOLOGRAPHIC TELEMETRY ]</div>
-</div>
-
 <div id="reticle">
-  <div class="chip"><span class="dot"></span><span class="chip-text">SCANNING</span></div>
-  <div class="r-corner tl"></div>
-  <div class="r-corner tr"></div>
-  <div class="r-corner bl"></div>
-  <div class="r-corner br"></div>
+  <div class="r-corner tl"></div><div class="r-corner tr"></div>
+  <div class="r-corner bl"></div><div class="r-corner br"></div>
   <div class="scanline"></div>
 </div>
 
+<!-- NEW 2D UI AR SCENE -->
 <div id="ar-scene">
   
-  <div id="card-engine" class="card" style="--glow:#ffb020;">
-    <div class="card-visual">
-      <div class="card-backlight"></div>
-      <div class="card-extrusion"></div>
-      <div class="card-face">
-        <div class="card-sheen"></div>
-        <div class="card-image-wrap"><img src="image/engine.png" alt="engine"></div>
+  <!-- Connector Lines -->
+  <svg id="connector-lines">
+    <line class="conn-line" x1="25%" y1="30%" x2="45%" y2="42%" />
+    <line class="conn-line" x1="25%" y1="75%" x2="52%" y2="75%" />
+    <line class="conn-line" x1="75%" y1="35%" x2="60%" y2="52%" />
+    <line class="conn-line" x1="75%" y1="70%" x2="65%" y2="73%" />
+  </svg>
+
+  <!-- Targets on Vehicle -->
+  <div class="target-node" id="target-wheels"><div class="target-arcs"></div><div class="target-dot"></div></div>
+  <div class="target-node" id="target-engine"><div class="target-arcs"></div><div class="target-dot"></div></div>
+  <div class="target-node" id="target-steering"><div class="target-arcs"></div><div class="target-dot"></div></div>
+  <div class="target-node" id="target-headlight"><div class="target-arcs"></div><div class="target-dot"></div></div>
+
+  <!-- Spec Cards -->
+  <div class="spec-container" id="spec-wheels">
+    <div class="spec-box">
+      <div class="spec-header">WHEELS</div>
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16M6.3 6.3l11.4 11.4M6.3 17.7l11.4-11.4"/></svg>
       </div>
     </div>
+    <div class="spec-text">20-inch Panamera<br>Turbo wheels</div>
   </div>
-  
-  <div id="card-led" class="card" style="--glow:#b866ff;">
-    <div class="card-visual">
-      <div class="card-backlight"></div>
-      <div class="card-extrusion"></div>
-      <div class="card-face">
-        <div class="card-sheen"></div>
-        <div class="card-image-wrap"><img src="image/led-system.png" alt="led"></div>
+
+  <div class="spec-container" id="spec-engine">
+    <div class="spec-box">
+      <div class="spec-header">ENGINE</div>
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24"><path d="M5 8h14v8H5zM8 5v3M16 5v3M5 12H3M21 12h-2M8 16v3M16 16v3"/></svg>
       </div>
     </div>
+    <div class="spec-text">4.0 liter twin-turbo<br>V8 engine</div>
   </div>
-  
-  <div id="card-frame" class="card" style="--glow:#4dd6ff;">
-    <div class="card-visual">
-      <div class="card-backlight"></div>
-      <div class="card-extrusion"></div>
-      <div class="card-face">
-        <div class="card-sheen"></div>
-        <div class="card-image-wrap"><img src="image/frame.png" alt="frame"></div>
+
+  <div class="spec-container" id="spec-steering">
+    <div class="spec-box">
+      <div class="spec-header">STEERING</div>
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 14v7M7.5 9l-4.5-2.5M16.5 9l4.5-2.5"/></svg>
       </div>
     </div>
+    <div class="spec-text">Adaptive Cruise<br>(ACC)</div>
   </div>
-  
-  <div id="card-front" class="card" style="--glow:#ff003c;">
-    <div class="card-visual">
-      <div class="card-backlight"></div>
-      <div class="card-extrusion"></div>
-      <div class="card-face">
-        <div class="card-sheen"></div>
-        <div class="card-image-wrap"><img src="image/frok.png" alt="fork"></div>
+
+  <div class="spec-container" id="spec-headlight">
+    <div class="spec-box">
+      <div class="spec-header">HEADLIGHTS</div>
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 18a5 5 0 0 1 0-10l4-2v14l-4-2zM21 12h-4M19 7l-3 3M19 17l-3-3"/></svg>
       </div>
     </div>
+    <div class="spec-text">LED Matrix System</div>
   </div>
-  
-  <div id="card-styling" class="card" style="--glow:#39ffb0;">
-    <div class="card-visual">
-      <div class="card-backlight"></div>
-      <div class="card-extrusion"></div>
-      <div class="card-face">
-        <div class="card-sheen"></div>
-        <div class="card-image-wrap"><img src="image/styling.png" alt="styling"></div>
-      </div>
-    </div>
+
+  <!-- Color Picker Tool (Top Right) -->
+  <div class="color-picker">
+    <svg viewBox="0 0 24 24"><path d="M19 3l2 2-7 7v3l-3 3-2-2 3-3h3l7-7zm-9 9l-5 5c-1 1-1 3 0 4s3 1 4 0l5-5"/></svg>
   </div>
-  
 </div>
 
 <div id="found-bar">
   <div class="title">TARGET LOCKED <span>&mdash; SPEC DATA ONLINE</span></div>
-  <div class="sub">Holographic panels streaming active data</div>
 </div>
 
 <script>
@@ -391,52 +308,33 @@
   const loading    = document.getElementById('loading');
   const camError   = document.getElementById('cam-error');
   const retryBtn   = document.getElementById('retry-btn');
-  const header     = document.getElementById('header');
-  const reticle     = document.getElementById('reticle');
-  const chipText   = document.querySelector('#reticle .chip-text');
+  const reticle    = document.getElementById('reticle');
   const foundBar   = document.getElementById('found-bar');
   const arScene    = document.getElementById('ar-scene');
-  const cards      = Array.from(document.querySelectorAll('.card'));
 
   let isScanningActive = false;
   let isLocked = false;
-  let baseBeta = null, baseGamma = null;
-  let smoothBeta = 0, smoothGamma = 0; 
-  const SMOOTHING = 0.15; 
-  const LOSE_THRESHOLD = 20; // Increased tolerance slightly
-  const REGAIN_THRESHOLD = 6;
 
   async function startSequence() {
     splash.style.display = 'none';
     loading.classList.add('show');
     camError.classList.remove('show');
     
-    // Bug Fix: Wait for both camera and permission (especially on iOS)
     let cameraStarted = false;
-    let trackingStarted = false;
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } },
-        audio: false
+        video: { facingMode: { ideal: 'environment' } }, audio: false
       });
       video.srcObject = stream;
       await video.play();
       cameraStarted = true;
     } catch (err) {
-      console.warn("Camera failed, using background image.", err);
-      // We don't fail here, we let the background image from CSS show.
-      cameraStarted = true;
+      console.warn("Camera failed. Using background color.");
+      cameraStarted = true; // Proceed anyway for testing UI
     }
 
-    try {
-      trackingStarted = await initializeMotionTracking();
-    } catch (err) {
-      console.error("Tracking permission denied.", err);
-    }
-
-    if (cameraStarted && trackingStarted) {
-      onSystemReady();
+    if (cameraStarted) {
+      setTimeout(onSystemReady, 1000); // Fake initialization time
     } else {
       loading.classList.remove('show');
       camError.classList.add('show');
@@ -445,111 +343,23 @@
 
   function onSystemReady() {
     loading.classList.remove('show');
-    header.classList.add('show');
     reticle.classList.add('show');
     isScanningActive = true;
     
-    setTimeout(lockOnTarget, 2200);
+    // Simulate auto-lock after scanning
+    setTimeout(lockOnTarget, 2500);
   }
 
   function lockOnTarget() {
     if (isLocked || !isScanningActive) return;
     isLocked = true;
     
-    reticle.classList.add('locked');
-    chipText.textContent = 'LOCKED';
+    reticle.classList.add('locked'); // Hide scanning reticle
     foundBar.classList.add('show');
-    
-    cards.forEach((card, i) => {
-      card.classList.remove('lost');
-      setTimeout(() => {
-        card.style.transform = ''; 
-        card.classList.add('show');
-      }, i * 110);
-    });
+    arScene.classList.add('show');   // Reveal the AR HUD UI
   }
 
-  function loseTargetTracking() {
-    if (!isLocked) return;
-    isLocked = false;
-    
-    reticle.classList.remove('locked');
-    chipText.textContent = 'SCANNING';
-    foundBar.classList.remove('show');
-    
-    cards.forEach((card, i) => {
-      setTimeout(() => {
-        card.classList.remove('show');
-        card.classList.add('lost');
-      }, i * 70);
-    });
-  }
-
-  function handleOrientation(e) {
-    if (!isScanningActive || e.beta === null || e.gamma === null) return;
-
-    if (baseBeta === null) {
-      baseBeta = e.beta;
-      baseGamma = e.gamma;
-      return;
-    }
-
-    const rawDeltaBeta = e.beta - baseBeta;
-    const rawDeltaGamma = e.gamma - baseGamma;
-
-    smoothBeta += (rawDeltaBeta - smoothBeta) * SMOOTHING;
-    smoothGamma += (rawDeltaGamma - smoothGamma) * SMOOTHING;
-
-    const driftAngle = Math.hypot(smoothBeta, smoothGamma);
-
-    if (isLocked) {
-      if (driftAngle > LOSE_THRESHOLD) {
-        loseTargetTracking();
-        return;
-      }
-
-      const rotY = smoothGamma * 0.45; 
-      const rotX = smoothBeta * -0.45; 
-      
-      arScene.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
-      
-    } else {
-      if (driftAngle < REGAIN_THRESHOLD) {
-        lockOnTarget();
-      }
-    }
-  }
-
-  // Bug Fix: iOS 13+ requires user permission for DeviceOrientation. This function must be triggered by a user gesture.
-  function initializeMotionTracking() {
-    return new Promise((resolve) => {
-      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
-          .then(response => {
-            if (response === 'granted') {
-              window.addEventListener('deviceorientation', handleOrientation);
-              resolve(true);
-            } else {
-              // Permission denied. Still resolve true so system starts, but tracking won't work.
-              console.warn("Motion permission denied by user.");
-              resolve(true); 
-            }
-          })
-          .catch(err => {
-            console.error("Error requesting motion permission:", err);
-            resolve(true); 
-          });
-      } else {
-        // Non-iOS or older device, permission is implicit.
-        window.addEventListener('deviceorientation', handleOrientation);
-        resolve(true);
-      }
-    });
-  }
-
-  // Bug Fix: Any tap on splash screen should start the experience.
   splash.addEventListener('click', startSequence);
-  // Still keep startBtn listener just in case user taps the circle.
   startBtn.addEventListener('click', startSequence);
   retryBtn.addEventListener('click', startSequence);
 </script>
