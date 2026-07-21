@@ -56,8 +56,8 @@
   #splash .hint { margin-top: 25px; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px; color: #9df9ff; }
 
   /* ============ LOADING ============ */
-  #loading { position: absolute; inset: 0; z-index: 900; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
-  #loading.show { display: flex; }
+  #loading { position: absolute; inset: 0; z-index: 900; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; opacity: 0; transition: opacity 0.6s ease; }
+  #loading.show { opacity: 1; }
   .spinner { position: relative; width: 65px; height: 65px; }
   .spinner .ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid transparent; border-top-color: #00f0ff; border-right-color: #00f0ff; animation: spin 1s linear infinite; }
   .spinner .ring.r2 { inset: 10px; border-top-color: transparent; border-right-color: transparent; border-bottom-color: #ff2d55; border-left-color: #ff2d55; animation-duration: 1.5s; animation-direction: reverse; }
@@ -217,11 +217,36 @@
 
   .spec-photo {
     width: 100%;
+    min-height: 70px;
     display: block;
     border-radius: 5px;
     position: relative;
     z-index: 1;
+    opacity: 0;
+    transform: scale(0.96);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    background: linear-gradient(135deg, rgba(0,240,255,0.06), rgba(0,240,255,0.02));
   }
+  .spec-photo.loaded {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Fallback shown only if an image fails to load, so a card never looks empty */
+  .spec-fallback {
+    display: none;
+    padding: 22px 6px;
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8.5px;
+    letter-spacing: 1px;
+    color: #00f0ff;
+    text-shadow: 0 0 6px rgba(0,240,255,0.6);
+    position: relative;
+    z-index: 1;
+  }
+  .spec-image-box.img-error .spec-photo { display: none; }
+  .spec-image-box.img-error .spec-fallback { display: block; }
 
   /* ============ BOTTOM STATUS ============ */
   #found-bar {
@@ -295,35 +320,40 @@
     <div class="spec-card" style="left: 10%; top: 20%;">
       <div class="spec-label">SYS.01 // OPTICS</div>
       <div class="spec-image-box">
-        <img class="spec-photo" src="image/led-system.png" alt="LED Lighting System">
+        <img class="spec-photo" src="image/led-system.png" alt="LED Lighting System" loading="eager" onload="this.classList.add('loaded')" onerror="this.parentElement.classList.add('img-error')">
+        <div class="spec-fallback">LED LIGHTING SYSTEM</div>
       </div>
     </div>
 
     <div class="spec-card card-delay-1" style="left: 10%; top: 58%;">
       <div class="spec-label">SYS.02 // POWER</div>
       <div class="spec-image-box">
-        <img class="spec-photo" src="image/engine.png" alt="Brute Power Engine">
+        <img class="spec-photo" src="image/engine.png" alt="Brute Power Engine" loading="eager" onload="this.classList.add('loaded')" onerror="this.parentElement.classList.add('img-error')">
+        <div class="spec-fallback">BRUTE POWER ENGINE</div>
       </div>
     </div>
 
     <div class="spec-card card-delay-2" style="left: 65%; top: 20%;">
       <div class="spec-label">SYS.03 // SUSPENSION</div>
       <div class="spec-image-box">
-        <img class="spec-photo" src="image/frok.png" alt="Upside Down Front Fork">
+        <img class="spec-photo" src="image/frok.png" alt="Upside Down Front Fork" loading="eager" onload="this.classList.add('loaded')" onerror="this.parentElement.classList.add('img-error')">
+        <div class="spec-fallback">UPSIDE-DOWN FRONT FORK</div>
       </div>
     </div>
 
     <div class="spec-card card-delay-3" style="left: 65%; top: 45%;">
       <div class="spec-label">SYS.04 // AERO</div>
       <div class="spec-image-box">
-        <img class="spec-photo" src="image/styling.png" alt="Aggressive Muscular Styling">
+        <img class="spec-photo" src="image/styling.png" alt="Aggressive Muscular Styling" loading="eager" onload="this.classList.add('loaded')" onerror="this.parentElement.classList.add('img-error')">
+        <div class="spec-fallback">AGGRESSIVE MUSCULAR STYLING</div>
       </div>
     </div>
 
     <div class="spec-card card-delay-4" style="left: 65%; top: 70%;">
       <div class="spec-label">SYS.05 // CHASSIS</div>
       <div class="spec-image-box">
-        <img class="spec-photo" src="image/frame.png" alt="Perimeter Frame">
+        <img class="spec-photo" src="image/frame.png" alt="Perimeter Frame" loading="eager" onload="this.classList.add('loaded')" onerror="this.parentElement.classList.add('img-error')">
+        <div class="spec-fallback">PERIMETER FRAME</div>
       </div>
     </div>
 
@@ -360,6 +390,42 @@
   let smoothBeta = 0, smoothGamma = 0; 
   const SMOOTHING = 0.12; 
 
+  // ============ SMOOTH LOADING: preload spec images so cards never pop in broken/late ============
+  const SPEC_IMAGES = [
+    'image/led-system.png',
+    'image/engine.png',
+    'image/frok.png',
+    'image/styling.png',
+    'image/frame.png'
+  ];
+
+  let imagesPreloaded = false;
+  let cameraReady = false;
+
+  function revealUI() {
+    // Only reveal the HUD once BOTH the camera is ready AND images have had a chance to load.
+    if (!cameraReady) return;
+    loading.classList.remove('show');
+    header.classList.add('show');
+    reticle.classList.add('show');
+    radarSweep.classList.add('show');
+  }
+
+  Promise.all(
+    SPEC_IMAGES.map(src => new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = () => {
+        console.warn('[XQOM AR] Failed to preload image:', src, '- check the file name/case and path relative to index.html');
+        resolve(); // never block the UI even if one image fails
+      };
+      img.src = src;
+    }))
+  ).then(() => { imagesPreloaded = true; });
+
+  // Safety net: if images take too long, don't hold the whole experience hostage
+  setTimeout(() => { imagesPreloaded = true; }, 4000);
+
   // 1. Click to Start AR Engine
   splash.addEventListener('click', async () => {
     splash.style.display = 'none';
@@ -383,12 +449,22 @@
     sceneEl.systems["mindar-image-system"].start();
   });
 
-  // 2. Camera Ready -> Show UI
+  // 2. Camera Ready -> Show UI (waits a beat for images so the reveal feels smooth, not jumpy)
   sceneEl.addEventListener("arReady", () => {
-    loading.classList.remove('show');
-    header.classList.add('show');
-    reticle.classList.add('show');
-    radarSweep.classList.add('show');
+    cameraReady = true;
+    if (imagesPreloaded) {
+      revealUI();
+    } else {
+      // Give preloading a brief moment to finish so the first paint of the HUD is smooth
+      const waitForImages = setInterval(() => {
+        if (imagesPreloaded) {
+          clearInterval(waitForImages);
+          revealUI();
+        }
+      }, 100);
+      // Hard cap so we never wait more than ~1.2s extra
+      setTimeout(() => { clearInterval(waitForImages); revealUI(); }, 1200);
+    }
   });
 
   // 3. ACTUAL TRACKING - Target Found
